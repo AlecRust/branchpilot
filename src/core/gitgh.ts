@@ -39,6 +39,15 @@ export async function getGitRoot(cwd: string): Promise<string | null> {
 	}
 }
 
+export async function isGitRepository(cwd: string): Promise<boolean> {
+	try {
+		await git(cwd, ['rev-parse', '--git-dir'])
+		return true
+	} catch {
+		return false
+	}
+}
+
 export async function getDefaultBranch(cwd: string): Promise<string> {
 	try {
 		// Try to get the default branch from GitHub

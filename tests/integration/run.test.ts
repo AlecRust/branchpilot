@@ -1,3 +1,4 @@
+import * as fs from 'node:fs'
 import os from 'node:os'
 import { DateTime } from 'luxon'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -7,6 +8,7 @@ import * as mdTickets from '../../src/core/md-tickets.js'
 import { runOnce } from '../../src/core/run.js'
 import type { Ticket } from '../../src/core/types.js'
 
+vi.mock('node:fs')
 vi.mock('node:fs/promises')
 vi.mock('../../src/core/config.js')
 vi.mock('../../src/core/md-tickets.js')
@@ -348,6 +350,10 @@ describe('run-once', () => {
 
 			setupMocks({ tickets: [ticket1, ticket2] })
 
+			// Mock filesystem and git checks for both repositories
+			vi.mocked(fs.existsSync).mockReturnValue(true)
+			vi.mocked(gitgh.isGitRepository).mockResolvedValue(true)
+
 			// Mock different original branches for each repo
 			vi.mocked(gitgh.getCurrentBranch).mockResolvedValueOnce('main').mockResolvedValueOnce('develop')
 
@@ -385,6 +391,10 @@ describe('run-once', () => {
 			const ticket = createTicket({ repository: '~/custom/repo' })
 			setupMocks({ tickets: [ticket] })
 
+			// Mock filesystem and git checks for the custom repository
+			vi.mocked(fs.existsSync).mockReturnValue(true)
+			vi.mocked(gitgh.isGitRepository).mockResolvedValue(true)
+
 			await runOnce({ mode: 'run' })
 
 			// Should use the specified repository
@@ -411,6 +421,35 @@ describe('run-once', () => {
 
 			expect(result).toBe(1) // Should return error
 			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('not in a git repository'))
+		})
+
+		it('validates repository path exists', async () => {
+			const ticket = createTicket({ repository: '/nonexistent/path' })
+			setupMocks({ tickets: [ticket] })
+
+			// Mock filesystem check to return false
+			vi.mocked(fs.existsSync).mockReturnValue(false)
+
+			const result = await runOnce({ mode: 'run' })
+
+			// Should return error exit code
+			expect(result).toBe(1)
+			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Repository path does not exist'))
+		})
+
+		it('validates repository path is a git repository', async () => {
+			const ticket = createTicket({ repository: '/existing/but/not/git' })
+			setupMocks({ tickets: [ticket] })
+
+			// Mock filesystem check to return true but git check to return false
+			vi.mocked(fs.existsSync).mockReturnValue(true)
+			vi.mocked(gitgh.isGitRepository).mockResolvedValue(false)
+
+			const result = await runOnce({ mode: 'run' })
+
+			// Should return error exit code
+			expect(result).toBe(1)
+			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Path is not a git repository'))
 		})
 	})
 

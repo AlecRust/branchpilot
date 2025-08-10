@@ -22,16 +22,28 @@ const TicketFront = z.object({
 	draft: z.boolean().optional(), // whether to open PR as a draft
 })
 
+function isValidTimezone(zone: string): boolean {
+	const testDt = DateTime.now().setZone(zone)
+	return testDt.isValid
+}
+
 export function parseWhenToUtcISO(whenStr: string, fallbackZone?: string): string {
 	const parts = whenStr.trim().split(/\s+/)
 	let dt: DateTime
 
 	// Check if timezone is specified as second part
 	if (parts.length === 2 && parts[0] && parts[1]) {
-		dt = parseDateTime(parts[0], parts[1])
+		const zone = parts[1]
+		if (!isValidTimezone(zone)) {
+			throw new Error(`Invalid timezone '${zone}' in 'when': ${whenStr}`)
+		}
+		dt = parseDateTime(parts[0], zone)
 	} else {
 		// Use fallback zone or UTC
 		const zone = fallbackZone ?? 'utc'
+		if (!isValidTimezone(zone)) {
+			throw new Error(`Invalid fallback timezone: ${zone}`)
+		}
 		dt = parseDateTime(whenStr, zone)
 	}
 

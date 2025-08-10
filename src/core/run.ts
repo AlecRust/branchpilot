@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+import { existsSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { green, red, yellow } from 'colorette'
@@ -14,6 +15,7 @@ import {
 	gh,
 	git,
 	hasUnmergedCommits,
+	isGitRepository,
 	pushBranch,
 } from './gitgh.js'
 import { Logger } from './logger.js'
@@ -23,7 +25,19 @@ import type { PushMode, RepoConfig, RunOnceArgs, Ticket } from './types.js'
 async function getRepoRoot(ticket: Ticket, ticketsDir: string): Promise<string> {
 	// If ticket specifies a repository path, expand it and use it
 	if (ticket.repository) {
-		return path.resolve(ticket.repository.replace(/^~/, os.homedir()))
+		const expandedPath = path.resolve(ticket.repository.replace(/^~/, os.homedir()))
+
+		// Validate the repository path exists
+		if (!existsSync(expandedPath)) {
+			throw new Error(`Repository path does not exist: ${expandedPath}`)
+		}
+
+		// Validate it's a git repository
+		if (!(await isGitRepository(expandedPath))) {
+			throw new Error(`Path is not a git repository: ${expandedPath}`)
+		}
+
+		return expandedPath
 	}
 	// Otherwise, find the git repository root from the tickets directory
 	const gitRoot = await getGitRoot(ticketsDir)

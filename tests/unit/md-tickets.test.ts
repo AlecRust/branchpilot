@@ -35,7 +35,9 @@ describe('md-tickets', () => {
 
 		it('throws on invalid input', () => {
 			expect(() => parseWhenToUtcISO('invalid-date')).toThrow("Invalid 'when'")
-			expect(() => parseWhenToUtcISO('2025-08-12T09:30:00 Invalid/Zone')).toThrow("Invalid 'when'")
+			expect(() => parseWhenToUtcISO('2025-08-12T09:30:00 Invalid/Zone')).toThrow(
+				"Invalid timezone 'Invalid/Zone' in 'when'",
+			)
 		})
 
 		it('handles edge case where DateTime.toISO() returns null', () => {

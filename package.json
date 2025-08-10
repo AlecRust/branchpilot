@@ -36,7 +36,7 @@
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"doctor": "node dist/cli.mjs doctor",
-		"release": "release-it"
+		"release": "GITHUB_TOKEN=$(gh auth token) release-it --ci"
 	},
 	"keywords": [
 		"git",

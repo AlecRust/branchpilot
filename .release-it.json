@@ -12,8 +12,7 @@
 		"releaseNotes": "git cliff --config cliff.toml --unreleased --latest --strip all"
 	},
 	"npm": {
-		"publish": true,
-		"publishPath": "./dist"
+		"publish": true
 	},
 	"hooks": {
 		"before:init": ["npm run lint", "npm run typecheck", "npm test"],

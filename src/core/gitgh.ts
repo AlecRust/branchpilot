@@ -14,8 +14,8 @@ export async function git(cwd: string, args: string[]) {
 }
 
 export async function gh(cwd: string, args: string[]) {
-	const timeout = args.includes('auth') ? 3000 : undefined
-	const { stdout } = await execa('gh', args, { cwd, timeout })
+	const options = args.includes('auth') ? { cwd, timeout: 3000 } : { cwd }
+	const { stdout } = await execa('gh', args, options)
 	return stdout.trim()
 }
 

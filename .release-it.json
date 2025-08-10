@@ -20,7 +20,7 @@
 			"npm run build",
 			"git cliff --config cliff.toml -o CHANGELOG.md --tag v${version}",
 			"git add CHANGELOG.md",
-			"git cliff ${latestTag}..v${version} --strip header | tail -n +3 > .release-notes.md"
+			"git cliff ${latestTag}..HEAD --strip header | tail -n +3 > .release-notes.md"
 		],
 		"after:release": [
 			"rm -f .release-notes.md",

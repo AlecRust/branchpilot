@@ -40,11 +40,11 @@
 	},
 	"keywords": [
 		"git",
-		"github",
-		"pr",
-		"schedule",
 		"cli",
-		"markdown"
+		"markdown",
+		"schedule",
+		"automation",
+		"pull-request"
 	],
 	"dependencies": {
 		"colorette": "^2.0.20",

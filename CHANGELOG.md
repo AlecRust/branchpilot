@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.6] - 2025-08-10
+
+### 💼 Other
+
+- Fix CHANGELOG.md formatting
+
+### ⚙️ Miscellaneous Tasks
+
+- Error when no tickets found
+
 ## [0.4.5] - 2025-08-10
 
 ### 🐛 Bug Fixes

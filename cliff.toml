@@ -6,7 +6,6 @@ header = """
 # Changelog
 
 """
-# Add blank line after each version
 body = """
 {% if version %}\
     ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}

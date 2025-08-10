@@ -15,7 +15,7 @@
 		"publish": true
 	},
 	"hooks": {
-		"before:init": ["npm run lint", "npm run typecheck", "npm test"],
+		"before:init": ["npm run check", "npm test"],
 		"after:bump": [
 			"npm run build",
 			"git cliff --config cliff.toml -o CHANGELOG.md --tag v${version}",

@@ -77,23 +77,30 @@ Priority: Ticket → Repository → Global → Defaults
 ## Commands
 
 ### `branchpilot run`
+
 Process due tickets and create PRs.
+
 - `--dir <path>` — Scan specific directories (multiple allowed)
 - `--dry-run` — Preview without changes
 
 ### `branchpilot list`
+
 Display all tickets in a formatted table.
+
 - `--dir <path>` — Scan specific directories
 
 ### `branchpilot init`
+
 Initialize project with example tickets and config.
 
 ### `branchpilot doctor`
+
 Verify git and GitHub CLI are installed and authenticated.
 
 ## Automation
 
 Example with [PM2](https://pm2.keymetrics.io/) running every 10 minutes:
+
 ```bash
 npm install pm2@latest -g
 pm2 start "branchpilot run --dir ~/tickets" --name branchpilot --cron "*/10 * * * *"
@@ -107,7 +114,7 @@ pm2 start "branchpilot run --dir ~/tickets" --name branchpilot --cron "*/10 * * 
 ## Development
 
 ```bash
-npm install  # Install dependencies
-npm test     # Run tests
-npm run lint # Lint code
+npm install
+npm test
+npm run check
 ```

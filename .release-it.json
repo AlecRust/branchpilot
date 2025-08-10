@@ -9,7 +9,7 @@
 	"github": {
 		"release": true,
 		"releaseName": "v${version}",
-		"releaseNotes": "git cliff --config cliff.toml --unreleased --latest --strip all"
+		"releaseNotes": "git cliff --config cliff.toml --tag v${version} --latest --strip header"
 	},
 	"npm": {
 		"publish": true

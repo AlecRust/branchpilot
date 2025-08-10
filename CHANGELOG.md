@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.7] - 2025-08-10
+
+### 💼 Other
+
+- Simplify npm scripts
+
+### 🚜 Refactor
+
+- Unify --verbose and list behaviour
+
+### 📚 Documentation
+
+- Adjust package.json keywords
+
+### ⚙️ Miscellaneous Tasks
+
+- Set packageManager version
+- Add .gitattributes file for windows
+
 ## [0.4.6] - 2025-08-10
 
 ### 💼 Other

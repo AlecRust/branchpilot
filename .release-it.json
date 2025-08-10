@@ -9,7 +9,10 @@
 	"github": {
 		"release": true,
 		"releaseName": "v${version}",
-		"releaseNotes": "sh -c \"git cliff ${latestTag}..v${version} --strip header | sed '1,2d'\""
+		"releaseNotes": {
+			"command": "git cliff --latest --strip header | sed '1,2d'",
+			"fallbackToChangeLog": true
+		}
 	},
 	"npm": {
 		"publish": true

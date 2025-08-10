@@ -62,14 +62,14 @@ assignees: ["bob"]                 # Assign PR
 Global config: `~/.config/branchpilot.toml`
 
 ```toml
-dirs = ["~/tickets"]              # Directories to scan
-defaultBase = "main"              # Default base branch
+dirs = ["~/tickets"]               # Directories to scan
+defaultBase = "main"               # Default base branch
 ```
 
 Repository config: `.branchpilot.toml`
 
 ```toml
-defaultBase = "develop"           # Override global settings
+defaultBase = "develop"            # Override global settings
 ```
 
 Priority: Ticket → Repository → Global → Defaults
@@ -93,9 +93,10 @@ Verify git and GitHub CLI are installed and authenticated.
 
 ## Automation
 
-Example with PM2:
+Example with [PM2](https://pm2.keymetrics.io/) running every 10 minutes:
 ```bash
-pm2 start "branchpilot run" --cron "*/10 * * * *"
+npm install pm2@latest -g
+pm2 start "branchpilot run --dir ~/tickets" --name branchpilot --cron "*/10 * * * *"
 ```
 
 ## Prerequisites

@@ -40,10 +40,6 @@ function nowUtcISO() {
 	return isoString
 }
 
-function isDue(ticket: Ticket, nowISO: string): boolean {
-	return DateTime.fromISO(nowISO) >= DateTime.fromISO(ticket.dueUtcISO)
-}
-
 export async function runOnce(args: RunOnceArgs): Promise<number> {
 	const globalCfg = await loadGlobalConfig(args.configPath)
 	const dirs = (args.dirs && args.dirs.length > 0 ? args.dirs : globalCfg.dirs) ?? []
@@ -71,14 +67,25 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 	for (const dir of dirs) {
 		const timezone = globalCfg.timezone
 		const tickets = await loadTickets(dir, timezone)
-		const due = tickets.filter((t) => isDue(t, nowISO))
 
-		if (due.length === 0) {
-			console.log(yellow(`No due tickets in ${dir}`))
+		if (tickets.length === 0) {
 			continue
 		}
 
-		for (const t of due) {
+		// Process each ticket and show status
+		for (const t of tickets) {
+			const ticketName = path.basename(t.file)
+			const dueDate = DateTime.fromISO(t.dueUtcISO)
+			const now = DateTime.fromISO(nowISO)
+			const isTicketDue = now >= dueDate
+
+			if (!isTicketDue) {
+				const relativeTime = dueDate.toRelative({ base: now })
+				console.log(yellow(`[${ticketName}] ${t.branch} - scheduled ${relativeTime}`))
+				continue
+			}
+
+			// Ticket is due, process it
 			let repoRoot: string
 			try {
 				repoRoot = await getRepoRoot(t, dir)
@@ -93,7 +100,6 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				repoConfigs.set(repoRoot, await loadRepoConfig(repoRoot))
 			}
 			const repoCfg = repoConfigs.get(repoRoot) ?? {}
-			const repoName = path.basename(repoRoot)
 
 			// Capture the original branch for this repository if we haven't already
 			if (!originalBranches.has(repoRoot) && args.mode === 'run') {
@@ -116,9 +122,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			const repo = globalCfg.repo // optional owner/name
 
 			if (args.mode === 'dry-run') {
-				const displayBase = t.rebase ? ` → ${base}` : ''
-				console.log(yellow(`[${repoName}] ${t.branch}${displayBase}`))
-				console.log(yellow(`  "${t.title}"`))
+				console.log(yellow(`[${ticketName}] ${t.branch} - would process (dry run)`))
 				continue
 			}
 
@@ -133,13 +137,9 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			}
 
 			if (openPrExists) {
-				console.log(yellow(`[${repoName}] ${t.branch}`))
-				console.log(yellow(`  ⊙ Open PR already exists, skipping`))
+				console.log(yellow(`[${ticketName}] ${t.branch} - PR already exists`))
 				continue
 			}
-
-			const displayBase = t.rebase ? ` → ${base}` : ''
-			console.log(green(`[${repoName}] ${t.branch}${displayBase}`))
 
 			try {
 				const pushOpts: Parameters<typeof pushBranch>[0] = {
@@ -166,10 +166,10 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				if (repo) prOpts.repo = repo
 				if (t.draft) prOpts.draft = t.draft
 				const url = await createOrUpdatePr(prOpts)
-				console.log(green(`  ✓ ${url}`))
+				console.log(green(`[${ticketName}] ${t.branch} - ✓ ${url}`))
 			} catch (e) {
 				fatal = true // mark as fatal error
-				console.log(red(`  ✗ ${e instanceof Error ? e.message : String(e)}`))
+				console.log(red(`[${ticketName}] ${t.branch} - ✗ ${e instanceof Error ? e.message : String(e)}`))
 				// leave ticket in place for retry after user fixes conflicts
 			}
 		}

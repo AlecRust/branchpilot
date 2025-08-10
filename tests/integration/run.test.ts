@@ -154,7 +154,9 @@ describe('run-once', () => {
 			const result = await runOnce({ mode: 'dry-run' })
 
 			expect(result).toBe(0)
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[repo] feature/test'))
+			expect(console.log).toHaveBeenCalledWith(
+				expect.stringContaining('[ticket.md] feature/test - would process (dry run)'),
+			)
 			expect(gitgh.pushBranch).not.toHaveBeenCalled()
 			expect(gitgh.createOrUpdatePr).not.toHaveBeenCalled()
 		})
@@ -165,7 +167,6 @@ describe('run-once', () => {
 			const result = await runOnce({ mode: 'run' })
 
 			expect(result).toBe(0)
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('No due tickets'))
 		})
 	})
 
@@ -461,9 +462,12 @@ describe('run-once', () => {
 
 			await runOnce({ mode: 'dry-run' })
 
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[repo] feature/test → develop'))
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[repo] feature/no-rebase'))
-			expect(console.log).not.toHaveBeenCalledWith(expect.stringContaining('[repo] feature/no-rebase → main'))
+			expect(console.log).toHaveBeenCalledWith(
+				expect.stringContaining('[ticket.md] feature/test - would process (dry run)'),
+			)
+			expect(console.log).toHaveBeenCalledWith(
+				expect.stringContaining('[no-rebase.md] feature/no-rebase - would process (dry run)'),
+			)
 		})
 	})
 })

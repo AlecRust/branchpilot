@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-import { green, yellow } from 'colorette'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { runDoctor } from './core/doctor.js'
@@ -56,11 +55,6 @@ await yargs(hideBin(process.argv))
 			if (Object.keys(overrides).length > 0) args.overrides = overrides
 
 			const code = await runOnce(args)
-			if (argv.dry) {
-				if (code === 0) console.log(yellow('✓ Dry-run complete'))
-			} else {
-				if (code === 0) console.log(green('✓ Done'))
-			}
 			process.exitCode = code
 		},
 	)

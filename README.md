@@ -60,6 +60,22 @@ branchpilot run --dry --dir ~/Desktop/PRs
 branchpilot doctor
 ```
 
+### Example Output
+
+```bash
+$ branchpilot run --dir ~/Desktop/PRs
+[api-endpoint.md] feature/api-endpoint - ✓ https://github.com/myorg/repo/pull/123
+[ui-update.md] feature/ui-update - scheduled in 2 hours
+[bugfix.md] fix/critical-bug - PR already exists
+[docs-update.md] docs/readme - ✗ Merge conflict needs resolution
+```
+
+Each ticket shows its status:
+- `✓ <url>` - PR successfully created
+- `scheduled in <time>` - Not due yet (will process when time arrives)
+- `PR already exists` - Open PR found, skipping
+- `✗ <error>` - Failed (error shown, ticket remains for retry)
+
 ## Ticket Options
 
 ```yaml

@@ -2,6 +2,7 @@
 
 import { Command } from 'commander'
 import { runDoctor } from './core/doctor.js'
+import { runInit } from './core/init.js'
 import { Logger } from './core/logger.js'
 import { runOnce } from './core/run.js'
 import type { RunOnceArgs } from './core/types.js'
@@ -36,6 +37,26 @@ program
 
 			const code = await runOnce(args)
 			process.exitCode = code
+		} catch (error) {
+			// Always show errors regardless of verbose flag
+			const logger = new Logger(true)
+			logger.error(`Fatal error: ${error}`)
+			process.exitCode = 1
+		}
+	})
+
+program
+	.command('init')
+	.description('Initialize branchpilot in the current directory')
+	.option('-f, --force', 'Reinitialize even if already initialized')
+	.option('-v, --verbose', 'Show detailed output')
+	.action(async (options) => {
+		try {
+			const result = await runInit({
+				force: options.force ?? false,
+				verbose: options.verbose ?? false,
+			})
+			process.exitCode = result.success ? 0 : 1
 		} catch (error) {
 			// Always show errors regardless of verbose flag
 			const logger = new Logger(true)

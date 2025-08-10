@@ -44,8 +44,22 @@ function nowUtcISO() {
 
 export async function runOnce(args: RunOnceArgs): Promise<number> {
 	const globalCfg = await loadGlobalConfig(args.configPath)
-	// Priority: CLI --dir flag > config dirs > current directory
-	const dirs = args.dirs || (globalCfg.dirs && globalCfg.dirs.length > 0 ? globalCfg.dirs : ['.'])
+
+	// Load local repo config to check for dirs setting
+	const localRepoCfg = await loadRepoConfig(process.cwd())
+
+	// Priority: CLI --dir flag > local repo config dirs > global config dirs > current directory
+	let dirs = args.dirs
+	if (!dirs || dirs.length === 0) {
+		if (localRepoCfg?.dirs && localRepoCfg.dirs.length > 0) {
+			dirs = localRepoCfg.dirs
+		} else if (globalCfg.dirs && globalCfg.dirs.length > 0) {
+			dirs = globalCfg.dirs
+		} else {
+			dirs = ['.']
+		}
+	}
+
 	const logger = new Logger(args.verbose ?? false)
 
 	try {

@@ -16,6 +16,9 @@ branchpilot doesn't run continuously. It processes tickets each time you run it,
 # Install
 npm i -g branchpilot
 
+# Initialize a project (optional, creates /tickets directory and examples)
+branchpilot init
+
 # Check your setup
 branchpilot doctor
 
@@ -175,6 +178,19 @@ pm2 startup
 
 ## Commands
 
+### `branchpilot init`
+
+Initialize branchpilot in the current directory.
+
+- Creates a `tickets/` directory for your ticket files
+- Generates `.branchpilot.toml` with sensible defaults
+- Creates example tickets to get you started (one ready to process immediately)
+
+Options:
+
+- `--force` — Reinitialize even if already initialized
+- `--verbose` — Show detailed output
+
 ### `branchpilot run`
 
 Process due tickets and create PRs.
@@ -184,6 +200,7 @@ Options:
 - `--dir <path>` — Directories to scan (can specify multiple, defaults to current directory)
 - `--dry-run` — Preview without making changes
 - `--config <path>` — Use custom config file
+- `--verbose` — Show detailed output including skipped tickets
 
 ### `branchpilot doctor`
 
@@ -192,6 +209,10 @@ Check that required tools are installed and configured:
 - Git installed and configured
 - GitHub CLI installed and authenticated
 - Current directory is a git repository (if applicable)
+
+Options:
+
+- `--verbose` — Show detailed output
 
 ## Prerequisites
 

@@ -93,7 +93,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 		const tickets = await loadTickets(dir)
 
 		if (tickets.length === 0) {
-			logger.verbose(yellow(`No tickets found in ${dir}`))
+			logger.error(`No tickets found in ${dir}`)
 			continue
 		}
 

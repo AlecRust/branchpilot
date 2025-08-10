@@ -78,14 +78,14 @@ Priority: Ticket → Repository → Global → Defaults
 
 ### `branchpilot run`
 
-Process due tickets and create PRs.
+Process tickets and create any due PRs.
 
 - `--dir <path>` — Scan specific directories
 - `--dry-run` — Preview without changes
 
 ### `branchpilot list`
 
-Display all tickets in a formatted table.
+List all tickets with their status.
 
 - `--dir <path>` — Scan specific directories
 
@@ -95,7 +95,7 @@ Initialize current directory project with example tickets and config.
 
 ### `branchpilot doctor`
 
-Run checks like verifying Git and GitHub CLI are installed and authenticated.
+Run checks like verifying Git and GitHub CLI are set up correctly.
 
 ## Automation
 

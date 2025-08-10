@@ -9,10 +9,7 @@
 	"github": {
 		"release": true,
 		"releaseName": "v${version}",
-		"releaseNotes": {
-			"command": "git cliff --latest --strip header | sed '1,2d'",
-			"fallbackToChangeLog": true
-		}
+		"releaseNotes": "cat .release-notes.md"
 	},
 	"npm": {
 		"publish": true
@@ -22,8 +19,12 @@
 		"after:bump": [
 			"npm run build",
 			"git cliff --config cliff.toml -o CHANGELOG.md --tag v${version}",
-			"git add CHANGELOG.md"
+			"git add CHANGELOG.md",
+			"git cliff ${latestTag}..v${version} --strip header | tail -n +3 > .release-notes.md"
 		],
-		"after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+		"after:release": [
+			"rm -f .release-notes.md",
+			"echo Successfully released ${name} v${version} to ${repo.repository}."
+		]
 	}
 }

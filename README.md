@@ -99,7 +99,7 @@ Simple example to run `branchpilot` every 10 minutes using [PM2](https://pm2.key
 
 ```bash
 npm install pm2@latest -g
-pm2 start "branchpilot run --dir ~/tickets --verbose" --name bp --cron "*/10 * * * *"
+pm2 start "branchpilot run" --name branchpilot --cron "*/10 * * * *"
 ```
 
 ## Prerequisites

@@ -4,7 +4,18 @@
 	"author": "Alec Rust",
 	"license": "MIT",
 	"description": "Local-first scheduled PRs from Markdown tickets",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AlecRust/branchpilot.git"
+	},
+	"homepage": "https://github.com/AlecRust/branchpilot#readme",
+	"bugs": {
+		"url": "https://github.com/AlecRust/branchpilot/issues"
+	},
 	"type": "module",
+	"files": [
+		"dist"
+	],
 	"bin": {
 		"branchpilot": "./dist/cli.mjs"
 	},

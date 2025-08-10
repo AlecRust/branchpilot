@@ -8,8 +8,11 @@ const cliPath = path.join(__dirname, '../../src/cli.ts')
 
 function runCLI(args: string[]): Promise<{ stdout: string; stderr: string; code: number | null }> {
 	return new Promise((resolve) => {
-		const child = spawn('tsx', [cliPath, ...args], {
+		const nodeArgs = ['--import', 'tsx', cliPath, ...args]
+
+		const child = spawn('node', nodeArgs, {
 			env: { ...process.env, NODE_ENV: 'test' },
+			shell: false,
 		})
 
 		let stdout = ''
@@ -21,6 +24,11 @@ function runCLI(args: string[]): Promise<{ stdout: string; stderr: string; code:
 
 		child.stderr.on('data', (data) => {
 			stderr += data.toString()
+		})
+
+		child.on('error', (error) => {
+			console.error('Failed to spawn process:', error)
+			resolve({ stdout: '', stderr: error.message, code: 1 })
 		})
 
 		child.on('close', (code) => {

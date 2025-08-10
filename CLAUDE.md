@@ -1,9 +1,9 @@
-# CLAUDE.md — BranchPilot Development Context
+# CLAUDE.md — branchpilot Development Context
 
-BranchPilot is a **local-first TypeScript CLI** that processes Markdown tickets to create GitHub PRs when their scheduled time arrives.
+branchpilot is a **local-first TypeScript CLI** that processes Markdown tickets to create GitHub PRs when their scheduled time arrives.
 
 ## Core Concept
-BranchPilot doesn't run continuously - it processes tickets each time it's executed. If a ticket's `when` timestamp has passed, the PR is created. Users typically run it periodically (cron/PM2) or manually.
+branchpilot doesn't run continuously - it processes tickets each time it's executed. If a ticket's `when` timestamp has passed, the PR is created. Users typically run it periodically (cron/PM2) or manually.
 
 ## Architecture
 

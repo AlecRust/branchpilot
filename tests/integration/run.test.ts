@@ -1,3 +1,4 @@
+import os from 'node:os'
 import { DateTime } from 'luxon'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as config from '../../src/core/config.js'
@@ -15,6 +16,7 @@ describe('run-once', () => {
 	beforeEach(() => {
 		vi.resetAllMocks()
 		vi.spyOn(console, 'log').mockImplementation(() => {})
+		vi.spyOn(os, 'homedir').mockReturnValue('/home/testuser')
 	})
 
 	const createTicket = (overrides: Partial<Ticket> = {}): Ticket => ({
@@ -369,7 +371,12 @@ describe('run-once', () => {
 			// Should use the specified repository
 			expect(gitgh.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					cwd: expect.stringContaining('/custom/repo'),
+					cwd: expect.stringContaining('custom'),
+				}),
+			)
+			expect(gitgh.pushBranch).toHaveBeenCalledWith(
+				expect.objectContaining({
+					cwd: expect.stringContaining('repo'),
 				}),
 			)
 		})

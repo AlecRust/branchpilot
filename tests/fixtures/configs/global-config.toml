@@ -1,4 +1,4 @@
-# Global BranchPilot configuration
+# Global branchpilot configuration
 dirs = [".scheduled-prs", "tickets", "prs"]
 defaultBase = "main"
 timezone = "America/New_York"

@@ -1,4 +1,4 @@
-# BranchPilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml)
+# branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml)
 
 Automate PR creation from local branches via Markdown tickets.
 
@@ -11,11 +11,11 @@ Automate PR creation from local branches via Markdown tickets.
 
 1. **Create a branch** with your changes in any repository
 2. **Write a Markdown ticket** describing when to open the PR, the description and some other options (in the same repo or centralized location)
-3. **Run BranchPilot** - it checks each ticket's `when` timestamp and creates PRs for any that are due (now or in the past)
+3. **Run branchpilot** - it checks each ticket's `when` timestamp and creates PRs for any that are due (now or in the past)
 
-**Note:** BranchPilot doesn't run continuously or create schedules. It processes tickets each time you run it, so you typically run it periodically (via cron, PM2, etc.) or manually.
+**Note:** branchpilot doesn't run continuously or create schedules. It processes tickets each time you run it, so you typically run it periodically (via cron, PM2, etc.) or manually.
 
-**Repository detection:** If your ticket doesn't specify a `repository`, BranchPilot uses the Git repository containing the ticket directory.
+**Repository detection:** If your ticket doesn't specify a `repository`, branchpilot uses the Git repository containing the ticket directory.
 
 ## Example
 
@@ -35,7 +35,7 @@ Added `.vscode/settings.json` to the `.gitignore` file to prevent VS Code worksp
 
 This assumes you've already created and committed changes to the `ignore-vscode-settings` branch.
 
-When BranchPilot runs after January 1st, 2025, it will:
+When branchpilot runs after January 1st, 2025, it will:
 
 - Detect the repository (from ticket location or `repository` field)
 - Push your existing `ignore-vscode-settings` branch to GitHub
@@ -78,7 +78,7 @@ assignees: ["charlie"]          # Optional: assign PR
 
 ## Automating with Schedules
 
-Since BranchPilot processes tickets whenever it runs, you typically want to run it periodically:
+Since branchpilot processes tickets whenever it runs, you typically want to run it periodically:
 
 ### Using PM2
 
@@ -86,7 +86,7 @@ Since BranchPilot processes tickets whenever it runs, you typically want to run 
 # Install PM2 globally
 npm install -g pm2
 
-# Start BranchPilot with PM2, running every 10 minutes
+# Start branchpilot with PM2, running every 10 minutes
 pm2 start "branchpilot run --dir ~/Desktop/PRs" --name branchpilot --cron "*/10 * * * *"
 
 # Save PM2 configuration to auto-start on reboot

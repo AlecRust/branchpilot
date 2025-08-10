@@ -6,7 +6,7 @@ draft: true
 labels: ["example", "draft"]
 ---
 
-This is an example of a draft PR. When BranchPilot processes this ticket, 
+This is an example of a draft PR. When branchpilot processes this ticket,
 it will create the PR as a draft on GitHub.
 
 ## Features

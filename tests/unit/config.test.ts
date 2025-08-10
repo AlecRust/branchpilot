@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { loadGlobalConfig, loadRepoConfig } from '../../src/core/config.js'
 import * as paths from '../../src/core/paths.js'
@@ -73,7 +74,7 @@ repo = "owner/repo"
 
 			const config = await loadRepoConfig('/repo')
 
-			expect(fs.readFile).toHaveBeenCalledWith('/repo/.branchpilot.toml', 'utf8')
+			expect(fs.readFile).toHaveBeenCalledWith(path.join('/repo', '.branchpilot.toml'), 'utf8')
 			expect(config).toEqual({
 				defaultBase: 'develop',
 				pushMode: 'force',

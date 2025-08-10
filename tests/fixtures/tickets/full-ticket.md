@@ -14,7 +14,7 @@ assignees: ["david", "eve"]
 This ticket demonstrates all available front matter fields.
 
 ## Description
-A comprehensive example showing how to use all the available options in BranchPilot tickets.
+A comprehensive example showing how to use all the available options in branchpilot tickets.
 
 ## Implementation Details
 - Full configuration override

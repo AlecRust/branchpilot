@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0] - 2025-08-10
+
+### <!-- 1 -->🐛 Bug Fixes
+
+- Fix release process
+
+### <!-- 10 -->💼 Other
+
+- Add release-it/git-cliff release process
+
+### <!-- 2 -->🚜 Refactor
+
+- Improve output
+
 ## [0.1.0] - 2025-08-10
 
 ### <!-- 1 -->🐛 Bug Fixes

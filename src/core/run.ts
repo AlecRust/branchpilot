@@ -42,11 +42,8 @@ function nowUtcISO() {
 
 export async function runOnce(args: RunOnceArgs): Promise<number> {
 	const globalCfg = await loadGlobalConfig(args.configPath)
-	const dirs = (args.dirs && args.dirs.length > 0 ? args.dirs : globalCfg.dirs) ?? []
-	if (dirs.length === 0) {
-		console.log(red('No directories provided. Use --dir or set dirs[] in config.toml'))
-		return 1
-	}
+	// Priority: CLI --dir flag > config dirs > current directory
+	const dirs = args.dirs || (globalCfg.dirs && globalCfg.dirs.length > 0 ? globalCfg.dirs : ['.'])
 
 	try {
 		await ensureTools()
@@ -116,10 +113,10 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				base = await getDefaultBranch(repoRoot)
 			}
 
-			const pushMode: PushMode =
-				t.pushMode ?? args.overrides?.pushMode ?? repoCfg?.pushMode ?? globalCfg.pushMode ?? 'force-with-lease'
-			const remote = args.overrides?.remote ?? globalCfg.remote ?? 'origin'
-			const repo = globalCfg.repo // optional owner/name
+			// Configuration hierarchy: ticket > repo config > global config > defaults
+			const pushMode: PushMode = t.pushMode ?? repoCfg?.pushMode ?? globalCfg.pushMode ?? 'force-with-lease'
+			const remote = repoCfg?.remote ?? globalCfg.remote ?? 'origin'
+			const repo = repoCfg?.repo ?? globalCfg.repo // optional owner/name
 
 			if (args.mode === 'dry-run') {
 				console.log(yellow(`[${ticketName}] ${t.branch} - would process (dry run)`))

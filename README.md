@@ -2,123 +2,201 @@
 
 Automate PR creation from local branches via Markdown tickets.
 
-## Prerequisites
-
-- **git** - Must be installed and configured
-- **gh** (GitHub CLI) - Must be installed and authenticated (`gh auth login`)
-
 ## How it works
 
-1. **Create a branch** with your changes in any repository
-2. **Write a Markdown ticket** describing when to open the PR, the description and some other options (in the same repo or centralized location)
-3. **Run branchpilot** - it checks each ticket's `when` timestamp and creates PRs for any that are due (now or in the past)
+1. **Create a branch** with your changes
+2. **Write a Markdown ticket** with YAML [front matter](https://gohugo.io/content-management/front-matter/) describing when to open the PR
+3. **Run branchpilot** — it creates PRs for tickets whose time has arrived
 
-**Note:** branchpilot doesn't run continuously or create schedules. It processes tickets each time you run it, so you typically run it periodically (via cron, PM2, etc.) or manually.
+branchpilot doesn't run continuously. It processes tickets each time you run it, making it perfect for cron jobs or manual execution.
 
-**Repository detection:** If your ticket doesn't specify a `repository`, branchpilot uses the Git repository containing the ticket directory.
+## Quick Start
 
-## Example
+```bash
+# Install
+npm i -g branchpilot
 
-Create a file like `~/Desktop/PRs/fix-gitignore.md`:
+# Check your setup
+branchpilot doctor
+
+# Process tickets in current directory
+branchpilot run
+
+# Process tickets in specific directories
+branchpilot run --dir ~/tickets --dir ~/projects/scheduled-prs
+
+# Preview without making changes
+branchpilot run --dry
+```
+
+## Writing Tickets
+
+Create a Markdown file (e.g., `fix-typo.md`) with YAML front matter:
 
 ```markdown
 ---
-branch: ignore-vscode-settings
-title: "Add .vscode/settings.json to .gitignore"
-when: 2025-01-01
+branch: fix/readme-typo
+title: Fix typo in README
+when: 2025-01-15T09:00:00
 ---
 
 ## Summary
 
-Added `.vscode/settings.json` to the `.gitignore` file to prevent VS Code workspace settings from being committed to the repository.
+Fixed a typo in the installation instructions.
 ```
 
-This assumes you've already created and committed changes to the `ignore-vscode-settings` branch.
+### Required Fields
 
-When branchpilot runs after January 1st, 2025, it will:
+- `branch` — Your local branch name
+- `title` — PR title
+- `when` — ISO timestamp for PR creation
 
-- Detect the repository (from ticket location or `repository` field)
-- Push your existing `ignore-vscode-settings` branch to GitHub
-- Create a PR with your title and description
-
-## Install
-
-```bash
-npm i -g branchpilot
-```
-
-## Usage
-
-```bash
-# Process due tickets
-branchpilot run --dir ~/Desktop/PRs
-
-# Preview what would happen
-branchpilot run --dry --dir ~/Desktop/PRs
-
-# Check your setup
-branchpilot doctor
-```
-
-### Example Output
-
-```bash
-$ branchpilot run --dir ~/Desktop/PRs
-[api-endpoint.md] feature/api-endpoint - ✓ https://github.com/myorg/repo/pull/123
-[ui-update.md] feature/ui-update - scheduled in 2 hours
-[bugfix.md] fix/critical-bug - PR already exists
-[docs-update.md] docs/readme - ✗ Merge conflict needs resolution
-```
-
-Each ticket shows its status:
-- `✓ <url>` - PR successfully created
-- `scheduled in <time>` - Not due yet (will process when time arrives)
-- `PR already exists` - Open PR found, skipping
-- `✗ <error>` - Failed (error shown, ticket remains for retry)
-
-## Ticket Options
+### Optional Fields
 
 ```yaml
----
-branch: feature/my-feature       # Required: your local branch
-title: "Add new feature"         # Required: PR title
-when: "2025-08-12T09:00:00"     # Required: when to create PR
-repository: ~/projects/my-repo   # Optional: override auto-detected repo
-rebase: true                     # Optional: rebase before pushing
-base: develop                    # Optional: PR base branch
-labels: ["feature", "urgent"]   # Optional: GitHub labels
-reviewers: ["alice", "bob"]     # Optional: request reviews
-assignees: ["charlie"]          # Optional: assign PR
----
+repository: ~/projects/other-repo  # Target a different repo
+base: develop                       # PR base branch (auto-detected if omitted)
+rebase: true                       # Rebase onto base before pushing
+draft: true                        # Create as draft PR
+labels: ["bug", "urgent"]         # GitHub labels
+reviewers: ["alice", "bob"]       # Request reviews
+assignees: ["charlie"]            # Assign PR
+pushMode: force                   # Push strategy (force-with-lease|ff-only|force)
 ```
 
-## Automating with Schedules
+## Configuration
 
-Since branchpilot processes tickets whenever it runs, you typically want to run it periodically:
+Configure defaults in `~/.config/branchpilot.toml` (Windows: `%APPDATA%/branchpilot.toml`):
 
-### Using PM2
+```toml
+# Directories to scan for tickets
+dirs = ["~/tickets", "~/projects/scheduled-prs"]
+
+# Default base branch
+defaultBase = "main"
+
+# Timezone for parsing dates
+timezone = "America/New_York"
+
+# Push strategy
+pushMode = "force-with-lease"
+
+# Git remote
+remote = "origin"
+
+# GitHub repository (owner/name)
+repo = "myorg/myrepo"
+```
+
+### Repository Config
+
+Override global settings with `.branchpilot.toml` in your repository root:
+
+```toml
+defaultBase = "develop"
+pushMode = "ff-only"
+```
+
+### Configuration Priority
+
+Settings are applied in order (highest priority first):
+
+1. Ticket front matter
+2. Repository config (`.branchpilot.toml`)
+3. Global config (`~/.config/branchpilot.toml`)
+4. Built-in defaults
+
+## Features
+
+### Cross-Repository PRs
+
+Target different repositories using the `repository` field:
+
+```yaml
+repository: ~/projects/backend
+```
+
+branchpilot will switch to that repository, push your branch, and create the PR there.
+
+### Automatic Branch Synchronization
+
+If your branch exists on the remote, branchpilot will:
+
+1. Fetch the remote branch
+2. Merge it locally (fast-forward only)
+3. Apply optional rebase if configured
+4. Push with your configured strategy
+
+### Smart Base Branch Detection
+
+When `base` isn't specified, branchpilot automatically detects the default branch:
+
+1. Via GitHub API (`gh repo view`)
+2. Via Git (`refs/remotes/origin/HEAD`)
+3. Fallback to `main`
+
+### Timezone Support
+
+Specify timezone in the `when` field or configure a default:
+
+```yaml
+# With timezone
+when: 2025-01-15T09:00:00-05:00
+
+# Without timezone (uses configured default)
+when: 2025-01-15T09:00:00
+```
+
+### Push Modes
+
+- `force-with-lease` (default) — Safe force push
+- `ff-only` — Only push if fast-forward possible
+- `force` — Always force push
+
+## Status Messages
+
+When you run branchpilot, you'll see:
+
+- `✓ https://github.com/...` — PR created successfully
+- `scheduled in X hours` — Not due yet
+- `PR already exists` — Open PR found, skipping
+- `✗ Error message` — Failed (ticket remains for retry)
+
+## Automation
+
+Run it however you like, here's an example using pm2 to run it every 10 minutes:
 
 ```bash
-# Install PM2 globally
 npm install -g pm2
-
-# Start branchpilot with PM2, running every 10 minutes
-pm2 start "branchpilot run --dir ~/Desktop/PRs" --name branchpilot --cron "*/10 * * * *"
-
-# Save PM2 configuration to auto-start on reboot
+pm2 start "branchpilot run" --name branchpilot --cron "*/10 * * * *"
 pm2 save
-pm2 startup  # Follow the instructions to enable startup
+pm2 startup
 ```
 
-### Using crontab
+## Commands
 
-```bash
-# Edit your crontab
-crontab -e
+### `branchpilot run`
 
-# Add this line to run every 10 minutes
-*/10 * * * * /usr/local/bin/branchpilot run --dir ~/Desktop/PRs
-```
+Process due tickets and create PRs.
+
+Options:
+
+- `--dir <path>` — Directories to scan (can specify multiple, defaults to current directory)
+- `--dry` — Preview without making changes
+- `--config <path>` — Use custom config file
+
+### `branchpilot doctor`
+
+Check that required tools are installed and configured:
+
+- Git installed and configured
+- GitHub CLI installed and authenticated
+- Current directory is a git repository (if applicable)
+
+## Prerequisites
+
+- **git** — Must be installed and configured
+- **gh** — GitHub CLI must be installed and authenticated (`gh auth login`)
 
 ## Development
 
@@ -126,18 +204,13 @@ crontab -e
 # Install dependencies
 npm install
 
-# Run without building (using tsx)
-npx tsx src/cli.ts run --dir ~/Desktop/PRs
-
-# Build the project
-npm run build
-
-# Run built version
-node dist/cli.mjs run --dir ~/Desktop/PRs
-
 # Run tests
 npm test
 
-# Type checking and linting
-npm run typecheck
+# Build
+npm run build
+
+# Lint & format
 npm run lint
+npm run format
+```

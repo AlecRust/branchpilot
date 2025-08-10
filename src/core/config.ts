@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { parse as parseToml } from 'toml'
 import { z } from 'zod'
-import { configDir } from './paths.js'
+import { configPath } from './paths.js'
 import type { GlobalConfig, RepoConfig } from './types.js'
 
 const GlobalSchema = z.object({
@@ -15,7 +15,7 @@ const GlobalSchema = z.object({
 })
 
 export async function loadGlobalConfig(explicitPath?: string): Promise<GlobalConfig> {
-	const p = explicitPath ?? path.join(configDir(), 'config.toml')
+	const p = explicitPath ?? configPath()
 	try {
 		const raw = await fs.readFile(p, 'utf8')
 		const parsed = GlobalSchema.parse(parseToml(raw))

@@ -12,7 +12,7 @@ export default defineConfig({
 				'node_modules/**',
 				'dist/**',
 				'coverage/**',
-				'**/*.config.{js,ts}',
+				'**/*.config.{js,ts,mjs}',
 				'**/*.test.ts',
 				'src/cli.ts', // Entry point, tested via integration
 				'src/core/types.ts', // Type definitions only

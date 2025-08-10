@@ -10,7 +10,7 @@ vi.mock('../../src/core/paths.js')
 describe('config', () => {
 	describe('loadGlobalConfig', () => {
 		it('loads and parses TOML config', async () => {
-			vi.mocked(paths.configDir).mockReturnValue('/home/user/.config/branchpilot')
+			vi.mocked(paths.configPath).mockReturnValue('/home/user/.config/branchpilot.toml')
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`
 dirs = [".scheduled-prs"]
 defaultBase = "develop"
@@ -22,6 +22,7 @@ repo = "owner/repo"
 
 			const config = await loadGlobalConfig()
 
+			expect(fs.readFile).toHaveBeenCalledWith('/home/user/.config/branchpilot.toml', 'utf8')
 			expect(config).toEqual({
 				dirs: ['.scheduled-prs'],
 				defaultBase: 'develop',
@@ -42,7 +43,7 @@ repo = "owner/repo"
 		})
 
 		it('returns empty object when file missing or invalid', async () => {
-			vi.mocked(paths.configDir).mockReturnValue('/home/user/.config/branchpilot')
+			vi.mocked(paths.configPath).mockReturnValue('/home/user/.config/branchpilot.toml')
 
 			// Missing file
 			vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('ENOENT'))
@@ -58,7 +59,7 @@ repo = "owner/repo"
 		})
 
 		it('handles partial configs', async () => {
-			vi.mocked(paths.configDir).mockReturnValue('/home/user/.config/branchpilot')
+			vi.mocked(paths.configPath).mockReturnValue('/home/user/.config/branchpilot.toml')
 			vi.mocked(fs.readFile).mockResolvedValueOnce('dirs = [".scheduled-prs"]')
 
 			const config = await loadGlobalConfig()

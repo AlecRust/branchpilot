@@ -99,13 +99,14 @@ describe('run-once', () => {
 			DateTime.utc = originalUtc
 		})
 
-		it('returns error when no directories provided', async () => {
+		it('defaults to current directory when no directories configured', async () => {
 			vi.mocked(config.loadGlobalConfig).mockResolvedValue({})
+			vi.mocked(mdTickets.loadTickets).mockResolvedValue([])
 
 			const result = await runOnce({ mode: 'run' })
 
-			expect(result).toBe(1)
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('No directories provided'))
+			expect(result).toBe(0)
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('.', undefined)
 		})
 
 		it('returns error when tools missing', async () => {
@@ -171,12 +172,20 @@ describe('run-once', () => {
 	})
 
 	describe('configuration hierarchy', () => {
-		it('uses directories from arguments over config', async () => {
+		it('uses directories from config when provided', async () => {
 			setupMocks({ globalConfig: { dirs: ['config-dir'] } })
 
-			await runOnce({ mode: 'run', dirs: ['arg-dir'] })
+			await runOnce({ mode: 'run' })
 
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('arg-dir', undefined)
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('config-dir', undefined)
+		})
+
+		it('uses directories from --dir flag over config', async () => {
+			setupMocks({ globalConfig: { dirs: ['config-dir'] } })
+
+			await runOnce({ mode: 'run', dirs: ['cli-dir'] })
+
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('cli-dir', undefined)
 		})
 
 		it('merges config hierarchy correctly', async () => {
@@ -234,25 +243,18 @@ describe('run-once', () => {
 			)
 		})
 
-		it('applies CLI overrides above all', async () => {
+		it('uses default values when no config provided', async () => {
 			setupMocks({
-				globalConfig: { pushMode: 'force-with-lease' },
+				globalConfig: {},
 				tickets: [createTicket()],
 			})
 
-			await runOnce({
-				mode: 'run',
-				overrides: {
-					base: 'cli-base',
-					pushMode: 'force',
-					remote: 'cli-remote',
-				},
-			})
+			await runOnce({ mode: 'run' })
 
 			expect(gitgh.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					pushMode: 'force',
-					remote: 'cli-remote',
+					pushMode: 'force-with-lease', // default
+					remote: 'origin', // default
 				}),
 			)
 		})

@@ -18,26 +18,26 @@ src/
 │   ├── md-tickets.ts   # Markdown parsing & processing
 │   ├── paths.ts        # Cross-platform path handling
 │   ├── run.ts          # Main execution logic
-│   ├── types.ts        # TypeScript interfaces
-│   └── utils.ts        # Shared utilities
+│   └── types.ts        # TypeScript interfaces
 └── tests/              # Comprehensive test suite
 ```
 
 ### Commands
-- `branchpilot run --dir <paths>` — Process due tickets (supports multiple dirs)
-- `branchpilot run --dry --dir <paths>` — Preview without actions
+- `branchpilot run` — Process due tickets (defaults to current directory)
+- `branchpilot run --dir <path>` — Process tickets in specific directories
+- `branchpilot run --dry` — Preview without actions
+- `branchpilot run --config <path>` — Use custom config file
 - `branchpilot doctor` — Validate environment setup
 
 ### Configuration Hierarchy (priority order)
 1. Ticket front matter (highest)
-2. CLI flags (`--base`, `--push-mode`, `--remote`)
-3. Repository config (`.branchpilot.toml`)
-4. Global config (`~/.config/branchpilot/config.toml`)
-5. Built-in defaults (lowest)
+2. Repository config (`.branchpilot.toml`)
+3. Global config (`~/.config/branchpilot.toml`)
+4. Built-in defaults (lowest)
 
 ## Ticket Processing Flow
 
-1. **Load Configuration** — Merge global → repo → CLI configs
+1. **Load Configuration** — Merge global → repo configs
 2. **Scan Directories** — Find `.md` files in specified directories
 3. **Parse & Validate** — Extract front matter, validate schema
 4. **Filter Due Tickets** — Compare `when` timestamp with current time
@@ -69,6 +69,15 @@ reviewers: string[]    # Request reviews
 assignees: string[]    # Assign PR
 ---
 ```
+
+## Default Behavior
+
+Without any configuration, branchpilot:
+- Scans the current directory for `.md` files with ticket front matter
+- Uses `origin` as the git remote
+- Uses `force-with-lease` for pushing
+- Auto-detects the repository's default branch
+- Works immediately with zero configuration
 
 ## Advanced Features
 
@@ -138,6 +147,6 @@ Before creating PR, checks: `gh pr list --head <branch>`
 Success = PR created. Failure = ticket remains for retry (non-fatal errors).
 
 ### Platform Support
-- Windows: `%APPDATA%/branchpilot/config.toml`
-- macOS/Linux: `~/.config/branchpilot/config.toml`
+- Windows: `%APPDATA%/branchpilot.toml`
+- macOS/Linux: `~/.config/branchpilot.toml`
 - Home directory expansion works everywhere

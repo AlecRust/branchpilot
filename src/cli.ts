@@ -4,55 +4,37 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { runDoctor } from './core/doctor.js'
 import { runOnce } from './core/run.js'
-import type { PushMode, RunOnceArgs } from './core/types.js'
-import { coerceDirs } from './core/utils.js'
+import type { RunOnceArgs } from './core/types.js'
 
 await yargs(hideBin(process.argv))
 	.scriptName('branchpilot')
 	.command(
 		'run',
-		'Scan directories and execute due tickets',
+		'Process due tickets and create PRs',
 		(y) =>
 			y
 				.option('dir', {
 					type: 'array',
 					string: true,
-					describe: 'One or more directories containing markdown tickets',
+					describe: 'Directories to scan for tickets (defaults to current directory)',
 				})
 				.option('config', {
 					type: 'string',
-					describe: 'Path to config.toml (defaults to global config if present)',
-				})
-				.option('base', {
-					type: 'string',
-					describe: 'Default base branch (overrides config)',
-				})
-				.option('push-mode', {
-					type: 'string',
-					choices: ['force-with-lease', 'ff-only', 'force'] as const,
-					describe: 'Push strategy after rebase',
-				})
-				.option('remote', {
-					type: 'string',
-					describe: 'Git remote name (default origin)',
+					describe: 'Path to custom config file',
 				})
 				.option('dry', {
 					type: 'boolean',
-					describe: 'Print actions without making changes',
+					describe: 'Preview actions without making changes',
 					default: false,
 				}),
 		async (argv) => {
-			const overrides: RunOnceArgs['overrides'] = {}
-			if (argv.base) overrides.base = argv.base as string
-			if (argv['push-mode']) overrides.pushMode = argv['push-mode'] as PushMode
-			if (argv.remote) overrides.remote = argv.remote as string
-
 			const args: RunOnceArgs = {
 				mode: argv.dry ? 'dry-run' : 'run',
-				dirs: coerceDirs(argv.dir),
+			}
+			if (argv.dir && argv.dir.length > 0) {
+				args.dirs = argv.dir as string[]
 			}
 			if (argv.config) args.configPath = argv.config as string
-			if (Object.keys(overrides).length > 0) args.overrides = overrides
 
 			const code = await runOnce(args)
 			process.exitCode = code

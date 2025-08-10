@@ -55,8 +55,13 @@ describe('CLI', () => {
 		expect(result.stderr).toContain('Not enough non-option arguments')
 	})
 
-	it('accepts run command with options', async () => {
-		const result = await runCLI(['run', '--dir', '/test', '--base', 'develop'])
+	it('accepts run command without options', async () => {
+		const result = await runCLI(['run'])
+		expect(result.code).not.toBe(null)
+	})
+
+	it('accepts run command with --dir flag', async () => {
+		const result = await runCLI(['run', '--dir', '/test/path'])
 		expect(result.code).not.toBe(null)
 	})
 
@@ -70,11 +75,9 @@ describe('CLI', () => {
 		expect(result.code).not.toBe(null)
 	})
 
-	it('rejects invalid push-mode', async () => {
-		const result = await runCLI(['run', '--push-mode', 'invalid'])
-
-		expect(result.code).toBe(1)
-		expect(result.stderr).toContain('Invalid values')
+	it('accepts run command with custom config', async () => {
+		const result = await runCLI(['run', '--config', '/custom/config.toml'])
+		expect(result.code).not.toBe(null)
 	})
 
 	it('rejects unknown commands', async () => {

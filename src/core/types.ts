@@ -34,11 +34,6 @@ export type RunMode = 'run' | 'dry-run'
 
 export type RunOnceArgs = {
 	mode: RunMode
-	dirs?: string[] // directories containing markdown tickets; fallback to config.dirs
+	dirs?: string[] // Override directories (from --dir flag)
 	configPath?: string
-	overrides?: {
-		base?: string
-		pushMode?: PushMode
-		remote?: string
-	}
 }

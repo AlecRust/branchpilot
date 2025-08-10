@@ -1,3 +1,12 @@
+## [0.4.4] - 2025-08-10
+
+### 🐛 Bug Fixes
+
+- Fix --version returning wrong version
+
+### 💼 Other
+
+- Fix GitHub Release body building
 ## [0.4.3] - 2025-08-10
 
 ### 💼 Other

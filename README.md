@@ -1,6 +1,6 @@
 # branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
 
-Schedule PR creation from local branches using Markdown tickets.
+Schedule Pull Request creation from local Git branches using Markdown files.
 
 ## Quick start
 
@@ -26,7 +26,9 @@ branchpilot run
 
 ## Writing tickets
 
-Create a Markdown file with [front matter](https://gohugo.io/content-management/front-matter/) config at the top. Place it anywhere e.g. a project directory `~/projects/my-project/tickets` or a dedicated tickets directory `~/tickets`.
+Create a Markdown file with some [front matter](https://gohugo.io/content-management/front-matter/) config at the top followed by your PR description.
+
+Place the file anywhere e.g. within a repo at `~/projects/my-repo/tickets` or in a dedicated tickets directory `~/tickets`.
 
 ```markdown
 ---
@@ -38,12 +40,6 @@ repository: ~/projects/my-project  # Optional, defaults to current repo
 
 Fixed a typo in the installation instructions.
 ```
-
-### Required fields
-
-- `title` — PR title
-- `when` — When to create the PR
-- `branch` — Local branch name
 
 ### Optional fields
 

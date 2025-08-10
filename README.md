@@ -26,7 +26,7 @@ branchpilot run
 
 ## Writing tickets
 
-Create a Markdown file with YAML [front matter](https://gohugo.io/content-management/front-matter/) at the top. Place it anywhere e.g. a project directory `~/projects/my-project/tickets` or a dedicated tickets directory `~/tickets`.
+Create a Markdown file with [front matter](https://gohugo.io/content-management/front-matter/) config at the top. Place it anywhere e.g. a project directory `~/projects/my-project/tickets` or a dedicated tickets directory `~/tickets`.
 
 ```markdown
 ---
@@ -103,7 +103,7 @@ Example with [PM2](https://pm2.keymetrics.io/) running every 10 minutes:
 
 ```bash
 npm install pm2@latest -g
-pm2 start "branchpilot run --dir ~/tickets --verbose" --name branchpilot --cron "*/10 * * * *"
+pm2 start "branchpilot run --dir ~/tickets --verbose" --name bp --cron "*/10 * * * *"
 ```
 
 ## Prerequisites

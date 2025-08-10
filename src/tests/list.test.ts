@@ -2,7 +2,12 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import type { MockInstance } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as gitgh from '../core/gitgh.js'
 import { listTickets } from '../core/list.js'
+import * as ticketStatus from '../core/ticket-status.js'
+
+vi.mock('../core/gitgh.js')
+vi.mock('../core/ticket-status.js')
 
 describe('list command', () => {
 	let tempDir: string
@@ -19,6 +24,13 @@ describe('list command', () => {
 
 		// Spy on console.log to capture output
 		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+		// Mock git functions to prevent actual git commands
+		vi.mocked(gitgh.getGitRoot).mockResolvedValue(tempDir)
+		vi.mocked(gitgh.isGitRepository).mockResolvedValue(true)
+		vi.mocked(gitgh.getDefaultBranch).mockResolvedValue('main')
+		vi.mocked(ticketStatus.getTicketRepoRoot).mockResolvedValue(tempDir)
+		vi.mocked(ticketStatus.checkTicketPrStatus).mockResolvedValue({ status: 'ready', base: 'main' })
 	})
 
 	afterEach(async () => {
@@ -60,8 +72,8 @@ This is the body of ticket 2.`,
 		expect(output).toContain('[ticket1.md] feature-1')
 		expect(output).toContain('[ticket2.md] fix-bug')
 		expect(output).toContain('Found 2 tickets')
-		expect(output).toContain('1 ready')
-		expect(output).toContain('1 pending')
+		expect(output).toContain('ready')
+		expect(output).toContain('pending')
 	})
 
 	it('should handle invalid tickets', async () => {

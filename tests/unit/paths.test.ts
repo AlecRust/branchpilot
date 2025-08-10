@@ -45,6 +45,7 @@ describe('paths', () => {
 		it('returns Unix config path on non-Windows platforms', () => {
 			Object.defineProperty(process, 'platform', { value: 'linux', writable: true })
 			vi.mocked(os.homedir).mockReturnValue('/home/testuser')
+			delete process.env.XDG_CONFIG_HOME
 
 			const result = configPath()
 			expect(result).toContain('branchpilot.toml')

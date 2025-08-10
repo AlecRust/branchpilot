@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0] - 2025-08-10
+
+### <!-- 10 -->💼 Other
+
+- Adjust GitHub Release description output
+
+### <!-- 2 -->🚜 Refactor
+
+- Streamline config and CLI with sensible defaults
+
 ## [0.2.0] - 2025-08-10
 
 ### <!-- 1 -->🐛 Bug Fixes
@@ -13,6 +23,10 @@
 ### <!-- 2 -->🚜 Refactor
 
 - Improve output
+
+### <!-- 7 -->⚙️ Miscellaneous Tasks
+
+- V0.2.0
 
 ## [0.1.0] - 2025-08-10
 

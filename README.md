@@ -8,8 +8,11 @@ Schedule PR creation from local branches using Markdown tickets.
 # Install
 npm i -g branchpilot
 
-# Check setup
+# (optional) Check setup
 branchpilot doctor
+
+# (optional) Initialize with example tickets and config
+branchpilot init
 
 # Process tickets
 branchpilot run
@@ -17,50 +20,54 @@ branchpilot run
 
 ## How It Works
 
-1. **Create a branch** with your changes
-2. **Write a ticket** (Markdown file with PR details and schedule)
-3. **Run branchpilot** — PRs are created when their time arrives
+1. **Create a branch** in any local repo with changes you want to schedule
+2. **Write a ticket** add a Markdown file with PR details and `when` timestamp
+3. **Run branchpilot** — PRs will be created on run if `when` is in the past
 
 ## Writing Tickets
 
-Create a Markdown file with YAML [front matter](https://gohugo.io/content-management/front-matter/):
+Create a Markdown file with YAML [front matter](https://gohugo.io/content-management/front-matter/) at the top. Place it anywhere e.g. a project directory `~/projects/my-project/tickets` or a dedicated tickets directory `~/tickets`.
 
 ```markdown
 ---
-branch: fix/readme-typo
 title: Fix typo in README
-when: 2025-01-15T09:00:00
+when: 2025-01-15T09:00
+branch: fix/readme-typo
+repository: ~/projects/my-project  # Optional, defaults to current repo
 ---
 
 Fixed a typo in the installation instructions.
 ```
 
 ### Required Fields
-- `branch` — Local branch name
+
 - `title` — PR title
-- `when` — When to create the PR (ISO timestamp)
+- `when` — When to create the PR
+- `branch` — Local branch name
 
 ### Optional Fields
+
 ```yaml
-repository: ~/projects/other-repo  # Target different repo
+repository: ~/projects/other-repo  # Target different repo (tickets can be placed anywhere)
 base: develop                      # Base branch (auto-detected if omitted)
-rebase: true                      # Rebase before pushing
-draft: true                       # Create draft PR
-labels: ["bug", "urgent"]        # GitHub labels
-reviewers: ["alice"]             # Request reviews
-assignees: ["bob"]               # Assign PR
+rebase: true                       # Rebase before pushing
+draft: true                        # Create draft PR
+labels: ["bug", "urgent"]          # GitHub labels
+reviewers: ["alice"]               # Request reviews
+assignees: ["bob"]                 # Assign PR
 ```
 
 ## Configuration
 
 Global config: `~/.config/branchpilot.toml`
+
 ```toml
 dirs = ["~/tickets"]              # Directories to scan
-timezone = "America/New_York"     # Default timezone
 defaultBase = "main"              # Default base branch
 ```
 
 Repository config: `.branchpilot.toml`
+
 ```toml
 defaultBase = "develop"           # Override global settings
 ```
@@ -83,15 +90,6 @@ Initialize project with example tickets and config.
 
 ### `branchpilot doctor`
 Verify git and GitHub CLI are installed and authenticated.
-
-## Features
-
-- **Cross-repository PRs** — Target different repos with `repository` field
-- **Smart branch sync** — Automatically fetches and merges remote changes
-- **Base branch detection** — Auto-detects default branch via GitHub API
-- **Timezone support** — Specify in ticket or configure default
-- **Safe push modes** — `force-with-lease` (default), `ff-only`, or `force`
-- **Non-destructive** — Failed tickets remain for retry
 
 ## Automation
 

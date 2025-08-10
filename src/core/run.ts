@@ -90,8 +90,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 	const repoConfigs = new Map<string, RepoConfig>()
 
 	for (const dir of dirs) {
-		const timezone = globalCfg.timezone
-		const tickets = await loadTickets(dir, timezone)
+		const tickets = await loadTickets(dir)
 
 		if (tickets.length === 0) {
 			logger.verbose(yellow(`No tickets found in ${dir}`))

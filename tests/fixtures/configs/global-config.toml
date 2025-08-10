@@ -1,7 +1,6 @@
 # Global branchpilot configuration
 dirs = [".scheduled-prs", "tickets", "prs"]
 defaultBase = "main"
-timezone = "Europe/London"
 pushMode = "force-with-lease"
 remote = "origin"
 repo = "owner/repo"

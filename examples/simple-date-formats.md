@@ -8,7 +8,7 @@ labels: ["example"]
 This PR demonstrates the simplified date format support.
 
 You can now use:
-- `2025-01-15` - Date only (assumes midnight in configured timezone)
+- `2025-01-15` - Date only (assumes midnight in system timezone)
 - `2025-01-15T14:30` - Date and time without seconds
 - `2025-01-15T14:30:00` - Full ISO format (still supported)
 

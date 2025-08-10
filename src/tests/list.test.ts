@@ -87,13 +87,9 @@ Missing required fields.`,
 		expect(output).toContain('1 invalid')
 	})
 
-	it('should respect timezone configuration', async () => {
-		// Create config with timezone
-		await fs.writeFile(
-			'.branchpilot.toml',
-			`timezone = "America/New_York"
-dirs = ["."]`,
-		)
+	it('should handle timezone in ticket when field', async () => {
+		// Create config without timezone
+		await fs.writeFile('.branchpilot.toml', `dirs = ["."]`)
 
 		// Create ticket with timezone-aware when
 		await fs.writeFile(
@@ -101,7 +97,7 @@ dirs = ["."]`,
 			`---
 branch: feature-1
 title: Timezone test
-when: 2025-01-01T12:00:00
+when: 2025-01-01T12:00:00 America/New_York
 ---
 Body`,
 		)

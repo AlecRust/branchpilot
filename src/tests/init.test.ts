@@ -42,7 +42,6 @@ describe('init command', () => {
 		// Check that config file was created
 		const configContent = await fs.readFile('.branchpilot.toml', 'utf8')
 		expect(configContent).toContain('dirs = ["tickets"]')
-		expect(configContent).toContain('timezone =')
 
 		// Check that tickets directory was created
 		const ticketsExists = await fs

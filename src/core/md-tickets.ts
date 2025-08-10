@@ -3,6 +3,7 @@ import path from 'node:path'
 import matter from 'gray-matter'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
+import { getSystemTimezone, isValidTimezone } from './timezone.js'
 import type { Ticket } from './types.js'
 
 const TicketFront = z.object({
@@ -22,12 +23,7 @@ const TicketFront = z.object({
 	draft: z.boolean().optional(), // whether to open PR as a draft
 })
 
-function isValidTimezone(zone: string): boolean {
-	const testDt = DateTime.now().setZone(zone)
-	return testDt.isValid
-}
-
-export function parseWhenToUtcISO(whenStr: string, fallbackZone?: string): string {
+export function parseWhenToUtcISO(whenStr: string): string {
 	const parts = whenStr.trim().split(/\s+/)
 	let dt: DateTime
 
@@ -39,11 +35,8 @@ export function parseWhenToUtcISO(whenStr: string, fallbackZone?: string): strin
 		}
 		dt = parseDateTime(parts[0], zone)
 	} else {
-		// Use fallback zone or UTC
-		const zone = fallbackZone ?? 'utc'
-		if (!isValidTimezone(zone)) {
-			throw new Error(`Invalid fallback timezone: ${zone}`)
-		}
+		// Use system timezone
+		const zone = getSystemTimezone()
 		dt = parseDateTime(whenStr, zone)
 	}
 
@@ -77,7 +70,7 @@ function parseDateTime(dateStr: string, zone: string): DateTime {
 	return DateTime.invalid('unparseable')
 }
 
-export async function loadTickets(dir: string, fallbackZone?: string): Promise<Ticket[]> {
+export async function loadTickets(dir: string): Promise<Ticket[]> {
 	let entries: string[] = []
 	try {
 		entries = await fs.readdir(dir)
@@ -93,7 +86,7 @@ export async function loadTickets(dir: string, fallbackZone?: string): Promise<T
 		const parsed = matter(raw)
 		const fm = TicketFront.safeParse(parsed.data)
 		if (!fm.success) continue
-		const dueUtcISO = parseWhenToUtcISO(fm.data.when, fallbackZone)
+		const dueUtcISO = parseWhenToUtcISO(fm.data.when)
 		const ticket: Ticket = {
 			file,
 			branch: fm.data.branch,

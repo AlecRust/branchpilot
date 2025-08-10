@@ -9,7 +9,6 @@ import type { GlobalConfig, RepoConfig } from './types.js'
 const GlobalSchema = z.object({
 	dirs: z.array(z.string()).optional(),
 	defaultBase: z.string().optional(),
-	timezone: z.string().optional(),
 	pushMode: z.enum(['force-with-lease', 'ff-only', 'force']).optional(),
 	remote: z.string().optional(),
 	repo: z.string().optional(),
@@ -36,7 +35,6 @@ export async function loadGlobalConfig(explicitPath?: string, logger?: Logger): 
 			const result: GlobalConfig = {}
 			if (validated.dirs) result.dirs = validated.dirs
 			if (validated.defaultBase) result.defaultBase = validated.defaultBase
-			if (validated.timezone) result.timezone = validated.timezone
 			if (validated.pushMode) result.pushMode = validated.pushMode
 			if (validated.remote) result.remote = validated.remote
 			if (validated.repo) result.repo = validated.repo
@@ -81,7 +79,6 @@ export async function loadRepoConfig(repoRoot: string, logger?: Logger): Promise
 			const result: RepoConfig = {}
 			if (validated.dirs) result.dirs = validated.dirs
 			if (validated.defaultBase) result.defaultBase = validated.defaultBase
-			if (validated.timezone) result.timezone = validated.timezone
 			if (validated.pushMode) result.pushMode = validated.pushMode
 			if (validated.remote) result.remote = validated.remote
 			if (validated.repo) result.repo = validated.repo

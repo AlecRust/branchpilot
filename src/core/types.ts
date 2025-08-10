@@ -3,7 +3,6 @@ export type PushMode = 'force-with-lease' | 'ff-only' | 'force'
 export type GlobalConfig = {
 	dirs?: string[]
 	defaultBase?: string
-	timezone?: string
 	pushMode?: PushMode
 	remote?: string
 	repo?: string // optional explicit owner/name for gh

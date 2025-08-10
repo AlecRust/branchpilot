@@ -45,7 +45,7 @@ const TicketFront = z.object({
 	draft: z.boolean().optional(),
 })
 
-async function scanDirectory(dir: string, baseDir: string, fallbackZone?: string): Promise<ListedTicket[]> {
+async function scanDirectory(dir: string, baseDir: string): Promise<ListedTicket[]> {
 	const tickets: ListedTicket[] = []
 
 	try {
@@ -94,7 +94,7 @@ async function scanDirectory(dir: string, baseDir: string, fallbackZone?: string
 
 				let dueUtcISO: string
 				try {
-					dueUtcISO = parseWhenToUtcISO(fm.data.when, fallbackZone)
+					dueUtcISO = parseWhenToUtcISO(fm.data.when)
 				} catch (error) {
 					tickets.push({
 						file,
@@ -258,7 +258,7 @@ export async function listTickets(options: ListOptions): Promise<void> {
 
 	// Scan all directories in parallel
 	const allTickets: ListedTicket[] = []
-	const scanPromises = dirsToScan.map((dir) => scanDirectory(dir, cwd, config.timezone))
+	const scanPromises = dirsToScan.map((dir) => scanDirectory(dir, cwd))
 	const results = await Promise.all(scanPromises)
 
 	for (const tickets of results) {

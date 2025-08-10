@@ -111,7 +111,7 @@ describe('run-once', () => {
 			const result = await runOnce({ mode: 'run' })
 
 			expect(result).toBe(0)
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('.', undefined)
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('.')
 		})
 
 		it('returns error when tools missing', async () => {
@@ -195,7 +195,7 @@ describe('run-once', () => {
 
 			await runOnce({ mode: 'run' })
 
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('config-dir', undefined)
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('config-dir')
 		})
 
 		it('uses directories from --dir flag over config', async () => {
@@ -203,7 +203,7 @@ describe('run-once', () => {
 
 			await runOnce({ mode: 'run', dirs: ['cli-dir'] })
 
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('cli-dir', undefined)
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('cli-dir')
 		})
 
 		it('merges config hierarchy correctly', async () => {
@@ -287,20 +287,8 @@ describe('run-once', () => {
 			await runOnce({ mode: 'run' })
 
 			expect(mdTickets.loadTickets).toHaveBeenCalledTimes(2)
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo1/tickets', undefined)
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo2/tickets', undefined)
-		})
-	})
-
-	describe('timezone handling', () => {
-		it('passes timezone to ticket loader', async () => {
-			setupMocks({
-				globalConfig: { timezone: 'Europe/London' },
-			})
-
-			await runOnce({ mode: 'run' })
-
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo/tickets', 'Europe/London')
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo1/tickets')
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo2/tickets')
 		})
 	})
 

@@ -48,13 +48,13 @@ Fixed a typo in the installation instructions.
 ### Optional fields
 
 ```yaml
-repository: ~/projects/other-repo  # Target different repo (tickets can be placed anywhere)
-base: develop                      # Base branch (auto-detected if omitted)
-rebase: true                       # Rebase against base branch before pushing
-draft: true                        # Create PR as draft
-labels: ["bug", "urgent"]          # Set labels
-reviewers: ["alice"]               # Set reviewers
-assignees: ["bob"]                 # Set assignees
+repository: ~/projects/repo  # Target different repo (tickets can be placed anywhere)
+base: develop                # Base branch (auto-detected if omitted)
+rebase: true                 # Rebase against base branch before pushing
+draft: true                  # Create PR as draft
+labels: ["bug", "urgent"]    # Set labels
+reviewers: ["alice"]         # Set reviewers
+assignees: ["bob"]           # Set assignees
 ```
 
 ## Configuration
@@ -62,14 +62,14 @@ assignees: ["bob"]                 # Set assignees
 Global config: `~/.config/branchpilot.toml`
 
 ```toml
-dirs = ["~/tickets"]               # Directories to scan
-defaultBase = "main"               # Default base branch
+dirs = ["~/tickets"]         # Directories to scan
+defaultBase = "main"         # Default base branch
 ```
 
 Repository config: `.branchpilot.toml`
 
 ```toml
-defaultBase = "develop"            # Override global settings
+defaultBase = "develop"      # Override global settings
 ```
 
 Priority: Ticket → Repository → Global → Defaults
@@ -95,11 +95,11 @@ Initialize current directory project with example tickets and config.
 
 ### `branchpilot doctor`
 
-Verify git and GitHub CLI are installed and authenticated.
+Run checks like verifying Git and GitHub CLI are installed and authenticated.
 
 ## Automation
 
-Run `branchpilot` every 10 minutes using [PM2](https://pm2.keymetrics.io/):
+Simple example to run `branchpilot` every 10 minutes using [PM2](https://pm2.keymetrics.io/):
 
 ```bash
 npm install pm2@latest -g

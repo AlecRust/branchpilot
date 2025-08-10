@@ -9,7 +9,6 @@ import { Logger } from './core/logger.js'
 import { runOnce } from './core/run.js'
 import type { RunOnceArgs } from './core/types.js'
 
-// Get version from package.json
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const packageJson = JSON.parse(readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
@@ -46,7 +45,6 @@ program
 			const code = await runOnce(args)
 			process.exitCode = code
 		} catch (error) {
-			// Always show errors regardless of verbose flag
 			const logger = new Logger(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1
@@ -66,7 +64,6 @@ program
 			})
 			process.exitCode = result.success ? 0 : 1
 		} catch (error) {
-			// Always show errors regardless of verbose flag
 			const logger = new Logger(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1
@@ -101,7 +98,6 @@ program
 			const ok = await runDoctor(options.verbose ?? false)
 			process.exitCode = ok ? 0 : 1
 		} catch (error) {
-			// Always show errors regardless of verbose flag
 			const logger = new Logger(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1

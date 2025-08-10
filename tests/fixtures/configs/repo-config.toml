@@ -1,0 +1,4 @@
+# Repository-specific BranchPilot configuration
+# This overrides global settings for this repository
+defaultBase = "develop"
+pushMode = "ff-only"

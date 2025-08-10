@@ -9,7 +9,7 @@
 	"github": {
 		"release": true,
 		"releaseName": "v${version}",
-		"releaseNotes": "git cliff ${latestTag}..HEAD --strip header | tail -n +3"
+		"releaseNotes": "sh -c \"git cliff ${latestTag}..HEAD --strip header | tail -n +3\""
 	},
 	"npm": {
 		"publish": true

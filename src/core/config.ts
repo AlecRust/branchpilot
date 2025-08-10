@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { parse as parseToml } from 'toml'
 import { z } from 'zod'
+import type { Logger } from './logger.js'
 import { configPath } from './paths.js'
 import type { GlobalConfig, RepoConfig } from './types.js'
 
@@ -14,38 +15,92 @@ const GlobalSchema = z.object({
 	repo: z.string().optional(),
 })
 
-export async function loadGlobalConfig(explicitPath?: string): Promise<GlobalConfig> {
+export async function loadGlobalConfig(explicitPath?: string, logger?: Logger): Promise<GlobalConfig> {
 	const p = explicitPath ?? configPath()
 	try {
 		const raw = await fs.readFile(p, 'utf8')
-		const parsed = GlobalSchema.parse(parseToml(raw))
-		const result: GlobalConfig = {}
-		if (parsed.dirs) result.dirs = parsed.dirs
-		if (parsed.defaultBase) result.defaultBase = parsed.defaultBase
-		if (parsed.timezone) result.timezone = parsed.timezone
-		if (parsed.pushMode) result.pushMode = parsed.pushMode
-		if (parsed.remote) result.remote = parsed.remote
-		if (parsed.repo) result.repo = parsed.repo
-		return result
+		let parsed: unknown
+		try {
+			parsed = parseToml(raw)
+		} catch (tomlError) {
+			if (logger) {
+				logger.warn(
+					`Invalid TOML syntax in global config (${p}): ${tomlError instanceof Error ? tomlError.message : String(tomlError)}`,
+				)
+			}
+			return {}
+		}
+
+		try {
+			const validated = GlobalSchema.parse(parsed)
+			const result: GlobalConfig = {}
+			if (validated.dirs) result.dirs = validated.dirs
+			if (validated.defaultBase) result.defaultBase = validated.defaultBase
+			if (validated.timezone) result.timezone = validated.timezone
+			if (validated.pushMode) result.pushMode = validated.pushMode
+			if (validated.remote) result.remote = validated.remote
+			if (validated.repo) result.repo = validated.repo
+			return result
+		} catch (schemaError) {
+			if (logger) {
+				if (schemaError instanceof z.ZodError) {
+					const issues = schemaError.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n')
+					logger.warn(`Invalid configuration in global config (${p}):\n${issues}`)
+				} else {
+					logger.warn(
+						`Invalid configuration in global config (${p}): ${schemaError instanceof Error ? schemaError.message : String(schemaError)}`,
+					)
+				}
+			}
+			return {}
+		}
 	} catch {
+		// File doesn't exist or can't be read - this is expected and not an error
 		return {}
 	}
 }
 
-export async function loadRepoConfig(repoRoot: string): Promise<RepoConfig> {
+export async function loadRepoConfig(repoRoot: string, logger?: Logger): Promise<RepoConfig> {
 	const p = path.join(repoRoot, '.branchpilot.toml')
 	try {
 		const raw = await fs.readFile(p, 'utf8')
-		const parsed = GlobalSchema.partial().parse(parseToml(raw))
-		const result: RepoConfig = {}
-		if (parsed.dirs) result.dirs = parsed.dirs
-		if (parsed.defaultBase) result.defaultBase = parsed.defaultBase
-		if (parsed.timezone) result.timezone = parsed.timezone
-		if (parsed.pushMode) result.pushMode = parsed.pushMode
-		if (parsed.remote) result.remote = parsed.remote
-		if (parsed.repo) result.repo = parsed.repo
-		return result
+		let parsed: unknown
+		try {
+			parsed = parseToml(raw)
+		} catch (tomlError) {
+			if (logger) {
+				logger.warn(
+					`Invalid TOML syntax in repo config (${p}): ${tomlError instanceof Error ? tomlError.message : String(tomlError)}`,
+				)
+			}
+			return {}
+		}
+
+		try {
+			const validated = GlobalSchema.partial().parse(parsed)
+			const result: RepoConfig = {}
+			if (validated.dirs) result.dirs = validated.dirs
+			if (validated.defaultBase) result.defaultBase = validated.defaultBase
+			if (validated.timezone) result.timezone = validated.timezone
+			if (validated.pushMode) result.pushMode = validated.pushMode
+			if (validated.remote) result.remote = validated.remote
+			if (validated.repo) result.repo = validated.repo
+			return result
+		} catch (schemaError) {
+			if (logger) {
+				if (schemaError instanceof z.ZodError) {
+					const issues = schemaError.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`).join('\n')
+					logger.warn(`Invalid configuration in repo config (${p}):\n${issues}`)
+				} else {
+					logger.warn(
+						`Invalid configuration in repo config (${p}): ${schemaError instanceof Error ? schemaError.message : String(schemaError)}`,
+					)
+				}
+			}
+			return {}
+		}
 	} catch {
+		// File doesn't exist or can't be read - this is expected and not an error
 		return {}
 	}
 }

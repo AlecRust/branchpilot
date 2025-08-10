@@ -241,9 +241,9 @@ export async function listTickets(options: ListOptions): Promise<void> {
 	const logger = new Logger(options.verbose ?? false)
 
 	// Load configuration
-	const globalConfig = await loadGlobalConfig()
+	const globalConfig = await loadGlobalConfig(undefined, logger)
 	const cwd = process.cwd()
-	const repoConfig = await loadRepoConfig(cwd)
+	const repoConfig = await loadRepoConfig(cwd, logger)
 
 	// Merge configs (repo overrides global)
 	const config: GlobalConfig = { ...globalConfig, ...repoConfig }

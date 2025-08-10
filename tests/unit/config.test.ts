@@ -83,8 +83,48 @@ repo = "owner/repo"
 		})
 
 		it('returns empty object when missing or invalid', async () => {
+			const mockLogger = {
+				warn: vi.fn(),
+				info: vi.fn(),
+				error: vi.fn(),
+				verbose: vi.fn(),
+				success: vi.fn(),
+				always: vi.fn(),
+			} as unknown as Logger
+
 			vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('ENOENT'))
-			expect(await loadRepoConfig('/repo')).toEqual({})
+			expect(await loadRepoConfig('/repo', mockLogger)).toEqual({})
+			expect(mockLogger.warn).not.toHaveBeenCalled()
+		})
+
+		it('warns about invalid TOML in repo config', async () => {
+			const mockLogger = {
+				warn: vi.fn(),
+				info: vi.fn(),
+				error: vi.fn(),
+				verbose: vi.fn(),
+				success: vi.fn(),
+				always: vi.fn(),
+			} as unknown as Logger
+
+			vi.mocked(fs.readFile).mockResolvedValueOnce('invalid {{{')
+			expect(await loadRepoConfig('/repo', mockLogger)).toEqual({})
+			expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid TOML syntax'))
+		})
+
+		it('warns about invalid schema in repo config', async () => {
+			const mockLogger = {
+				warn: vi.fn(),
+				info: vi.fn(),
+				error: vi.fn(),
+				verbose: vi.fn(),
+				success: vi.fn(),
+				always: vi.fn(),
+			} as unknown as Logger
+
+			vi.mocked(fs.readFile).mockResolvedValueOnce('pushMode = "not-a-valid-mode"')
+			expect(await loadRepoConfig('/repo', mockLogger)).toEqual({})
+			expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Invalid configuration'))
 		})
 	})
 })

@@ -55,10 +55,11 @@ function nowUtcISO() {
 }
 
 export async function runOnce(args: RunOnceArgs): Promise<number> {
-	const globalCfg = await loadGlobalConfig(args.configPath)
+	const logger = new Logger(args.verbose ?? false)
+	const globalCfg = await loadGlobalConfig(args.configPath, logger)
 
 	// Load local repo config to check for dirs setting
-	const localRepoCfg = await loadRepoConfig(process.cwd())
+	const localRepoCfg = await loadRepoConfig(process.cwd(), logger)
 
 	// Priority: CLI --dir flag > local repo config dirs > global config dirs > current directory
 	let dirs = args.dirs
@@ -71,8 +72,6 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			dirs = ['.']
 		}
 	}
-
-	const logger = new Logger(args.verbose ?? false)
 
 	try {
 		await ensureTools()
@@ -124,7 +123,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 
 			// Load repo config if we haven't already
 			if (!repoConfigs.has(repoRoot)) {
-				repoConfigs.set(repoRoot, await loadRepoConfig(repoRoot))
+				repoConfigs.set(repoRoot, await loadRepoConfig(repoRoot, logger))
 			}
 			const repoCfg = repoConfigs.get(repoRoot) ?? {}
 

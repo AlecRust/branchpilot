@@ -1,14 +1,6 @@
 # branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
 
-Automate PR creation from local branches via Markdown tickets.
-
-## How it works
-
-1. **Create a branch** with your changes
-2. **Add a Markdown file** that includes the branch name, when to open it and the PR description
-3. **Run branchpilot** — it creates PRs for tickets whose time has arrived
-
-branchpilot doesn't run continuously. It processes tickets each time you run it, making it suitable for cron jobs or manual execution.
+Schedule PR creation from local branches using Markdown tickets.
 
 ## Quick Start
 
@@ -16,31 +8,22 @@ branchpilot doesn't run continuously. It processes tickets each time you run it,
 # Install
 npm i -g branchpilot
 
-# Initialize a project (optional, creates /tickets directory and examples)
-branchpilot init
-
-# Check your setup
+# Check setup
 branchpilot doctor
 
-# List all tickets
-branchpilot list
-
-# List tickets in specific directories
-branchpilot list --dir ~/tickets --dir ~/projects/scheduled-prs
-
-# Process tickets in current directory
+# Process tickets
 branchpilot run
-
-# Process tickets in specific directories
-branchpilot run --dir ~/tickets --dir ~/projects/scheduled-prs
-
-# Preview without making changes
-branchpilot run --dry-run
 ```
+
+## How It Works
+
+1. **Create a branch** with your changes
+2. **Write a ticket** (Markdown file with PR details and schedule)
+3. **Run branchpilot** — PRs are created when their time arrives
 
 ## Writing Tickets
 
-Create a Markdown file (e.g., `fix-typo.md`) that includes YAML [front matter](https://gohugo.io/content-management/front-matter/):
+Create a Markdown file with YAML [front matter](https://gohugo.io/content-management/front-matter/):
 
 ```markdown
 ---
@@ -49,211 +32,83 @@ title: Fix typo in README
 when: 2025-01-15T09:00:00
 ---
 
-## Summary
-
 Fixed a typo in the installation instructions.
 ```
 
 ### Required Fields
-
-- `branch` — Your local branch name
+- `branch` — Local branch name
 - `title` — PR title
-- `when` — ISO timestamp for PR creation
+- `when` — When to create the PR (ISO timestamp)
 
 ### Optional Fields
-
 ```yaml
-repository: ~/projects/other-repo  # Target a different repo
-base: develop                       # PR base branch (auto-detected if omitted)
-rebase: true                       # Rebase onto base before pushing
-draft: true                        # Create as draft PR
-labels: ["bug", "urgent"]         # GitHub labels
-reviewers: ["alice", "bob"]       # Request reviews
-assignees: ["charlie"]            # Assign PR
-pushMode: force                   # Push strategy (force-with-lease|ff-only|force)
+repository: ~/projects/other-repo  # Target different repo
+base: develop                      # Base branch (auto-detected if omitted)
+rebase: true                      # Rebase before pushing
+draft: true                       # Create draft PR
+labels: ["bug", "urgent"]        # GitHub labels
+reviewers: ["alice"]             # Request reviews
+assignees: ["bob"]               # Assign PR
 ```
 
 ## Configuration
 
-Configure defaults in `~/.config/branchpilot.toml` (Windows: `%APPDATA%/branchpilot.toml`):
-
+Global config: `~/.config/branchpilot.toml`
 ```toml
-# Directories to scan for tickets
-dirs = ["~/tickets", "~/projects/scheduled-prs"]
-
-# Default base branch
-defaultBase = "main"
-
-# Timezone for parsing dates
-timezone = "Europe/London"
-
-# Push strategy
-pushMode = "force-with-lease"
-
-# Git remote
-remote = "origin"
-
-# GitHub repository (owner/name)
-repo = "myorg/myrepo"
+dirs = ["~/tickets"]              # Directories to scan
+timezone = "America/New_York"     # Default timezone
+defaultBase = "main"              # Default base branch
 ```
 
-### Repository Config
-
-Override global settings with `.branchpilot.toml` in your repository root:
-
+Repository config: `.branchpilot.toml`
 ```toml
-defaultBase = "develop"
-pushMode = "ff-only"
+defaultBase = "develop"           # Override global settings
 ```
 
-### Configuration Priority
-
-Settings are applied in order (highest priority first):
-
-1. Ticket front matter
-2. Repository config (`.branchpilot.toml`)
-3. Global config (`~/.config/branchpilot.toml`)
-4. Built-in defaults
-
-## Features
-
-### Cross-Repository PRs
-
-Target different repositories using the `repository` field:
-
-```yaml
-repository: ~/projects/backend
-```
-
-branchpilot will switch to that repository, push your branch, and create the PR there.
-
-### Automatic Branch Synchronization
-
-If your branch exists on the remote, branchpilot will:
-
-1. Fetch the remote branch
-2. Merge it locally (fast-forward only)
-3. Apply optional rebase if configured
-4. Push with your configured strategy
-
-### Smart Base Branch Detection
-
-When `base` isn't specified, branchpilot automatically detects the default branch:
-
-1. Via GitHub API (`gh repo view`)
-2. Via Git (`refs/remotes/origin/HEAD`)
-3. Fallback to `main`
-
-### Timezone Support
-
-Specify timezone in the `when` field or configure a default:
-
-```yaml
-# With timezone
-when: 2025-01-15T09:00:00-05:00
-
-# Without timezone (uses configured default)
-when: 2025-01-15T09:00:00
-```
-
-### Push Modes
-
-- `force-with-lease` (default) — Safe force push
-- `ff-only` — Only push if fast-forward possible
-- `force` — Always force push
-
-## Status Messages
-
-When you run branchpilot, you'll see:
-
-- `✓ https://github.com/...` — PR created successfully
-- `scheduled in X hours` — Not due yet
-- `PR already exists` — Open PR found, skipping
-- `✗ Error message` — Failed (ticket remains for retry)
-
-## Automation
-
-Run it however you like, here's an example using pm2 to run it every 10 minutes:
-
-```bash
-npm install -g pm2
-pm2 start "branchpilot run" --name branchpilot --cron "*/10 * * * *"
-pm2 save
-pm2 startup
-```
+Priority: Ticket → Repository → Global → Defaults
 
 ## Commands
 
-### `branchpilot init`
-
-Initialize branchpilot in the current directory.
-
-- Creates a `tickets/` directory for your ticket files
-- Generates `.branchpilot.toml` with sensible defaults
-- Creates example tickets to get you started (one ready to process immediately)
-
-Options:
-
-- `--force` — Reinitialize even if already initialized
-- `--verbose` — Show detailed output
-
 ### `branchpilot run`
-
 Process due tickets and create PRs.
-
-Options:
-
-- `--dir <path>` — Directories to scan (can specify multiple, defaults to current directory)
-- `--dry-run` — Preview without making changes
-- `--config <path>` — Use custom config file
-- `--verbose` — Show detailed output including skipped tickets
+- `--dir <path>` — Scan specific directories (multiple allowed)
+- `--dry-run` — Preview without changes
 
 ### `branchpilot list`
+Display all tickets in a formatted table.
+- `--dir <path>` — Scan specific directories
 
-Display all tickets in configured directories.
-
-Shows tickets in a formatted table with:
-- Status indicator (due/pending/invalid)
-- Branch name
-- PR title
-- When the ticket is scheduled
-- File path
-
-Options:
-
-- `--dir <path>` — Directories to scan (can specify multiple, defaults to configured dirs)
-- `--verbose` — Show detailed error messages for invalid tickets
+### `branchpilot init`
+Initialize project with example tickets and config.
 
 ### `branchpilot doctor`
+Verify git and GitHub CLI are installed and authenticated.
 
-Check that required tools are installed and configured:
+## Features
 
-- Git installed and configured
-- GitHub CLI installed and authenticated
-- Current directory is a git repository (if applicable)
+- **Cross-repository PRs** — Target different repos with `repository` field
+- **Smart branch sync** — Automatically fetches and merges remote changes
+- **Base branch detection** — Auto-detects default branch via GitHub API
+- **Timezone support** — Specify in ticket or configure default
+- **Safe push modes** — `force-with-lease` (default), `ff-only`, or `force`
+- **Non-destructive** — Failed tickets remain for retry
 
-Options:
+## Automation
 
-- `--verbose` — Show detailed output
+Example with PM2:
+```bash
+pm2 start "branchpilot run" --cron "*/10 * * * *"
+```
 
 ## Prerequisites
 
-- **git** — Must be installed and configured
-- **gh** — GitHub CLI must be installed and authenticated (`gh auth login`)
+- **git** — Installed and configured
+- **gh** — GitHub CLI authenticated (`gh auth login`)
 
 ## Development
 
 ```bash
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Build
-npm run build
-
-# Lint & format
-npm run lint
-npm run format
+npm install  # Install dependencies
+npm test     # Run tests
+npm run lint # Lint code
 ```

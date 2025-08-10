@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: MIT
-
 import { Command } from 'commander'
 import { runDoctor } from './core/doctor.js'
 import { runInit } from './core/init.js'

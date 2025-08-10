@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { getDefaultBranch, getGitRoot, gh, hasUnmergedCommits, isGitRepository } from './gitgh.js'
+import { getDefaultBranch, getGitRoot, gh, hasUnmergedCommits, isBranchMerged, isGitRepository } from './gitgh.js'
 import type { GlobalConfig, RepoConfig, Ticket } from './types.js'
 
 export type TicketPrStatus = 'pr-exists' | 'merged' | 'ready'
@@ -63,12 +63,23 @@ export async function checkTicketPrStatus(
 
 	// Get base branch
 	const base = ticket.base || (await getDefaultBranch(repoRoot))
+	const remote = repoCfg?.remote ?? globalCfg.remote ?? 'origin'
+
+	// First check if the branch has been merged into the base branch
+	try {
+		const isMerged = await isBranchMerged(repoRoot, ticket.branch, base, remote)
+		if (isMerged) {
+			return { status: 'merged', base }
+		}
+	} catch {
+		// If we can't determine, continue checking
+	}
 
 	// Check if branch has any unmerged commits
-	const remote = repoCfg?.remote ?? globalCfg.remote ?? 'origin'
 	try {
 		const hasCommits = await hasUnmergedCommits(repoRoot, ticket.branch, base, remote)
 		if (!hasCommits) {
+			// Branch exists but has no new commits - treat as merged
 			return { status: 'merged', base }
 		}
 	} catch {

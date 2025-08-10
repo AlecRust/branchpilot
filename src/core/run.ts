@@ -105,11 +105,6 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			const remote = repoCfg?.remote ?? globalCfg.remote ?? 'origin'
 			const repo = repoCfg?.repo ?? globalCfg.repo // optional owner/name
 
-			if (args.mode === 'dry-run') {
-				logger.always(yellow(`[${ticketName}] ${t.branch} - would process (dry run)`))
-				continue
-			}
-
 			if (prStatus.status === 'pr-exists') {
 				logger.verbose(yellow(`[${ticketName}] ${t.branch} - PR already exists`))
 				continue
@@ -117,6 +112,11 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 
 			if (prStatus.status === 'merged') {
 				logger.verbose(yellow(`[${ticketName}] ${t.branch} - already merged into ${base}`))
+				continue
+			}
+
+			if (args.mode === 'dry-run') {
+				logger.always(yellow(`[${ticketName}] ${t.branch} - would process (dry run)`))
 				continue
 			}
 

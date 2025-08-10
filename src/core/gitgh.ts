@@ -80,17 +80,42 @@ export async function hasUncommittedChanges(cwd: string): Promise<boolean> {
 
 export async function hasUnmergedCommits(cwd: string, branch: string, base: string, remote: string): Promise<boolean> {
 	try {
-		// Fetch latest from remote to ensure we have up-to-date info
+		// Fetch latest base from remote
 		await git(cwd, ['fetch', remote, base])
 
-		// Check if there are any commits in branch that are not in base
-		// git rev-list returns the commits in branch that are not in base
+		// Check if the local branch exists
+		try {
+			await git(cwd, ['rev-parse', '--verify', branch])
+		} catch {
+			// Local branch doesn't exist, no commits to merge
+			return false
+		}
+
+		// Check if there are any commits in the local branch that are not in the remote base
 		const result = await git(cwd, ['rev-list', '--count', `${remote}/${base}..${branch}`])
 		const commitCount = parseInt(result, 10)
 		return commitCount > 0
 	} catch {
 		// If we can't determine, assume there might be commits to be safe
 		return true
+	}
+}
+
+export async function isBranchMerged(cwd: string, branch: string, base: string, remote: string): Promise<boolean> {
+	try {
+		// Fetch latest from remote to ensure we have up-to-date info
+		await git(cwd, ['fetch', remote, base])
+
+		// Check if the branch has been merged into the base branch
+		// --merged lists branches that have been merged into the specified branch
+		const result = await git(cwd, ['branch', '-r', '--merged', `${remote}/${base}`])
+		const mergedBranches = result.split('\n').map((b) => b.trim())
+
+		// Check if our branch is in the list of merged branches
+		return mergedBranches.includes(`${remote}/${branch}`)
+	} catch {
+		// If we can't determine, assume it's not merged
+		return false
 	}
 }
 

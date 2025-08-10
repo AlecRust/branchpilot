@@ -5,7 +5,7 @@ Automate PR creation from local branches via Markdown tickets.
 ## How it works
 
 1. **Create a branch** with your changes
-2. **Write a Markdown ticket** with YAML [front matter](https://gohugo.io/content-management/front-matter/) describing when to open the PR
+2. **Add a Markdown file** that includes the branch name, when to open it and the PR description
 3. **Run branchpilot** — it creates PRs for tickets whose time has arrived
 
 branchpilot doesn't run continuously. It processes tickets each time you run it, making it suitable for cron jobs or manual execution.
@@ -22,6 +22,12 @@ branchpilot init
 # Check your setup
 branchpilot doctor
 
+# List all tickets
+branchpilot list
+
+# List tickets in specific directories
+branchpilot list --dir ~/tickets --dir ~/projects/scheduled-prs
+
 # Process tickets in current directory
 branchpilot run
 
@@ -34,7 +40,7 @@ branchpilot run --dry-run
 
 ## Writing Tickets
 
-Create a Markdown file (e.g., `fix-typo.md`) with YAML front matter:
+Create a Markdown file (e.g., `fix-typo.md`) that includes YAML [front matter](https://gohugo.io/content-management/front-matter/):
 
 ```markdown
 ---
@@ -201,6 +207,22 @@ Options:
 - `--dry-run` — Preview without making changes
 - `--config <path>` — Use custom config file
 - `--verbose` — Show detailed output including skipped tickets
+
+### `branchpilot list`
+
+Display all tickets in configured directories.
+
+Shows tickets in a formatted table with:
+- Status indicator (due/pending/invalid)
+- Branch name
+- PR title
+- When the ticket is scheduled
+- File path
+
+Options:
+
+- `--dir <path>` — Directories to scan (can specify multiple, defaults to configured dirs)
+- `--verbose` — Show detailed error messages for invalid tickets
 
 ### `branchpilot doctor`
 

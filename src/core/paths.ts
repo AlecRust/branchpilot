@@ -10,3 +10,10 @@ export function configPath(): string {
 	const xdgConfigHome = process.env.XDG_CONFIG_HOME ?? path.join(home, '.config')
 	return path.join(xdgConfigHome, 'branchpilot.toml')
 }
+
+export function expandPath(p: string): string {
+	if (p.startsWith('~')) {
+		return path.resolve(p.replace(/^~/, os.homedir()))
+	}
+	return path.resolve(p)
+}

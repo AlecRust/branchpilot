@@ -18,28 +18,38 @@ program
 	.description('Process due tickets and create PRs')
 	.option('-d, --dir <directories...>', 'Directories to scan for tickets (defaults to current directory)')
 	.option('-c, --config <path>', 'Path to custom config file')
-	.option('--dry', 'Preview actions without making changes')
+	.option('--dry-run', 'Preview actions without making changes')
 	.action(async (options) => {
-		const args: RunOnceArgs = {
-			mode: options.dry ? 'dry-run' : 'run',
-		}
-		if (options.dir && options.dir.length > 0) {
-			args.dirs = options.dir
-		}
-		if (options.config) {
-			args.configPath = options.config
-		}
+		try {
+			const args: RunOnceArgs = {
+				mode: options.dryRun ? 'dry-run' : 'run',
+			}
+			if (options.dir && options.dir.length > 0) {
+				args.dirs = options.dir
+			}
+			if (options.config) {
+				args.configPath = options.config
+			}
 
-		const code = await runOnce(args)
-		process.exitCode = code
+			const code = await runOnce(args)
+			process.exitCode = code
+		} catch (error) {
+			console.error('Fatal error:', error)
+			process.exitCode = 1
+		}
 	})
 
 program
 	.command('doctor')
 	.description('Check environment and tools')
 	.action(async () => {
-		const ok = await runDoctor()
-		process.exitCode = ok ? 0 : 1
+		try {
+			const ok = await runDoctor()
+			process.exitCode = ok ? 0 : 1
+		} catch (error) {
+			console.error('Fatal error:', error)
+			process.exitCode = 1
+		}
 	})
 
 program.parse()

@@ -65,8 +65,8 @@ describe('CLI', () => {
 		expect(result.code).not.toBe(null)
 	})
 
-	it('accepts run command with --dry flag', async () => {
-		const result = await runCLI(['run', '--dry'])
+	it('accepts run command with --dry-run flag', async () => {
+		const result = await runCLI(['run', '--dry-run'])
 		expect(result.code).not.toBe(null)
 	})
 

@@ -26,7 +26,7 @@ branchpilot run
 branchpilot run --dir ~/tickets --dir ~/projects/scheduled-prs
 
 # Preview without making changes
-branchpilot run --dry
+branchpilot run --dry-run
 ```
 
 ## Writing Tickets
@@ -182,7 +182,7 @@ Process due tickets and create PRs.
 Options:
 
 - `--dir <path>` — Directories to scan (can specify multiple, defaults to current directory)
-- `--dry` — Preview without making changes
+- `--dry-run` — Preview without making changes
 - `--config <path>` — Use custom config file
 
 ### `branchpilot doctor`

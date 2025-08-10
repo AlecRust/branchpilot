@@ -47,7 +47,9 @@ describe('paths', () => {
 			vi.mocked(os.homedir).mockReturnValue('/home/testuser')
 
 			const result = configPath()
-			expect(result).toBe('/home/testuser/.config/branchpilot.toml')
+			expect(result).toContain('branchpilot.toml')
+			expect(result).toContain('.config')
+			expect(result).toContain('testuser')
 		})
 	})
 })

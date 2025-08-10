@@ -1,3 +1,17 @@
+## [0.4.3] - 2025-08-10
+
+### 💼 Other
+
+- Fix GitHub Release body building
+
+### 🚜 Refactor
+
+- Simplify timezone configuration
+
+### 📚 Documentation
+
+- Improve README
+- Improve README
 ## [0.4.2] - 2025-08-10
 
 ### 🐛 Bug Fixes

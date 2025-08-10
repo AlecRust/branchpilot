@@ -11,7 +11,7 @@ npm i -g branchpilot
 # (optional) Check setup
 branchpilot doctor
 
-# (optional) Initialize with example tickets and config
+# (optional) Initialize current project
 branchpilot init
 
 # Process tickets
@@ -21,8 +21,8 @@ branchpilot run
 ## How it works
 
 1. **Create a branch** in any local repo with changes you want to schedule
-2. **Write a ticket** add a Markdown file with PR details and `when` timestamp
-3. **Run branchpilot** — PRs will be created on run if `when` is in the past
+2. **Write a ticket** a Markdown file with PR details and `when` timestamp
+3. **Run branchpilot** — PRs will be opened on run if `when` is in the past
 
 ## Writing tickets
 
@@ -50,11 +50,11 @@ Fixed a typo in the installation instructions.
 ```yaml
 repository: ~/projects/other-repo  # Target different repo (tickets can be placed anywhere)
 base: develop                      # Base branch (auto-detected if omitted)
-rebase: true                       # Rebase before pushing
-draft: true                        # Create draft PR
-labels: ["bug", "urgent"]          # GitHub labels
-reviewers: ["alice"]               # Request reviews
-assignees: ["bob"]                 # Assign PR
+rebase: true                       # Rebase against base branch before pushing
+draft: true                        # Create PR as draft
+labels: ["bug", "urgent"]          # Set labels
+reviewers: ["alice"]               # Set reviewers
+assignees: ["bob"]                 # Set assignees
 ```
 
 ## Configuration
@@ -80,7 +80,7 @@ Priority: Ticket → Repository → Global → Defaults
 
 Process due tickets and create PRs.
 
-- `--dir <path>` — Scan specific directories (multiple allowed)
+- `--dir <path>` — Scan specific directories
 - `--dry-run` — Preview without changes
 
 ### `branchpilot list`
@@ -91,7 +91,7 @@ Display all tickets in a formatted table.
 
 ### `branchpilot init`
 
-Initialize project with example tickets and config.
+Initialize current directory project with example tickets and config.
 
 ### `branchpilot doctor`
 
@@ -99,7 +99,7 @@ Verify git and GitHub CLI are installed and authenticated.
 
 ## Automation
 
-Example with [PM2](https://pm2.keymetrics.io/) running every 10 minutes:
+Run `branchpilot` every 10 minutes using [PM2](https://pm2.keymetrics.io/):
 
 ```bash
 npm install pm2@latest -g
@@ -108,8 +108,8 @@ pm2 start "branchpilot run --dir ~/tickets --verbose" --name bp --cron "*/10 * *
 
 ## Prerequisites
 
-- **git** — Installed and configured
-- **gh** — GitHub CLI authenticated (`gh auth login`)
+- **[git](https://git-scm.com/)** — Installed and configured
+- **[gh](https://cli.github.com/)** — GitHub CLI authenticated (`gh auth login`)
 
 ## Development
 

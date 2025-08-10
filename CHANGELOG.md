@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.8] - 2025-08-10
+
+### 🐛 Bug Fixes
+
+- Handle merged branches and no-commit scenarios
+
+### 🧪 Testing
+
+- Improve list command mocking
+
+### ⚙️ Miscellaneous Tasks
+
+- Tidy .gitignore
+
 ## [0.4.7] - 2025-08-10
 
 ### 💼 Other

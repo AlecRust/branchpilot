@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
 import { runDoctor } from './core/doctor.js'
 import { runInit } from './core/init.js'
@@ -6,12 +9,18 @@ import { Logger } from './core/logger.js'
 import { runOnce } from './core/run.js'
 import type { RunOnceArgs } from './core/types.js'
 
+// Get version from package.json
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const packageJson = JSON.parse(readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'))
+const { version } = packageJson
+
 const program = new Command()
 
 program
 	.name('branchpilot')
 	.description('Local-first scheduled PRs from Markdown tickets')
-	.version('0.3.0')
+	.version(version)
 	.showHelpAfterError('(add --help for additional information)')
 
 program

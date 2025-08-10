@@ -1,6 +1,6 @@
 # branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
 
-Schedule Pull Request creation from local Git branches using Markdown files.
+Automate Pull Request creation from local Git branches using Markdown files.
 
 ## Quick start
 
@@ -98,7 +98,6 @@ Run checks like verifying Git and GitHub CLI are set up correctly.
 Simple example to run `branchpilot` every 10 minutes using [PM2](https://pm2.keymetrics.io/):
 
 ```bash
-npm install pm2@latest -g
 pm2 start "branchpilot run" --name branchpilot --cron "*/10 * * * *"
 ```
 

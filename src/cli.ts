@@ -18,7 +18,7 @@ const program = new Command()
 
 program
 	.name('branchpilot')
-	.description('Local-first scheduled PRs from Markdown tickets')
+	.description('Automate Pull Request creation from local Git branches using Markdown files.')
 	.version(version)
 	.showHelpAfterError('(add --help for additional information)')
 

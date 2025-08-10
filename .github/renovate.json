@@ -9,5 +9,6 @@
 		":maintainLockFilesMonthly",
 		":disableDependencyDashboard"
 	],
-	"rangeStrategy": "bump"
+	"rangeStrategy": "bump",
+	"ignoreDeps": ["node"]
 }

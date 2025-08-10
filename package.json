@@ -20,7 +20,7 @@
 		"branchpilot": "dist/cli.mjs"
 	},
 	"engines": {
-		"node": ">=20.11"
+		"node": ">=20.19.4"
 	},
 	"scripts": {
 		"dev": "tsx watch src/cli.ts",

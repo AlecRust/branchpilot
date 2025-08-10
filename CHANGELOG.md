@@ -1,3 +1,22 @@
+## [0.4.2] - 2025-08-10
+
+### 🐛 Bug Fixes
+
+- Validate timezone strings and repository paths
+
+### 💼 Other
+
+- Improve release notes building
+
+### 📚 Documentation
+
+- Simplify README
+
+### ⚙️ Miscellaneous Tasks
+
+- Remove SPDX license identifier comments
+- Check for uncommitted changes before checkout to prevent data loss
+- Improve handling of invalid TOML
 ## [0.4.1] - 2025-08-10
 
 ### 💼 Other

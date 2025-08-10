@@ -1,6 +1,6 @@
 {
 	"name": "branchpilot",
-	"version": "0.4.1",
+	"version": "0.4.2",
 	"author": "Alec Rust",
 	"license": "MIT",
 	"description": "Local-first scheduled PRs from Markdown tickets",

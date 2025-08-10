@@ -7,5 +7,6 @@ export function configPath(): string {
 		const appData = process.env.APPDATA ?? path.join(home, 'AppData', 'Roaming')
 		return path.join(appData, 'branchpilot.toml')
 	}
-	return path.join(home, '.config', 'branchpilot.toml')
+	const xdgConfigHome = process.env.XDG_CONFIG_HOME ?? path.join(home, '.config')
+	return path.join(xdgConfigHome, 'branchpilot.toml')
 }

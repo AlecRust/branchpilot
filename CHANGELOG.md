@@ -1,3 +1,11 @@
+## [0.4.5] - 2025-08-10
+
+### 🐛 Bug Fixes
+
+- Improve release notes generation for GitHub releases
+- Use HEAD instead of future tag for release notes generation
+- Simplify release notes generation in release-it config
+- Improve release notes generation for GitHub releases
 ## [0.4.4] - 2025-08-10
 
 ### 🐛 Bug Fixes

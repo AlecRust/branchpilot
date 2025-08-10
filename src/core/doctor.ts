@@ -10,7 +10,7 @@ export async function runDoctor(): Promise<boolean> {
 
 		// Check gh auth only if tools are available
 		try {
-			const u = await gh(process.cwd(), ['auth', 'status', '--show-token'])
+			const u = await gh(process.cwd(), ['auth', 'status'])
 			if (/Logged in to/i.test(u)) {
 				console.log(green('✔ gh auth'))
 			} else {

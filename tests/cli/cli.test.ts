@@ -48,11 +48,11 @@ describe('CLI', () => {
 		expect(result.stdout).toContain('doctor')
 	})
 
-	it('requires a command', async () => {
+	it('shows help when no command given', async () => {
 		const result = await runCLI([])
 
 		expect(result.code).toBe(1)
-		expect(result.stderr).toContain('Not enough non-option arguments')
+		expect(result.stderr).toContain('Usage: branchpilot')
 	})
 
 	it('accepts run command without options', async () => {
@@ -84,6 +84,6 @@ describe('CLI', () => {
 		const result = await runCLI(['unknown'])
 
 		expect(result.code).toBe(1)
-		expect(result.stderr).toContain('Unknown argument')
+		expect(result.stderr).toContain("error: unknown command 'unknown'")
 	})
 })

@@ -48,12 +48,12 @@
 	],
 	"dependencies": {
 		"colorette": "^2.0.20",
+		"commander": "^14.0.0",
 		"execa": "^9.6.0",
 		"gray-matter": "^4.0.3",
 		"luxon": "^3.7.1",
 		"toml": "^3.0.0",
 		"which": "^5.0.0",
-		"yargs": "^18.0.0",
 		"zod": "^4.0.17"
 	},
 	"devDependencies": {
@@ -65,7 +65,6 @@
 		"@types/luxon": "^3.7.1",
 		"@types/node": "^24.2.1",
 		"@types/which": "^3.0.4",
-		"@types/yargs": "^17.0.33",
 		"@vitest/coverage-v8": "^3.2.4",
 		"git-cliff": "^2.10.0",
 		"lefthook": "^1.12.2",

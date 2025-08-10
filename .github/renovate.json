@@ -10,5 +10,12 @@
 		":disableDependencyDashboard"
 	],
 	"rangeStrategy": "bump",
-	"ignoreDeps": ["node"]
+	"packageRules": [
+		{
+			"description": "Ignore major Node.js engine updates",
+			"matchDepTypes": ["engines"],
+			"matchUpdateTypes": ["major"],
+			"enabled": false
+		}
+	]
 }

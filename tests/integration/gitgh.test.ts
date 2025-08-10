@@ -8,6 +8,7 @@ import {
 	getDefaultBranch,
 	getGitRoot,
 	git,
+	hasUncommittedChanges,
 	pushBranch,
 } from '../../src/core/gitgh.js'
 
@@ -59,9 +60,54 @@ describe('gitgh', () => {
 		})
 	})
 
+	describe('hasUncommittedChanges', () => {
+		it('returns true when there are uncommitted changes', async () => {
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('M file.txt\n?? new-file.js'))
+
+			const result = await hasUncommittedChanges('/repo')
+
+			expect(result).toBe(true)
+			expect(execa).toHaveBeenCalledWith('git', ['status', '--porcelain'], { cwd: '/repo' })
+		})
+
+		it('returns false when working tree is clean', async () => {
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult(''))
+
+			const result = await hasUncommittedChanges('/repo')
+
+			expect(result).toBe(false)
+			expect(execa).toHaveBeenCalledWith('git', ['status', '--porcelain'], { cwd: '/repo' })
+		})
+
+		it('returns true when git status fails', async () => {
+			vi.mocked(execa).mockRejectedValueOnce(new Error('git command failed'))
+
+			const result = await hasUncommittedChanges('/repo')
+
+			expect(result).toBe(true)
+		})
+	})
+
 	describe('pushBranch', () => {
+		it('throws error when there are uncommitted changes', async () => {
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('M file.txt')) // git status --porcelain shows changes
+
+			await expect(
+				pushBranch({
+					cwd: '/repo',
+					branch: 'feature/test',
+					remote: 'origin',
+					pushMode: 'force-with-lease',
+				}),
+			).rejects.toThrow('Cannot checkout branch: uncommitted changes detected')
+
+			expect(execa).toHaveBeenCalledWith('git', ['status', '--porcelain'], { cwd: '/repo' })
+			expect(execa).toHaveBeenCalledTimes(1) // Should not proceed to checkout
+		})
+
 		it('performs push without rebase by default', async () => {
 			vi.mocked(execa)
+				.mockResolvedValueOnce(mockExecaResult('')) // git status --porcelain (clean)
 				.mockResolvedValueOnce(mockExecaResult('success')) // checkout
 				.mockResolvedValueOnce(mockExecaResult('refs/heads/feature/test')) // ls-remote (branch exists)
 				.mockResolvedValueOnce(mockExecaResult('success')) // fetch branch
@@ -76,15 +122,17 @@ describe('gitgh', () => {
 			})
 
 			const calls = vi.mocked(execa).mock.calls
-			expect(calls[0]).toEqual(['git', ['checkout', 'feature/test'], { cwd: '/repo' }])
-			expect(calls[1]).toEqual(['git', ['ls-remote', '--heads', 'origin', 'feature/test'], { cwd: '/repo' }])
-			expect(calls[2]).toEqual(['git', ['fetch', 'origin', 'feature/test'], { cwd: '/repo' }])
-			expect(calls[3]).toEqual(['git', ['merge', '--ff-only', 'origin/feature/test'], { cwd: '/repo' }])
-			expect(calls[4]).toEqual(['git', ['push', '--force-with-lease', 'origin', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[0]).toEqual(['git', ['status', '--porcelain'], { cwd: '/repo' }])
+			expect(calls[1]).toEqual(['git', ['checkout', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[2]).toEqual(['git', ['ls-remote', '--heads', 'origin', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[3]).toEqual(['git', ['fetch', 'origin', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[4]).toEqual(['git', ['merge', '--ff-only', 'origin/feature/test'], { cwd: '/repo' }])
+			expect(calls[5]).toEqual(['git', ['push', '--force-with-lease', 'origin', 'feature/test'], { cwd: '/repo' }])
 		})
 
 		it('performs rebase when requested', async () => {
 			vi.mocked(execa)
+				.mockResolvedValueOnce(mockExecaResult('')) // git status --porcelain (clean)
 				.mockResolvedValueOnce(mockExecaResult('success')) // checkout
 				.mockResolvedValueOnce(mockExecaResult('refs/heads/feature/test')) // ls-remote (branch exists)
 				.mockResolvedValueOnce(mockExecaResult('success')) // fetch branch
@@ -103,19 +151,26 @@ describe('gitgh', () => {
 			})
 
 			const calls = vi.mocked(execa).mock.calls
-			expect(calls[0]).toEqual(['git', ['checkout', 'feature/test'], { cwd: '/repo' }])
-			expect(calls[1]).toEqual(['git', ['ls-remote', '--heads', 'origin', 'feature/test'], { cwd: '/repo' }])
-			expect(calls[2]).toEqual(['git', ['fetch', 'origin', 'feature/test'], { cwd: '/repo' }])
-			expect(calls[3]).toEqual(['git', ['merge', '--ff-only', 'origin/feature/test'], { cwd: '/repo' }])
-			expect(calls[4]).toEqual(['git', ['fetch', 'origin', 'main'], { cwd: '/repo' }])
-			expect(calls[5]).toEqual(['git', ['rebase', 'origin/main'], { cwd: '/repo' }])
-			expect(calls[6]).toEqual(['git', ['push', '--force-with-lease', 'origin', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[0]).toEqual(['git', ['status', '--porcelain'], { cwd: '/repo' }])
+			expect(calls[1]).toEqual(['git', ['checkout', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[2]).toEqual(['git', ['ls-remote', '--heads', 'origin', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[3]).toEqual(['git', ['fetch', 'origin', 'feature/test'], { cwd: '/repo' }])
+			expect(calls[4]).toEqual(['git', ['merge', '--ff-only', 'origin/feature/test'], { cwd: '/repo' }])
+			expect(calls[5]).toEqual(['git', ['fetch', 'origin', 'main'], { cwd: '/repo' }])
+			expect(calls[6]).toEqual(['git', ['rebase', 'origin/main'], { cwd: '/repo' }])
+			expect(calls[7]).toEqual(['git', ['push', '--force-with-lease', 'origin', 'feature/test'], { cwd: '/repo' }])
 		})
 
 		it('handles different push modes', async () => {
-			vi.mocked(execa).mockResolvedValue(mockExecaResult('success'))
-
 			// Test ff-only
+			vi.mocked(execa)
+				.mockResolvedValueOnce(mockExecaResult('')) // git status --porcelain (clean)
+				.mockResolvedValueOnce(mockExecaResult('success')) // checkout
+				.mockResolvedValueOnce(mockExecaResult('refs/heads/test')) // ls-remote (branch exists)
+				.mockResolvedValueOnce(mockExecaResult('success')) // fetch branch
+				.mockResolvedValueOnce(mockExecaResult('success')) // merge
+				.mockResolvedValueOnce(mockExecaResult('success')) // push
+
 			await pushBranch({
 				cwd: '/repo',
 				branch: 'test',
@@ -127,6 +182,14 @@ describe('gitgh', () => {
 			expect(lastCall?.[1]).toContain('--ff-only')
 
 			// Test force
+			vi.mocked(execa)
+				.mockResolvedValueOnce(mockExecaResult('')) // git status --porcelain (clean)
+				.mockResolvedValueOnce(mockExecaResult('success')) // checkout
+				.mockResolvedValueOnce(mockExecaResult('refs/heads/test')) // ls-remote (branch exists)
+				.mockResolvedValueOnce(mockExecaResult('success')) // fetch branch
+				.mockResolvedValueOnce(mockExecaResult('success')) // merge
+				.mockResolvedValueOnce(mockExecaResult('success')) // push
+
 			await pushBranch({
 				cwd: '/repo',
 				branch: 'test',
@@ -140,6 +203,7 @@ describe('gitgh', () => {
 
 		it('handles local-only branches', async () => {
 			vi.mocked(execa)
+				.mockResolvedValueOnce(mockExecaResult('')) // git status --porcelain (clean)
 				.mockResolvedValueOnce(mockExecaResult('success')) // checkout
 				.mockResolvedValueOnce(mockExecaResult('')) // ls-remote returns empty (branch doesn't exist)
 				.mockImplementationOnce(() => Promise.reject(new Error('no upstream'))) // branch --unset-upstream (might fail)
@@ -153,15 +217,17 @@ describe('gitgh', () => {
 			})
 
 			const calls = vi.mocked(execa).mock.calls
-			expect(calls[0]).toEqual(['git', ['checkout', 'new-feature'], { cwd: '/repo' }])
-			expect(calls[1]).toEqual(['git', ['ls-remote', '--heads', 'origin', 'new-feature'], { cwd: '/repo' }])
-			expect(calls[2]).toEqual(['git', ['branch', '--unset-upstream'], { cwd: '/repo' }])
+			expect(calls[0]).toEqual(['git', ['status', '--porcelain'], { cwd: '/repo' }])
+			expect(calls[1]).toEqual(['git', ['checkout', 'new-feature'], { cwd: '/repo' }])
+			expect(calls[2]).toEqual(['git', ['ls-remote', '--heads', 'origin', 'new-feature'], { cwd: '/repo' }])
+			expect(calls[3]).toEqual(['git', ['branch', '--unset-upstream'], { cwd: '/repo' }])
 			// For new branches, we don't use --force-with-lease to avoid stale tracking issues
-			expect(calls[3]).toEqual(['git', ['push', 'origin', 'new-feature'], { cwd: '/repo' }])
+			expect(calls[4]).toEqual(['git', ['push', 'origin', 'new-feature'], { cwd: '/repo' }])
 		})
 
 		it('handles rebase failures', async () => {
 			vi.mocked(execa)
+				.mockResolvedValueOnce(mockExecaResult('')) // git status --porcelain (clean)
 				.mockResolvedValueOnce(mockExecaResult('ok')) // checkout
 				.mockResolvedValueOnce(mockExecaResult('refs/heads/test')) // ls-remote (branch exists)
 				.mockResolvedValueOnce(mockExecaResult('ok')) // fetch branch

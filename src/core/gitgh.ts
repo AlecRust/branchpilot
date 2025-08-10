@@ -66,6 +66,18 @@ export async function getDefaultBranch(cwd: string): Promise<string> {
 	}
 }
 
+export async function hasUncommittedChanges(cwd: string): Promise<boolean> {
+	try {
+		// Check for any uncommitted changes (staged or unstaged)
+		// --porcelain gives parseable output, empty if working tree is clean
+		const result = await git(cwd, ['status', '--porcelain'])
+		return result.length > 0
+	} catch {
+		// If we can't determine, assume there might be changes to be safe
+		return true
+	}
+}
+
 export async function hasUnmergedCommits(cwd: string, branch: string, base: string, remote: string): Promise<boolean> {
 	try {
 		// Fetch latest from remote to ensure we have up-to-date info
@@ -91,6 +103,11 @@ export async function pushBranch(opts: {
 	pushMode: PushMode
 }) {
 	const { cwd, branch, base, rebase, remote, pushMode } = opts
+
+	// Check for uncommitted changes before checkout to prevent data loss
+	if (await hasUncommittedChanges(cwd)) {
+		throw new Error('Cannot checkout branch: uncommitted changes detected. Please commit or stash your changes first.')
+	}
 
 	// Checkout the branch locally
 	await git(cwd, ['checkout', branch])

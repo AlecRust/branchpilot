@@ -1,3 +1,5 @@
+# Changelog
+
 ## [0.4.5] - 2025-08-10
 
 ### 🐛 Bug Fixes
@@ -6,6 +8,7 @@
 - Use HEAD instead of future tag for release notes generation
 - Simplify release notes generation in release-it config
 - Improve release notes generation for GitHub releases
+
 ## [0.4.4] - 2025-08-10
 
 ### 🐛 Bug Fixes
@@ -15,6 +18,7 @@
 ### 💼 Other
 
 - Fix GitHub Release body building
+
 ## [0.4.3] - 2025-08-10
 
 ### 💼 Other
@@ -29,6 +33,7 @@
 
 - Improve README
 - Improve README
+
 ## [0.4.2] - 2025-08-10
 
 ### 🐛 Bug Fixes
@@ -48,6 +53,7 @@
 - Remove SPDX license identifier comments
 - Check for uncommitted changes before checkout to prevent data loss
 - Improve handling of invalid TOML
+
 ## [0.4.1] - 2025-08-10
 
 ### 💼 Other
@@ -57,6 +63,7 @@
 ### 📚 Documentation
 
 - Add npm badge to README
+
 ## [0.4.0] - 2025-08-10
 
 ### 🚀 Features
@@ -85,6 +92,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Tidy files
+
 ## [0.3.0] - 2025-08-10
 
 ### 💼 Other
@@ -94,6 +102,7 @@
 ### 🚜 Refactor
 
 - Streamline config and CLI with sensible defaults
+
 ## [0.2.0] - 2025-08-10
 
 ### 🐛 Bug Fixes
@@ -107,6 +116,7 @@
 ### 🚜 Refactor
 
 - Improve output
+
 ## [0.1.0] - 2025-08-10
 
 ### 🐛 Bug Fixes
@@ -129,3 +139,4 @@
 
 - Fix Windows unit tests
 - Fix windows tests
+

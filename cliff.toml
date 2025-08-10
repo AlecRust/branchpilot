@@ -1,8 +1,28 @@
 # git-cliff configuration file
 # https://git-cliff.org/docs/configuration
 
+[changelog]
+header = """
+# Changelog
+
+"""
+# Add blank line after each version
+body = """
+{% if version %}\
+    ## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+    ## [unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+    ### {{ group | striptags | trim | upper_first }}
+    {% for commit in commits %}
+        - {{ commit.message | upper_first }}\
+    {% endfor %}
+{% endfor %}
+
+"""
+
 [git]
 commit_preprocessors = [
-    # Remove release commits before parsing
     { pattern = "^chore\\(release\\): v\\d+\\.\\d+\\.\\d+", replace = "" },
 ]

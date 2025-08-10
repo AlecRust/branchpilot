@@ -1,50 +1,12 @@
-import { existsSync } from 'node:fs'
-import os from 'node:os'
 import path from 'node:path'
 import { green, red, yellow } from 'colorette'
 import { DateTime } from 'luxon'
 import { loadGlobalConfig, loadRepoConfig } from './config.js'
-import {
-	createOrUpdatePr,
-	ensureTools,
-	getCurrentBranch,
-	getDefaultBranch,
-	getGitRoot,
-	gh,
-	git,
-	hasUnmergedCommits,
-	isGitRepository,
-	pushBranch,
-} from './gitgh.js'
+import { createOrUpdatePr, ensureTools, getCurrentBranch, git, pushBranch } from './gitgh.js'
 import { Logger } from './logger.js'
 import { loadTickets } from './md-tickets.js'
-import type { PushMode, RepoConfig, RunOnceArgs, Ticket } from './types.js'
-
-async function getRepoRoot(ticket: Ticket, ticketsDir: string): Promise<string> {
-	// If ticket specifies a repository path, expand it and use it
-	if (ticket.repository) {
-		const expandedPath = path.resolve(ticket.repository.replace(/^~/, os.homedir()))
-
-		// Validate the repository path exists
-		if (!existsSync(expandedPath)) {
-			throw new Error(`Repository path does not exist: ${expandedPath}`)
-		}
-
-		// Validate it's a git repository
-		if (!(await isGitRepository(expandedPath))) {
-			throw new Error(`Path is not a git repository: ${expandedPath}`)
-		}
-
-		return expandedPath
-	}
-	// Otherwise, find the git repository root from the tickets directory
-	const gitRoot = await getGitRoot(ticketsDir)
-	if (gitRoot) {
-		return gitRoot
-	}
-	// If not in a git repo, throw an error
-	throw new Error(`Directory ${ticketsDir} is not in a git repository and ticket doesn't specify repository field`)
-}
+import { checkTicketPrStatus, getTicketRepoRoot } from './ticket-status.js'
+import type { PushMode, RepoConfig, RunOnceArgs } from './types.js'
 
 function nowUtcISO() {
 	const isoString = DateTime.utc().toISO()
@@ -113,7 +75,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			// Ticket is due, process it
 			let repoRoot: string
 			try {
-				repoRoot = await getRepoRoot(t, dir)
+				repoRoot = await getTicketRepoRoot(t, dir)
 			} catch (e) {
 				logger.error(red(`[${ticketName}] ✗ ${e instanceof Error ? e.message : String(e)}`))
 				fatal = true
@@ -134,12 +96,9 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				}
 			}
 
-			// Get base branch - use ticket's base, or get the repo's default branch
-			let base = t.base
-			if (!base) {
-				// Only get default branch if we need it (when ticket doesn't specify base)
-				base = await getDefaultBranch(repoRoot)
-			}
+			// Check PR status using shared function
+			const prStatus = await checkTicketPrStatus(t, repoRoot, repoCfg, globalCfg)
+			const base = prStatus.base
 
 			// Configuration hierarchy: ticket > repo config > global config > defaults
 			const pushMode: PushMode = t.pushMode ?? repoCfg?.pushMode ?? globalCfg.pushMode ?? 'force-with-lease'
@@ -151,31 +110,12 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				continue
 			}
 
-			// Check if an open PR already exists
-			let openPrExists = false
-			try {
-				const result = await gh(repoRoot, ['pr', 'list', '--head', t.branch, '--state', 'open', '--json', 'number'])
-				const prs = JSON.parse(result)
-				openPrExists = prs.length > 0
-			} catch {
-				// Error checking PRs, proceed
-			}
-
-			if (openPrExists) {
+			if (prStatus.status === 'pr-exists') {
 				logger.verbose(yellow(`[${ticketName}] ${t.branch} - PR already exists`))
 				continue
 			}
 
-			// Check if branch has any unmerged commits
-			let hasCommits = true
-			try {
-				hasCommits = await hasUnmergedCommits(repoRoot, t.branch, base, remote)
-			} catch {
-				// If we can't determine, assume there might be commits
-				hasCommits = true
-			}
-
-			if (!hasCommits) {
+			if (prStatus.status === 'merged') {
 				logger.verbose(yellow(`[${ticketName}] ${t.branch} - already merged into ${base}`))
 				continue
 			}

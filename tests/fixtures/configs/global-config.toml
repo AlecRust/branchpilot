@@ -1,5 +1,5 @@
 # Global branchpilot configuration
-dirs = [".scheduled-prs", "tickets", "prs"]
+dirs = ["tickets", "prs"]
 defaultBase = "main"
 pushMode = "force-with-lease"
 remote = "origin"

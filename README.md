@@ -2,7 +2,7 @@
 
 Schedule PR creation from local branches using Markdown tickets.
 
-## Quick Start
+## Quick start
 
 ```bash
 # Install
@@ -18,13 +18,13 @@ branchpilot init
 branchpilot run
 ```
 
-## How It Works
+## How it works
 
 1. **Create a branch** in any local repo with changes you want to schedule
 2. **Write a ticket** add a Markdown file with PR details and `when` timestamp
 3. **Run branchpilot** — PRs will be created on run if `when` is in the past
 
-## Writing Tickets
+## Writing tickets
 
 Create a Markdown file with YAML [front matter](https://gohugo.io/content-management/front-matter/) at the top. Place it anywhere e.g. a project directory `~/projects/my-project/tickets` or a dedicated tickets directory `~/tickets`.
 
@@ -39,13 +39,13 @@ repository: ~/projects/my-project  # Optional, defaults to current repo
 Fixed a typo in the installation instructions.
 ```
 
-### Required Fields
+### Required fields
 
 - `title` — PR title
 - `when` — When to create the PR
 - `branch` — Local branch name
 
-### Optional Fields
+### Optional fields
 
 ```yaml
 repository: ~/projects/other-repo  # Target different repo (tickets can be placed anywhere)
@@ -103,7 +103,7 @@ Example with [PM2](https://pm2.keymetrics.io/) running every 10 minutes:
 
 ```bash
 npm install pm2@latest -g
-pm2 start "branchpilot run --dir ~/tickets" --name branchpilot --cron "*/10 * * * *"
+pm2 start "branchpilot run --dir ~/tickets --verbose" --name branchpilot --cron "*/10 * * * *"
 ```
 
 ## Prerequisites

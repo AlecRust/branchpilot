@@ -12,7 +12,7 @@ describe('config', () => {
 		it('loads and parses TOML config', async () => {
 			vi.mocked(paths.configPath).mockReturnValue('/home/user/.config/branchpilot.toml')
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`
-dirs = [".scheduled-prs"]
+dirs = ["tickets"]
 defaultBase = "develop"
 pushMode = "force-with-lease"
 remote = "upstream"
@@ -23,7 +23,7 @@ repo = "owner/repo"
 
 			expect(fs.readFile).toHaveBeenCalledWith('/home/user/.config/branchpilot.toml', 'utf8')
 			expect(config).toEqual({
-				dirs: ['.scheduled-prs'],
+				dirs: ['tickets'],
 				defaultBase: 'develop',
 				pushMode: 'force-with-lease',
 				remote: 'upstream',
@@ -58,11 +58,11 @@ repo = "owner/repo"
 
 		it('handles partial configs', async () => {
 			vi.mocked(paths.configPath).mockReturnValue('/home/user/.config/branchpilot.toml')
-			vi.mocked(fs.readFile).mockResolvedValueOnce('dirs = [".scheduled-prs"]')
+			vi.mocked(fs.readFile).mockResolvedValueOnce('dirs = ["tickets"]')
 
 			const config = await loadGlobalConfig()
 
-			expect(config.dirs).toEqual(['.scheduled-prs'])
+			expect(config.dirs).toEqual(['tickets'])
 			expect(config.defaultBase).toBeUndefined()
 		})
 	})

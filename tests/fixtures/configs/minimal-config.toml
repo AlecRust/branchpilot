@@ -1,2 +1,2 @@
 # Minimal configuration with just directories
-dirs = [".scheduled-prs"]
+dirs = ["tickets"]

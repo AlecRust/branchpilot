@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { blue, cyan, gray, green, red, yellow } from 'colorette'
+import { blue, gray, green, red, yellow } from 'colorette'
 import matter from 'gray-matter'
 import { DateTime } from 'luxon'
 import { z } from 'zod'
@@ -8,9 +8,10 @@ import { loadGlobalConfig, loadRepoConfig } from './config.js'
 import { Logger } from './logger.js'
 import { parseWhenToUtcISO } from './md-tickets.js'
 import { expandPath } from './paths.js'
-import type { GlobalConfig } from './types.js'
+import { checkTicketPrStatus, getTicketRepoRoot } from './ticket-status.js'
+import type { GlobalConfig, RepoConfig } from './types.js'
 
-export type TicketStatus = 'pending' | 'due' | 'invalid'
+export type TicketStatus = 'pending' | 'due' | 'pr-exists' | 'merged' | 'invalid' | 'ready'
 
 export type ListedTicket = {
 	file: string
@@ -22,6 +23,8 @@ export type ListedTicket = {
 	status: TicketStatus
 	error?: string
 	daysUntilDue?: number
+	repository?: string
+	base?: string
 }
 
 export type ListOptions = {
@@ -113,7 +116,7 @@ async function scanDirectory(dir: string, baseDir: string): Promise<ListedTicket
 				const isDue = dueDate <= now
 				const daysUntilDue = Math.floor(dueDate.diff(now, 'days').days)
 
-				tickets.push({
+				const newTicket: ListedTicket = {
 					file,
 					relativePath,
 					branch: fm.data.branch,
@@ -122,7 +125,10 @@ async function scanDirectory(dir: string, baseDir: string): Promise<ListedTicket
 					dueUtcISO,
 					status: isDue ? 'due' : 'pending',
 					daysUntilDue,
-				})
+				}
+				if (fm.data.repository) newTicket.repository = fm.data.repository
+				if (fm.data.base) newTicket.base = fm.data.base
+				tickets.push(newTicket)
 			} catch (error) {
 				tickets.push({
 					file,
@@ -142,56 +148,65 @@ async function scanDirectory(dir: string, baseDir: string): Promise<ListedTicket
 	return tickets
 }
 
-function formatRelativeTime(daysUntilDue: number | undefined): string {
-	if (daysUntilDue === undefined) return ''
+function formatTicketStatus(ticket: ListedTicket): string {
+	if (!ticket.dueUtcISO) return ''
 
-	const absDays = Math.abs(daysUntilDue)
+	const dueDate = DateTime.fromISO(ticket.dueUtcISO)
+	const now = DateTime.utc()
 
-	if (daysUntilDue < 0) {
-		if (absDays === 0) return 'today'
-		if (absDays === 1) return '1 day ago'
-		if (absDays < 7) return `${absDays} days ago`
-		if (absDays < 30) return `${Math.floor(absDays / 7)} weeks ago`
-		return `${Math.floor(absDays / 30)} months ago`
+	if (ticket.status === 'pr-exists') {
+		return 'PR already exists'
 	}
 
-	if (daysUntilDue === 0) return 'today'
-	if (daysUntilDue === 1) return 'in 1 day'
-	if (daysUntilDue < 7) return `in ${daysUntilDue} days`
-	if (daysUntilDue < 30) return `in ${Math.floor(daysUntilDue / 7)} weeks`
-	return `in ${Math.floor(daysUntilDue / 30)} months`
-}
-
-function formatStatus(status: TicketStatus): string {
-	switch (status) {
-		case 'due':
-			return yellow('✓ due')
-		case 'pending':
-			return green('⏳ pend')
-		case 'invalid':
-			return red('✗ inv')
+	if (ticket.status === 'merged') {
+		const base = ticket.base || 'main'
+		return `already merged into ${base}`
 	}
+
+	if (ticket.status === 'pending') {
+		const relativeTime = dueDate.toRelative({ base: now })
+		return `scheduled ${relativeTime}`
+	}
+
+	if (ticket.status === 'ready') {
+		return 'ready to process'
+	}
+
+	// For due tickets that haven't been checked yet
+	return 'due (unchecked)'
 }
 
-function truncate(str: string, maxLen: number): string {
-	if (str.length <= maxLen) return str
-	return `${str.substring(0, maxLen - 3)}...`
+function formatTicketLine(ticket: ListedTicket): string {
+	const fileName = path.basename(ticket.file)
+	const status = formatTicketStatus(ticket)
+
+	if (ticket.status === 'invalid') {
+		return red(`[${fileName}] ${ticket.branch} - ${ticket.error || 'invalid ticket'}`)
+	}
+
+	if (ticket.status === 'pr-exists' || ticket.status === 'merged' || ticket.status === 'pending') {
+		return yellow(`[${fileName}] ${ticket.branch} - ${status}`)
+	}
+
+	// Ready status (tickets that are due and can be processed)
+	if (ticket.status === 'ready') {
+		return green(`[${fileName}] ${ticket.branch} - ${status}`)
+	}
+
+	// Due but unchecked
+	return yellow(`[${fileName}] ${ticket.branch} - ${status}`)
 }
 
-function formatTable(tickets: ListedTicket[], verbose: boolean): string {
+function formatOutput(tickets: ListedTicket[]): string {
 	if (tickets.length === 0) {
 		return gray('No tickets found.')
 	}
 
 	const lines: string[] = []
 
-	// Header
-	lines.push(cyan('Status   Branch                Title                         When            Path'))
-	lines.push(gray('─'.repeat(85)))
-
-	// Sort tickets: due first, then pending, then invalid
+	// Sort tickets: ready first, then due, then pending, then pr-exists/merged, then invalid
 	const sorted = [...tickets].sort((a, b) => {
-		const statusOrder = { due: 0, pending: 1, invalid: 2 }
+		const statusOrder = { ready: 0, due: 1, pending: 2, 'pr-exists': 3, merged: 4, invalid: 5 }
 		const statusDiff = statusOrder[a.status] - statusOrder[b.status]
 		if (statusDiff !== 0) return statusDiff
 
@@ -202,17 +217,9 @@ function formatTable(tickets: ListedTicket[], verbose: boolean): string {
 		return 0
 	})
 
-	// Rows
+	// Format each ticket
 	for (const ticket of sorted) {
-		const status = formatStatus(ticket.status)
-		const branch = truncate(ticket.branch, 20).padEnd(20)
-		const title =
-			ticket.status === 'invalid' && ticket.error && verbose ? red(`[${ticket.error}]`) : truncate(ticket.title, 28)
-		const titlePadded = title.padEnd(28)
-		const when = ticket.status === 'invalid' ? ''.padEnd(14) : formatRelativeTime(ticket.daysUntilDue).padEnd(14)
-		const pathStr = truncate(ticket.relativePath, 25)
-
-		lines.push(`${status}  ${branch} ${titlePadded} ${when} ${pathStr}`)
+		lines.push(formatTicketLine(ticket))
 	}
 
 	return lines.join('\n')
@@ -220,21 +227,30 @@ function formatTable(tickets: ListedTicket[], verbose: boolean): string {
 
 function formatSummary(tickets: ListedTicket[]): string {
 	const total = tickets.length
+	const ready = tickets.filter((t) => t.status === 'ready').length
 	const due = tickets.filter((t) => t.status === 'due').length
 	const pending = tickets.filter((t) => t.status === 'pending').length
+	const prExists = tickets.filter((t) => t.status === 'pr-exists').length
+	const merged = tickets.filter((t) => t.status === 'merged').length
 	const invalid = tickets.filter((t) => t.status === 'invalid').length
 
-	const parts: string[] = [`Found ${total} tickets`]
-
-	if (total > 0) {
-		const details: string[] = []
-		if (due > 0) details.push(`${due} due`)
-		if (pending > 0) details.push(`${pending} pending`)
-		if (invalid > 0) details.push(`${invalid} invalid`)
-		parts.push(details.join(', '))
+	if (total === 0) {
+		return ''
 	}
 
-	return blue(`\n${parts.join(': ')}`)
+	const details: string[] = []
+	if (ready > 0) details.push(`${ready} ready`)
+	if (due > 0) details.push(`${due} due (unchecked)`)
+	if (pending > 0) details.push(`${pending} pending`)
+	if (prExists > 0) details.push(`${prExists} with existing PRs`)
+	if (merged > 0) details.push(`${merged} already merged`)
+	if (invalid > 0) details.push(`${invalid} invalid`)
+
+	if (details.length === 0) {
+		return blue(`\nFound ${total} tickets`)
+	}
+
+	return blue(`\nFound ${total} tickets: ${details.join(', ')}`)
 }
 
 export async function listTickets(options: ListOptions): Promise<void> {
@@ -265,7 +281,45 @@ export async function listTickets(options: ListOptions): Promise<void> {
 		allTickets.push(...tickets)
 	}
 
+	// Cache for repo configs
+	const repoConfigs = new Map<string, RepoConfig>()
+
+	// Check PR status for each ticket
+	for (const ticket of allTickets) {
+		if (ticket.status === 'invalid') continue
+
+		// Get repository root for this ticket
+		const dir = path.dirname(ticket.file)
+		try {
+			const repoRoot = await getTicketRepoRoot(ticket, dir)
+
+			// Load repo config if we haven't already
+			if (!repoConfigs.has(repoRoot)) {
+				repoConfigs.set(repoRoot, await loadRepoConfig(repoRoot, logger))
+			}
+			const repoCfg = repoConfigs.get(repoRoot) ?? {}
+
+			// Check PR status using shared function
+			const prStatus = await checkTicketPrStatus(ticket, repoRoot, repoCfg, globalConfig)
+			ticket.base = prStatus.base
+
+			// Map PR status to ticket status
+			if (prStatus.status === 'pr-exists') {
+				ticket.status = 'pr-exists'
+			} else if (prStatus.status === 'merged') {
+				ticket.status = 'merged'
+			} else if (ticket.status === 'due') {
+				ticket.status = 'ready'
+			}
+		} catch {
+			// If we can't get repo root or check status, keep original status
+		}
+	}
+
 	// Output
-	console.log(formatTable(allTickets, options.verbose ?? false))
-	console.log(formatSummary(allTickets))
+	console.log(formatOutput(allTickets))
+	const summary = formatSummary(allTickets)
+	if (summary) {
+		console.log(summary)
+	}
 }

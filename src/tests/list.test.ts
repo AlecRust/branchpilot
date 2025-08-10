@@ -57,12 +57,10 @@ This is the body of ticket 2.`,
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('feature-1')
-		expect(output).toContain('Add new feature')
-		expect(output).toContain('fix-bug')
-		expect(output).toContain('Fix critical bug')
+		expect(output).toContain('[ticket1.md] feature-1')
+		expect(output).toContain('[ticket2.md] fix-bug')
 		expect(output).toContain('Found 2 tickets')
-		expect(output).toContain('1 due')
+		expect(output).toContain('1 ready')
 		expect(output).toContain('1 pending')
 	})
 
@@ -81,8 +79,8 @@ Missing required fields.`,
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('feature-1')
-		expect(output).toContain('[missing]')
+		expect(output).toContain('[invalid.md] feature-1')
+		expect(output).toContain('Missing required fields')
 		expect(output).toContain('Found 1 tickets')
 		expect(output).toContain('1 invalid')
 	})
@@ -107,8 +105,7 @@ Body`,
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('feature-1')
-		expect(output).toContain('Timezone test')
+		expect(output).toContain('[ticket.md] feature-1')
 		expect(output).toContain('Found 1 tickets')
 	})
 
@@ -145,10 +142,8 @@ Body`,
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('feature-1')
-		expect(output).toContain('Ticket in tickets dir')
-		expect(output).toContain('feature-2')
-		expect(output).toContain('Ticket in more-tickets dir')
+		expect(output).toContain('[ticket1.md] feature-1')
+		expect(output).toContain('[ticket2.md] feature-2')
 		expect(output).toContain('Found 2 tickets')
 	})
 
@@ -162,7 +157,6 @@ Body`,
 		const output = calls.map((c) => c[0]).join('\n')
 
 		expect(output).toContain('No tickets found')
-		expect(output).toContain('Found 0 tickets')
 	})
 
 	it('should format output as table', async () => {
@@ -178,15 +172,11 @@ Body`,
 
 		await listTickets({})
 
-		// Check that table was output
+		// Check that simplified output format is used
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
-		expect(output).toContain('Status')
-		expect(output).toContain('Branch')
-		expect(output).toContain('Title')
-		expect(output).toContain('When')
-		expect(output).toContain('Path')
-		expect(output).toContain('─') // table separator
+		expect(output).toContain('[ticket.md] feature-1')
+		expect(output).toContain('Found 1 tickets')
 	})
 
 	it('should show verbose errors when requested', async () => {
@@ -252,10 +242,8 @@ Body`,
 		const output = calls.map((c) => c[0]).join('\n')
 
 		// Should see tickets from dir1 and dir2 (specified by --dir)
-		expect(output).toContain('feature-1')
-		expect(output).toContain('Ticket in dir1')
-		expect(output).toContain('feature-2')
-		expect(output).toContain('Ticket in dir2')
+		expect(output).toContain('[ticket1.md] feature-1')
+		expect(output).toContain('[ticket2.md] feature-2')
 
 		// Should NOT see ticket from dir3 (not in --dir list)
 		expect(output).not.toContain('feature-3')

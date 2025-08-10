@@ -1,0 +1,27 @@
+{
+	"git": {
+		"commitMessage": "chore(release): v${version}",
+		"requireBranch": "main",
+		"requireCleanWorkingDir": true,
+		"requireUpstream": true,
+		"tagName": "v${version}"
+	},
+	"github": {
+		"release": true,
+		"releaseName": "v${version}",
+		"releaseNotes": "git cliff --config cliff.toml --unreleased --latest --strip all"
+	},
+	"npm": {
+		"publish": true,
+		"publishPath": "./dist"
+	},
+	"hooks": {
+		"before:init": ["npm run lint", "npm run typecheck", "npm test"],
+		"after:bump": [
+			"npm run build",
+			"git cliff --config cliff.toml -o CHANGELOG.md --tag v${version}",
+			"git add CHANGELOG.md"
+		],
+		"after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+	}
+}

@@ -1,27 +1,29 @@
 import { green, red, yellow } from 'colorette'
 import { ensureTools, gh } from './gitgh.js'
+import { Logger } from './logger.js'
 
-export async function runDoctor(): Promise<boolean> {
+export async function runDoctor(verbose = false): Promise<boolean> {
+	const logger = new Logger(verbose)
 	let ok = true
 	try {
 		const tools = await ensureTools()
-		console.log(green(`✔ git: ${tools.git}`))
-		console.log(green(`✔ gh:  ${tools.gh}`))
+		logger.always(green(`✔ git: ${tools.git}`))
+		logger.always(green(`✔ gh:  ${tools.gh}`))
 
 		// Check gh auth only if tools are available
 		try {
 			const u = await gh(process.cwd(), ['auth', 'status'])
 			if (/Logged in to/i.test(u)) {
-				console.log(green('✔ gh auth'))
+				logger.always(green('✔ gh auth'))
 			} else {
-				console.log(yellow('! gh auth status unclear'))
+				logger.always(yellow('! gh auth status unclear'))
 			}
 		} catch {
-			console.log(red('✖ gh auth not set up. Run: gh auth login'))
+			logger.error(red('✖ gh auth not set up. Run: gh auth login'))
 			ok = false
 		}
 	} catch (_e) {
-		console.log(red('✖ Missing git and/or gh on PATH'))
+		logger.error(red('✖ Missing git and/or gh on PATH'))
 		ok = false
 	}
 

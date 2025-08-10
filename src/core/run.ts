@@ -13,8 +13,10 @@ import {
 	getGitRoot,
 	gh,
 	git,
+	hasUnmergedCommits,
 	pushBranch,
 } from './gitgh.js'
+import { Logger } from './logger.js'
 import { loadTickets } from './md-tickets.js'
 import type { PushMode, RepoConfig, RunOnceArgs, Ticket } from './types.js'
 
@@ -44,11 +46,12 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 	const globalCfg = await loadGlobalConfig(args.configPath)
 	// Priority: CLI --dir flag > config dirs > current directory
 	const dirs = args.dirs || (globalCfg.dirs && globalCfg.dirs.length > 0 ? globalCfg.dirs : ['.'])
+	const logger = new Logger(args.verbose ?? false)
 
 	try {
 		await ensureTools()
 	} catch (e) {
-		console.log(red(`Tools missing: ${e instanceof Error ? e.message : String(e)}`))
+		logger.error(red(`Tools missing: ${e instanceof Error ? e.message : String(e)}`))
 		return 1
 	}
 
@@ -66,6 +69,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 		const tickets = await loadTickets(dir, timezone)
 
 		if (tickets.length === 0) {
+			logger.verbose(yellow(`No tickets found in ${dir}`))
 			continue
 		}
 
@@ -78,7 +82,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 
 			if (!isTicketDue) {
 				const relativeTime = dueDate.toRelative({ base: now })
-				console.log(yellow(`[${ticketName}] ${t.branch} - scheduled ${relativeTime}`))
+				logger.verbose(yellow(`[${ticketName}] ${t.branch} - scheduled ${relativeTime}`))
 				continue
 			}
 
@@ -87,7 +91,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			try {
 				repoRoot = await getRepoRoot(t, dir)
 			} catch (e) {
-				console.log(red(`  ✗ ${e instanceof Error ? e.message : String(e)}`))
+				logger.error(red(`[${ticketName}] ✗ ${e instanceof Error ? e.message : String(e)}`))
 				fatal = true
 				continue
 			}
@@ -119,7 +123,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			const repo = repoCfg?.repo ?? globalCfg.repo // optional owner/name
 
 			if (args.mode === 'dry-run') {
-				console.log(yellow(`[${ticketName}] ${t.branch} - would process (dry run)`))
+				logger.always(yellow(`[${ticketName}] ${t.branch} - would process (dry run)`))
 				continue
 			}
 
@@ -134,7 +138,21 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			}
 
 			if (openPrExists) {
-				console.log(yellow(`[${ticketName}] ${t.branch} - PR already exists`))
+				logger.verbose(yellow(`[${ticketName}] ${t.branch} - PR already exists`))
+				continue
+			}
+
+			// Check if branch has any unmerged commits
+			let hasCommits = true
+			try {
+				hasCommits = await hasUnmergedCommits(repoRoot, t.branch, base, remote)
+			} catch {
+				// If we can't determine, assume there might be commits
+				hasCommits = true
+			}
+
+			if (!hasCommits) {
+				logger.verbose(yellow(`[${ticketName}] ${t.branch} - already merged into ${base}`))
 				continue
 			}
 
@@ -163,10 +181,10 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				if (repo) prOpts.repo = repo
 				if (t.draft) prOpts.draft = t.draft
 				const url = await createOrUpdatePr(prOpts)
-				console.log(green(`[${ticketName}] ${t.branch} - ✓ ${url}`))
+				logger.always(green(`[${ticketName}] ${t.branch} - ✓ ${url}`))
 			} catch (e) {
 				fatal = true // mark as fatal error
-				console.log(red(`[${ticketName}] ${t.branch} - ✗ ${e instanceof Error ? e.message : String(e)}`))
+				logger.error(red(`[${ticketName}] ${t.branch} - ✗ ${e instanceof Error ? e.message : String(e)}`))
 				// leave ticket in place for retry after user fixes conflicts
 			}
 		}
@@ -179,7 +197,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 				await git(repoRoot, ['checkout', originalBranch])
 			} catch (e) {
 				// Log warning but don't fail the entire operation
-				console.log(
+				logger.error(
 					yellow(
 						`  ⚠ Could not restore branch in ${path.basename(repoRoot)}: ${e instanceof Error ? e.message : String(e)}`,
 					),

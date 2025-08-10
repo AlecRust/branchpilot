@@ -71,6 +71,9 @@ describe('run-once', () => {
 		// Mock getCurrentBranch to return the original branch
 		vi.mocked(gitgh.getCurrentBranch).mockResolvedValue('original-branch')
 
+		// Mock hasUnmergedCommits to return true by default (has commits to push)
+		vi.mocked(gitgh.hasUnmergedCommits).mockResolvedValue(true)
+
 		// Mock git for branch restoration
 		vi.mocked(gitgh.git).mockResolvedValue('')
 
@@ -168,6 +171,19 @@ describe('run-once', () => {
 			const result = await runOnce({ mode: 'run' })
 
 			expect(result).toBe(0)
+		})
+
+		it('skips tickets with branches already merged', async () => {
+			setupMocks({ tickets: [createTicket()] })
+			// Mock hasUnmergedCommits to return false (already merged)
+			vi.mocked(gitgh.hasUnmergedCommits).mockResolvedValue(false)
+
+			const result = await runOnce({ mode: 'run' })
+
+			expect(result).toBe(0)
+			expect(gitgh.hasUnmergedCommits).toHaveBeenCalled()
+			expect(gitgh.pushBranch).not.toHaveBeenCalled()
+			expect(gitgh.createOrUpdatePr).not.toHaveBeenCalled()
 		})
 	})
 

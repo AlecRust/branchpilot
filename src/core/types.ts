@@ -36,4 +36,5 @@ export type RunOnceArgs = {
 	mode: RunMode
 	dirs?: string[] // Override directories (from --dir flag)
 	configPath?: string
+	verbose?: boolean
 }

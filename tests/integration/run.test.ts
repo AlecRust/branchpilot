@@ -277,12 +277,12 @@ describe('run-once', () => {
 	describe('timezone handling', () => {
 		it('passes timezone to ticket loader', async () => {
 			setupMocks({
-				globalConfig: { timezone: 'America/New_York' },
+				globalConfig: { timezone: 'Europe/London' },
 			})
 
 			await runOnce({ mode: 'run' })
 
-			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo/tickets', 'America/New_York')
+			expect(mdTickets.loadTickets).toHaveBeenCalledWith('/repo/tickets', 'Europe/London')
 		})
 	})
 

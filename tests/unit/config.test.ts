@@ -14,7 +14,7 @@ describe('config', () => {
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`
 dirs = [".scheduled-prs"]
 defaultBase = "develop"
-timezone = "America/New_York"
+timezone = "Europe/London"
 pushMode = "force-with-lease"
 remote = "upstream"
 repo = "owner/repo"
@@ -26,7 +26,7 @@ repo = "owner/repo"
 			expect(config).toEqual({
 				dirs: ['.scheduled-prs'],
 				defaultBase: 'develop',
-				timezone: 'America/New_York',
+				timezone: 'Europe/London',
 				pushMode: 'force-with-lease',
 				remote: 'upstream',
 				repo: 'owner/repo',

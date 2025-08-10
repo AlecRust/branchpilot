@@ -13,7 +13,7 @@ describe('md-tickets', () => {
 
 			// With timezone
 			expect(parseWhenToUtcISO('2025-08-12T09:30:00 Europe/London')).toContain('2025-08-12T08:30:00')
-			expect(parseWhenToUtcISO('2025-08-12T09:30:00 America/New_York')).toContain('2025-08-12T13:30:00')
+			expect(parseWhenToUtcISO('2025-08-12T09:30:00 Europe/Paris')).toContain('2025-08-12T07:30:00')
 
 			// With fallback timezone
 			expect(parseWhenToUtcISO('2025-08-12T09:30:00', 'America/Los_Angeles')).toContain('2025-08-12T16:30:00')
@@ -22,7 +22,7 @@ describe('md-tickets', () => {
 		it('parses simplified date formats', () => {
 			// Date only (YYYY-MM-DD) - assumes start of day
 			expect(parseWhenToUtcISO('2025-01-01')).toContain('2025-01-01T00:00:00')
-			expect(parseWhenToUtcISO('2025-01-01 America/New_York')).toContain('2025-01-01T05:00:00')
+			expect(parseWhenToUtcISO('2025-01-01 Europe/Paris')).toContain('2024-12-31T23:00:00')
 
 			// Date and time without seconds (YYYY-MM-DDTHH:MM)
 			expect(parseWhenToUtcISO('2025-01-01T09:00')).toContain('2025-01-01T09:00:00')
@@ -30,7 +30,7 @@ describe('md-tickets', () => {
 
 			// With fallback timezone for simplified formats
 			expect(parseWhenToUtcISO('2025-01-01', 'America/Los_Angeles')).toContain('2025-01-01T08:00:00')
-			expect(parseWhenToUtcISO('2025-01-01T14:30', 'America/New_York')).toContain('2025-01-01T19:30:00')
+			expect(parseWhenToUtcISO('2025-01-01T14:30', 'Europe/London')).toContain('2025-01-01T14:30:00')
 		})
 
 		it('throws on invalid input', () => {

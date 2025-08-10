@@ -8,7 +8,7 @@ Automate PR creation from local branches via Markdown tickets.
 2. **Write a Markdown ticket** with YAML [front matter](https://gohugo.io/content-management/front-matter/) describing when to open the PR
 3. **Run branchpilot** — it creates PRs for tickets whose time has arrived
 
-branchpilot doesn't run continuously. It processes tickets each time you run it, making it perfect for cron jobs or manual execution.
+branchpilot doesn't run continuously. It processes tickets each time you run it, making it suitable for cron jobs or manual execution.
 
 ## Quick Start
 
@@ -76,7 +76,7 @@ dirs = ["~/tickets", "~/projects/scheduled-prs"]
 defaultBase = "main"
 
 # Timezone for parsing dates
-timezone = "America/New_York"
+timezone = "Europe/London"
 
 # Push strategy
 pushMode = "force-with-lease"

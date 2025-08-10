@@ -13,5 +13,5 @@ You can now use:
 - `2025-01-15T14:30:00` - Full ISO format (still supported)
 
 All formats support timezone specification:
-- `2025-01-15 America/New_York`
+- `2025-01-15 Europe/London`
 - `2025-01-15T14:30 Europe/London`

@@ -1,4 +1,4 @@
-# BranchPilot
+# BranchPilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml)
 
 Automate PR creation from local branches via Markdown tickets.
 

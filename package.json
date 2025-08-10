@@ -17,7 +17,7 @@
 		"dist"
 	],
 	"bin": {
-		"branchpilot": "./dist/cli.mjs"
+		"branchpilot": "dist/cli.mjs"
 	},
 	"engines": {
 		"node": ">=20.11"

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.1] - 2025-08-12
+
+### 🚜 Refactor
+
+- Improve consistency of output formatting
+
+### 🧪 Testing
+
+- Improve tests
+
 ## [0.5.0] - 2025-08-12
 
 ### 🚀 Features

@@ -102,7 +102,7 @@ Run checks verifying dependencies and configuration.
 Simple example to run `branchpilot` every 15 minutes using [PM2](https://pm2.keymetrics.io/):
 
 ```bash
-pm2 start "branchpilot run" --cron-restart "*/15 * * * *"
+pm2 start branchpilot --cron "*/15 * * * *" --no-autorestart -- run
 ```
 
 ## Development

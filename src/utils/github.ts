@@ -1,6 +1,7 @@
 import { execa } from 'execa'
 import { simpleGit } from 'simple-git'
 import which from 'which'
+import { logger } from './logger.js'
 
 export async function ensureGh(): Promise<string> {
 	return await which('gh')
@@ -40,6 +41,7 @@ export async function createOrUpdatePr(opts: {
 	assignees?: string[]
 	repo?: string
 	draft?: boolean
+	autoMerge?: boolean
 }): Promise<string> {
 	const { cwd, branch, base, title, body } = opts
 
@@ -66,5 +68,15 @@ export async function createOrUpdatePr(opts: {
 	}
 
 	const result = await gh(cwd, args)
+
+	if (opts.autoMerge) {
+		const prUrl = result.trim()
+		try {
+			await gh(cwd, ['pr', 'merge', prUrl, '--auto', '--merge'])
+		} catch (error) {
+			logger.warn(`Could not enable auto-merge: ${error instanceof Error ? error.message : String(error)}`)
+		}
+	}
+
 	return result
 }

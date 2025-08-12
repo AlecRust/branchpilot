@@ -113,6 +113,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			if (t.assignees) prOpts.assignees = t.assignees
 			if (repo) prOpts.repo = repo
 			if (t.draft) prOpts.draft = t.draft
+			if (t.autoMerge) prOpts.autoMerge = t.autoMerge
 			const url = await createOrUpdatePr(prOpts)
 			spinner.stop()
 			logger.success(`[${ticketName}] ${t.branch} - ${url}`)

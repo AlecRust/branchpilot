@@ -27,6 +27,7 @@ export type Ticket = {
 	assignees?: string[]
 	repository?: string // optional local path to repository
 	draft?: boolean // whether to open PR as a draft
+	autoMerge?: boolean // whether to enable auto-merge on the PR
 }
 
 export type RunOnceArgs = {

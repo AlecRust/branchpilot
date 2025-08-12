@@ -46,6 +46,7 @@ const TicketFrontSchema = z.object({
 	assignees: z.array(z.string()).optional(),
 	repository: z.string().optional(),
 	draft: z.boolean().optional(),
+	autoMerge: z.boolean().optional(),
 })
 
 export type TicketStatus = 'pending' | 'ready' | 'pr-exists' | 'merged' | 'invalid'
@@ -67,6 +68,7 @@ export interface LoadedTicket {
 	assignees?: string[]
 	repository?: string
 	draft?: boolean
+	autoMerge?: boolean
 
 	status: TicketStatus
 	dueUtcISO?: string
@@ -271,6 +273,7 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 				if (fm.data.assignees) ticket.assignees = fm.data.assignees
 				if (fm.data.repository) ticket.repository = fm.data.repository
 				if (fm.data.draft) ticket.draft = fm.data.draft
+				if (fm.data.autoMerge) ticket.autoMerge = fm.data.autoMerge
 
 				tickets.push(ticket)
 			} catch (error) {

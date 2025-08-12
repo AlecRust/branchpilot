@@ -18,6 +18,10 @@ branchpilot init
 branchpilot run
 ```
 
+## Prerequisites
+
+[git](https://git-scm.com/) and [gh](https://cli.github.com/) must be installed and configured.
+
 ## How it works
 
 1. **Create a branch** in any local repo with changes you want to schedule
@@ -44,10 +48,11 @@ Fixed a typo in the installation instructions.
 ### Optional fields
 
 ```yaml
-repository: ~/projects/repo  # Target different repo (tickets can be placed anywhere)
+repository: ~/projects/repo  # Path to target repo for PRs (defaults to current repo)
 base: develop                # Base branch (auto-detected if omitted)
 rebase: true                 # Rebase against base branch before pushing
 draft: true                  # Create PR as draft
+autoMerge: true              # Enable auto-merge on PR
 labels: ["bug", "urgent"]    # Set labels
 reviewers: ["alice"]         # Set reviewers
 assignees: ["bob"]           # Set assignees
@@ -99,11 +104,6 @@ Simple example to run `branchpilot` every 10 minutes using [PM2](https://pm2.key
 ```bash
 pm2 start "branchpilot run" --name branchpilot --cron "*/10 * * * *"
 ```
-
-## Prerequisites
-
-- **[git](https://git-scm.com/)** — Installed and configured
-- **[gh](https://cli.github.com/)** — GitHub CLI authenticated (`gh auth login`)
 
 ## Development
 

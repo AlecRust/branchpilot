@@ -3,6 +3,7 @@ import { blue, gray, green, red, yellow } from 'colorette'
 import { DateTime } from 'luxon'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
 import { Logger } from '../utils/logger.js'
+import { withSpinner } from '../utils/spinner.js'
 import { type LoadedTicket, loadAllTickets, type TicketStatus } from '../utils/tickets.js'
 import type { GlobalConfig } from '../utils/types.js'
 
@@ -146,7 +147,11 @@ export async function listTickets(options: ListOptions): Promise<void> {
 
 	logger.verbose(`Scanning directories: ${dirsToScan.join(', ')}`)
 
-	const tickets = await loadAllTickets(dirsToScan, config, logger)
+	const tickets = await withSpinner(
+		() => loadAllTickets(dirsToScan, config, logger),
+		'Loading tickets and checking PR status...',
+		options.verbose ?? false,
+	)
 
 	console.log(formatOutput(tickets))
 	const summary = formatSummary(tickets)

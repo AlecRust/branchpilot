@@ -1,9 +1,9 @@
 import path from 'node:path'
-import { blue, gray, green, red, yellow } from 'colorette'
 import { DateTime } from 'luxon'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
+import { createBorderlessTable } from '../utils/table.js'
 import { type LoadedTicket, loadAllTickets, type TicketStatus } from '../utils/tickets.js'
 import type { GlobalConfig } from '../utils/types.js'
 
@@ -57,31 +57,11 @@ function getTicketIdentifier(ticket: LoadedTicket): string {
 	return dirName
 }
 
-function formatTicketLine(ticket: LoadedTicket): string {
-	const identifier = getTicketIdentifier(ticket)
-	const status = formatTicketStatus(ticket)
-
-	if (ticket.status === 'invalid') {
-		return red(`[${identifier}] ${ticket.branch} - ${ticket.error || 'invalid ticket'}`)
-	}
-
-	if (ticket.status === 'pr-exists' || ticket.status === 'merged' || ticket.status === 'pending') {
-		return yellow(`[${identifier}] ${ticket.branch} - ${status}`)
-	}
-
-	if (ticket.status === 'ready') {
-		return green(`[${identifier}] ${ticket.branch} - ${status}`)
-	}
-
-	return yellow(`[${identifier}] ${ticket.branch} - ${status}`)
-}
-
-function formatOutput(tickets: LoadedTicket[]): string {
+function outputTickets(tickets: LoadedTicket[]): void {
 	if (tickets.length === 0) {
-		return gray('No tickets found.')
+		console.log('No tickets found.')
+		return
 	}
-
-	const lines: string[] = []
 
 	const statusOrder: Record<TicketStatus, number> = {
 		ready: 0,
@@ -101,37 +81,15 @@ function formatOutput(tickets: LoadedTicket[]): string {
 		return 0
 	})
 
+	const table = createBorderlessTable(['Repository', 'Branch', 'Status'])
+
 	for (const ticket of sorted) {
-		lines.push(formatTicketLine(ticket))
+		const repo = getTicketIdentifier(ticket)
+		const status = formatTicketStatus(ticket) || (ticket.error ? `invalid: ${ticket.error}` : '')
+		table.push([repo, ticket.branch, status])
 	}
 
-	return lines.join('\n')
-}
-
-function formatSummary(tickets: LoadedTicket[]): string {
-	const total = tickets.length
-	const ready = tickets.filter((t) => t.status === 'ready').length
-	const pending = tickets.filter((t) => t.status === 'pending').length
-	const prExists = tickets.filter((t) => t.status === 'pr-exists').length
-	const merged = tickets.filter((t) => t.status === 'merged').length
-	const invalid = tickets.filter((t) => t.status === 'invalid').length
-
-	if (total === 0) {
-		return ''
-	}
-
-	const details: string[] = []
-	if (ready > 0) details.push(`${ready} ready`)
-	if (pending > 0) details.push(`${pending} pending`)
-	if (prExists > 0) details.push(`${prExists} with existing PRs`)
-	if (merged > 0) details.push(`${merged} already merged`)
-	if (invalid > 0) details.push(`${invalid} invalid`)
-
-	if (details.length === 0) {
-		return blue(`\nFound ${total} tickets`)
-	}
-
-	return blue(`\nFound ${total} tickets: ${details.join(', ')}`)
+	console.log(table.toString())
 }
 
 export async function listTickets(options: ListOptions): Promise<void> {
@@ -153,9 +111,5 @@ export async function listTickets(options: ListOptions): Promise<void> {
 		options.verbose ?? false,
 	)
 
-	console.log(formatOutput(tickets))
-	const summary = formatSummary(tickets)
-	if (summary) {
-		console.log(summary)
-	}
+	outputTickets(tickets)
 }

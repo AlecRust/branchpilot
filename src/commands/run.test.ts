@@ -127,7 +127,7 @@ describe('run-once', () => {
 			const result = await runOnce({})
 
 			expect(result).toBe(1)
-			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('✗'))
+			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Rebase conflict'))
 		})
 	})
 

@@ -1,5 +1,4 @@
 import path from 'node:path'
-import { green, red, yellow } from 'colorette'
 import ora from 'ora'
 import { simpleGit } from 'simple-git'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
@@ -31,7 +30,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 		await ensureGit()
 		await ensureGh()
 	} catch (e) {
-		logger.error(red(`Tools missing: ${e instanceof Error ? e.message : String(e)}`))
+		logger.error(`Tools missing: ${e instanceof Error ? e.message : String(e)}`)
 		return 1
 	}
 
@@ -65,7 +64,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 
 		if (!t.repoRoot) {
 			spinner.stop()
-			logger.error(red(`[${ticketName}] ${t.branch} - ✗ Repository root not set`))
+			logger.error(`[${ticketName}] ${t.branch} - Repository root not set`)
 			fatal = true
 			continue
 		}
@@ -116,11 +115,11 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			if (t.draft) prOpts.draft = t.draft
 			const url = await createOrUpdatePr(prOpts)
 			spinner.stop()
-			logger.info(green(`[${ticketName}] ${t.branch} - ✓ ${url}`))
+			logger.success(`[${ticketName}] ${t.branch} - ${url}`)
 		} catch (e) {
 			spinner.stop()
 			fatal = true
-			logger.error(red(`[${ticketName}] ${t.branch} - ✗ ${e instanceof Error ? e.message : String(e)}`))
+			logger.error(`[${ticketName}] ${t.branch} - ${e instanceof Error ? e.message : String(e)}`)
 		}
 	}
 
@@ -130,10 +129,8 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 		try {
 			await simpleGit(repoRoot).checkout(originalBranch)
 		} catch (e) {
-			logger.error(
-				yellow(
-					`  ⚠ Could not restore branch in ${path.basename(repoRoot)}: ${e instanceof Error ? e.message : String(e)}`,
-				),
+			logger.warn(
+				`Could not restore branch in ${path.basename(repoRoot)}: ${e instanceof Error ? e.message : String(e)}`,
 			)
 		}
 	}

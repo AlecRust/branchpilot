@@ -4,6 +4,7 @@ import type { MockInstance } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as git from '../utils/git.js'
 import * as github from '../utils/github.js'
+import { logger } from '../utils/logger.js'
 import { listTickets } from './list.js'
 
 vi.mock('node:fs')
@@ -14,6 +15,10 @@ describe('list command', () => {
 	let tempDir: string
 	let originalCwd: string
 	let consoleLogSpy: MockInstance
+	let loggerSuccessSpy: MockInstance
+	let loggerWarnSpy: MockInstance
+	let loggerErrorSpy: MockInstance
+	let loggerInfoSpy: MockInstance
 	const mockRepoPath = '/Users/test/projects/test-repo'
 
 	beforeEach(async () => {
@@ -24,6 +29,10 @@ describe('list command', () => {
 		process.chdir(tempDir)
 
 		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+		loggerSuccessSpy = vi.spyOn(logger, 'success').mockImplementation(() => {})
+		loggerWarnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+		loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {})
+		loggerInfoSpy = vi.spyOn(logger, 'info').mockImplementation(() => {})
 
 		vi.mocked(git.getGitRoot).mockResolvedValue(mockRepoPath)
 		vi.mocked(git.isGitRepository).mockResolvedValue(true)
@@ -38,6 +47,10 @@ describe('list command', () => {
 		await fs.rm(tempDir, { recursive: true, force: true })
 		vi.clearAllMocks()
 		consoleLogSpy.mockRestore()
+		loggerSuccessSpy.mockRestore()
+		loggerWarnSpy.mockRestore()
+		loggerErrorSpy.mockRestore()
+		loggerInfoSpy.mockRestore()
 	})
 
 	it('should list tickets from current directory', async () => {
@@ -63,14 +76,22 @@ This is the body of ticket 2.`,
 
 		await listTickets({ dirs: ['.'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
-		expect(output).toContain('[test-repo] feature-1')
-		expect(output).toContain('[test-repo] fix-bug')
-		expect(output).toContain('Found 2 tickets')
-		expect(output).toContain('ready')
-		expect(output).toContain('pending')
+		expect(output).toContain('Repository')
+		expect(output).toContain('Branch')
+		expect(output).toContain('Status')
+		expect(output).toContain('test-repo')
+		expect(output).toContain('feature-1')
+		expect(output).toContain('fix-bug')
+		expect(output).toContain('ready to process')
 	})
 
 	it('should handle invalid tickets', async () => {
@@ -84,13 +105,18 @@ Missing required fields.`,
 
 		await listTickets({ dirs: ['.'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
-		expect(output).toContain('[invalid.md] feature-1')
-		expect(output).toContain('Missing required fields')
-		expect(output).toContain('Found 1 tickets')
-		expect(output).toContain('1 invalid')
+		expect(output).toContain('invalid.md')
+		expect(output).toContain('feature-1')
+		expect(output).toContain('invalid')
 	})
 
 	it('should handle timezone in ticket when field', async () => {
@@ -108,11 +134,17 @@ Body`,
 
 		await listTickets({ dirs: ['.'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
-		expect(output).toContain('[test-repo] feature-1')
-		expect(output).toContain('Found 1 tickets')
+		expect(output).toContain('test-repo')
+		expect(output).toContain('feature-1')
 	})
 
 	it('should scan multiple directories', async () => {
@@ -143,12 +175,18 @@ Body`,
 
 		await listTickets({})
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
-		expect(output).toContain('[test-repo] feature-1')
-		expect(output).toContain('[test-repo] feature-2')
-		expect(output).toContain('Found 2 tickets')
+		expect(output).toContain('test-repo')
+		expect(output).toContain('feature-1')
+		expect(output).toContain('feature-2')
 	})
 
 	it('should handle missing directories gracefully', async () => {
@@ -156,8 +194,14 @@ Body`,
 
 		await listTickets({ dirs: ['.'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
 		expect(output).toContain('No tickets found')
 	})
@@ -175,10 +219,16 @@ Body`,
 
 		await listTickets({ dirs: ['.'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
-		expect(output).toContain('[test-repo] feature-1')
-		expect(output).toContain('Found 1 tickets')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
+		expect(output).toContain('test-repo')
+		expect(output).toContain('feature-1')
 	})
 
 	it('should show verbose errors when requested', async () => {
@@ -192,8 +242,14 @@ Missing fields`,
 
 		await listTickets({ dirs: ['.'], verbose: true })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 		expect(output.toLowerCase()).toMatch(/missing|required/)
 	})
 
@@ -236,11 +292,18 @@ Body`,
 
 		await listTickets({ dirs: ['dir1', 'dir2'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
-		expect(output).toContain('[test-repo] feature-1')
-		expect(output).toContain('[test-repo] feature-2')
+		expect(output).toContain('test-repo')
+		expect(output).toContain('feature-1')
+		expect(output).toContain('feature-2')
 		expect(output).not.toContain('feature-3')
 		expect(output).not.toContain('Ticket in dir3')
 	})
@@ -280,8 +343,14 @@ Invalid`,
 
 		await listTickets({ dirs: ['.'] })
 
-		const calls = consoleLogSpy.mock.calls
-		const output = calls.map((c) => c[0]).join('\n')
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
 
 		const dueIndex = output.indexOf('due-branch')
 		const pendingIndex = output.indexOf('pending-branch')

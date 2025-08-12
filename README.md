@@ -99,10 +99,10 @@ Run checks verifying dependencies and configuration.
 
 ## Automation
 
-Simple example to run `branchpilot` every 10 minutes using [PM2](https://pm2.keymetrics.io/):
+Simple example to run `branchpilot` every 15 minutes using [PM2](https://pm2.keymetrics.io/):
 
 ```bash
-pm2 start "branchpilot run" --name branchpilot --cron "*/10 * * * *"
+pm2 start "branchpilot run" --cron-restart "*/15 * * * *"
 ```
 
 ## Development

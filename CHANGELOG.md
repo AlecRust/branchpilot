@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.5.0] - 2025-08-12
+
+### 🚀 Features
+
+- Add loading spinner for commands that take a while
+
+### 🚜 Refactor
+
+- Remove dry run, switch to simple-git, restructure code
+- Show repo name not ticket filename in list command
+- Use consola for logging
+
+### 📚 Documentation
+
+- Improve README
+- Improve docs
+- Improve README
+- Improve README
+- Improve README
+- Improve PM2 example docs
+
+### ⚙️ Miscellaneous Tasks
+
+- Improve consistency of tool description
+- Remove old files
+
 ## [0.4.8] - 2025-08-10
 
 ### 🐛 Bug Fixes

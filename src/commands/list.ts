@@ -38,23 +38,41 @@ function formatTicketStatus(ticket: LoadedTicket): string {
 	return ''
 }
 
+function getTicketIdentifier(ticket: LoadedTicket): string {
+	// Always use repository name when available
+	if (ticket.repoRoot) {
+		return path.basename(ticket.repoRoot)
+	}
+	// For invalid tickets or when repo root is not available,
+	// use the parent directory name if it's not a temp test directory
+	const dir = path.dirname(ticket.file)
+	const dirName = path.basename(dir)
+
+	// If we're in a test directory or the current directory, use the filename
+	if (dirName.startsWith('.test-') || dirName === '.') {
+		return path.basename(ticket.file)
+	}
+
+	return dirName
+}
+
 function formatTicketLine(ticket: LoadedTicket): string {
-	const fileName = path.basename(ticket.file)
+	const identifier = getTicketIdentifier(ticket)
 	const status = formatTicketStatus(ticket)
 
 	if (ticket.status === 'invalid') {
-		return red(`[${fileName}] ${ticket.branch} - ${ticket.error || 'invalid ticket'}`)
+		return red(`[${identifier}] ${ticket.branch} - ${ticket.error || 'invalid ticket'}`)
 	}
 
 	if (ticket.status === 'pr-exists' || ticket.status === 'merged' || ticket.status === 'pending') {
-		return yellow(`[${fileName}] ${ticket.branch} - ${status}`)
+		return yellow(`[${identifier}] ${ticket.branch} - ${status}`)
 	}
 
 	if (ticket.status === 'ready') {
-		return green(`[${fileName}] ${ticket.branch} - ${status}`)
+		return green(`[${identifier}] ${ticket.branch} - ${status}`)
 	}
 
-	return yellow(`[${fileName}] ${ticket.branch} - ${status}`)
+	return yellow(`[${identifier}] ${ticket.branch} - ${status}`)
 }
 
 function formatOutput(tickets: LoadedTicket[]): string {

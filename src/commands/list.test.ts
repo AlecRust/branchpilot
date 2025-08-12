@@ -14,6 +14,7 @@ describe('list command', () => {
 	let tempDir: string
 	let originalCwd: string
 	let consoleLogSpy: MockInstance
+	const mockRepoPath = '/Users/test/projects/test-repo'
 
 	beforeEach(async () => {
 		originalCwd = process.cwd()
@@ -24,7 +25,7 @@ describe('list command', () => {
 
 		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
-		vi.mocked(git.getGitRoot).mockResolvedValue(tempDir)
+		vi.mocked(git.getGitRoot).mockResolvedValue(mockRepoPath)
 		vi.mocked(git.isGitRepository).mockResolvedValue(true)
 		vi.mocked(github.getDefaultBranch).mockResolvedValue('main')
 		vi.mocked(github.gh).mockResolvedValue('[]')
@@ -60,13 +61,13 @@ when: 2024-01-01T10:00:00Z
 This is the body of ticket 2.`,
 		)
 
-		await listTickets({})
+		await listTickets({ dirs: ['.'] })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('[ticket1.md] feature-1')
-		expect(output).toContain('[ticket2.md] fix-bug')
+		expect(output).toContain('[test-repo] feature-1')
+		expect(output).toContain('[test-repo] fix-bug')
 		expect(output).toContain('Found 2 tickets')
 		expect(output).toContain('ready')
 		expect(output).toContain('pending')
@@ -81,7 +82,7 @@ branch: feature-1
 Missing required fields.`,
 		)
 
-		await listTickets({})
+		await listTickets({ dirs: ['.'] })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
@@ -105,12 +106,12 @@ when: 2025-01-01T12:00:00 America/New_York
 Body`,
 		)
 
-		await listTickets({})
+		await listTickets({ dirs: ['.'] })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('[ticket.md] feature-1')
+		expect(output).toContain('[test-repo] feature-1')
 		expect(output).toContain('Found 1 tickets')
 	})
 
@@ -145,15 +146,15 @@ Body`,
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('[ticket1.md] feature-1')
-		expect(output).toContain('[ticket2.md] feature-2')
+		expect(output).toContain('[test-repo] feature-1')
+		expect(output).toContain('[test-repo] feature-2')
 		expect(output).toContain('Found 2 tickets')
 	})
 
 	it('should handle missing directories gracefully', async () => {
 		await fs.writeFile('.branchpilot.toml', `dirs = ["non-existent-dir"]`)
 
-		await listTickets({})
+		await listTickets({ dirs: ['.'] })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
@@ -172,11 +173,11 @@ when: 2025-01-01T10:00:00Z
 Body`,
 		)
 
-		await listTickets({})
+		await listTickets({ dirs: ['.'] })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
-		expect(output).toContain('[ticket.md] feature-1')
+		expect(output).toContain('[test-repo] feature-1')
 		expect(output).toContain('Found 1 tickets')
 	})
 
@@ -189,7 +190,7 @@ branch: feature-1
 Missing fields`,
 		)
 
-		await listTickets({ verbose: true })
+		await listTickets({ dirs: ['.'], verbose: true })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
@@ -238,8 +239,8 @@ Body`,
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')
 
-		expect(output).toContain('[ticket1.md] feature-1')
-		expect(output).toContain('[ticket2.md] feature-2')
+		expect(output).toContain('[test-repo] feature-1')
+		expect(output).toContain('[test-repo] feature-2')
 		expect(output).not.toContain('feature-3')
 		expect(output).not.toContain('Ticket in dir3')
 	})
@@ -277,7 +278,7 @@ branch: invalid-branch
 Invalid`,
 		)
 
-		await listTickets({})
+		await listTickets({ dirs: ['.'] })
 
 		const calls = consoleLogSpy.mock.calls
 		const output = calls.map((c) => c[0]).join('\n')

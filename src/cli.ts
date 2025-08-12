@@ -2,12 +2,12 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
-import { runDoctor } from './core/doctor.js'
-import { runInit } from './core/init.js'
-import { listTickets } from './core/list.js'
-import { Logger } from './core/logger.js'
-import { runOnce } from './core/run.js'
-import type { RunOnceArgs } from './core/types.js'
+import { runDoctor } from './commands/doctor.js'
+import { runInit } from './commands/init.js'
+import { listTickets } from './commands/list.js'
+import { runOnce } from './commands/run.js'
+import { Logger } from './utils/logger.js'
+import type { RunOnceArgs } from './utils/types.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -27,12 +27,10 @@ program
 	.description('Process due tickets and create PRs')
 	.option('-d, --dir <directories...>', 'Directories to scan for tickets (defaults to current directory)')
 	.option('-c, --config <path>', 'Path to custom config file')
-	.option('--dry-run', 'Preview actions without making changes')
 	.option('-v, --verbose', 'Show detailed output including skipped tickets')
 	.action(async (options) => {
 		try {
 			const args: RunOnceArgs = {
-				mode: options.dryRun ? 'dry-run' : 'run',
 				verbose: options.verbose ?? false,
 			}
 			if (options.dir && options.dir.length > 0) {

@@ -2,7 +2,7 @@
 	"extends": "@tsconfig/node-lts/tsconfig.json",
 	"compilerOptions": {
 		"module": "ESNext",
-		"moduleResolution": "Bundler",
+		"moduleResolution": "Node",
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
 		"types": ["node"]

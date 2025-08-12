@@ -8,9 +8,11 @@ import { z } from 'zod'
 import { loadRepoConfig } from './config.js'
 import { getGitRoot, hasUnmergedCommits, isBranchMerged, isGitRepository } from './git.js'
 import { getDefaultBranch, gh } from './github.js'
-import type { Logger } from './logger.js'
+import type { logger } from './logger.js'
 import { expandPath } from './paths.js'
 import type { GlobalConfig, PushMode, RepoConfig } from './types.js'
+
+type Logger = typeof logger
 
 const validTimezoneCache = new Map<string, boolean>()
 
@@ -286,7 +288,7 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 			}
 		}
 	} catch {
-		logger.verbose(`Could not read directory: ${dir}`)
+		logger.debug(`Could not read directory: ${dir}`)
 	}
 
 	return tickets

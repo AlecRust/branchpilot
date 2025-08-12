@@ -6,7 +6,7 @@ import { runDoctor } from './commands/doctor.js'
 import { runInit } from './commands/init.js'
 import { listTickets } from './commands/list.js'
 import { runOnce } from './commands/run.js'
-import { Logger } from './utils/logger.js'
+import { logger, setVerbose } from './utils/logger.js'
 import type { RunOnceArgs } from './utils/types.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -43,7 +43,7 @@ program
 			const code = await runOnce(args)
 			process.exitCode = code
 		} catch (error) {
-			const logger = new Logger(true)
+			setVerbose(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1
 		}
@@ -62,7 +62,7 @@ program
 			})
 			process.exitCode = result.success ? 0 : 1
 		} catch (error) {
-			const logger = new Logger(true)
+			setVerbose(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1
 		}
@@ -81,7 +81,7 @@ program
 			})
 			process.exitCode = 0
 		} catch (error) {
-			const logger = new Logger(true)
+			setVerbose(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1
 		}
@@ -96,7 +96,7 @@ program
 			const ok = await runDoctor(options.verbose ?? false)
 			process.exitCode = ok ? 0 : 1
 		} catch (error) {
-			const logger = new Logger(true)
+			setVerbose(true)
 			logger.error(`Fatal error: ${error}`)
 			process.exitCode = 1
 		}

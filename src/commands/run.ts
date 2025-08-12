@@ -5,13 +5,13 @@ import { simpleGit } from 'simple-git'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
 import { ensureGit, getCurrentBranch, pushBranch } from '../utils/git.js'
 import { createOrUpdatePr, ensureGh } from '../utils/github.js'
-import { Logger } from '../utils/logger.js'
+import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
 import { loadAllTickets } from '../utils/tickets.js'
 import type { PushMode, RepoConfig, RunOnceArgs } from '../utils/types.js'
 
 export async function runOnce(args: RunOnceArgs): Promise<number> {
-	const logger = new Logger(args.verbose ?? false)
+	setVerbose(args.verbose ?? false)
 	const globalCfg = await loadGlobalConfig(args.configPath, logger)
 
 	const localRepoCfg = await loadRepoConfig(process.cwd(), logger)
@@ -48,10 +48,10 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 	const readyTickets = allTickets.filter((t) => t.status === 'ready')
 
 	if (readyTickets.length === 0) {
-		logger.verbose('No tickets ready to process')
+		logger.debug('No tickets ready to process')
 		const pendingTickets = allTickets.filter((t) => t.status === 'pending')
 		if (pendingTickets.length > 0) {
-			logger.verbose(`${pendingTickets.length} tickets are scheduled for later`)
+			logger.debug(`${pendingTickets.length} tickets are scheduled for later`)
 		}
 	}
 
@@ -116,7 +116,7 @@ export async function runOnce(args: RunOnceArgs): Promise<number> {
 			if (t.draft) prOpts.draft = t.draft
 			const url = await createOrUpdatePr(prOpts)
 			spinner.stop()
-			logger.always(green(`[${ticketName}] ${t.branch} - ✓ ${url}`))
+			logger.info(green(`[${ticketName}] ${t.branch} - ✓ ${url}`))
 		} catch (e) {
 			spinner.stop()
 			fatal = true

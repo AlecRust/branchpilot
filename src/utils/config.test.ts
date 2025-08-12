@@ -2,8 +2,10 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { loadGlobalConfig, loadRepoConfig } from './config.js'
-import type { Logger } from './logger.js'
+import type { logger } from './logger.js'
 import * as paths from './paths.js'
+
+type Logger = typeof logger
 
 vi.mock('node:fs/promises')
 vi.mock('./paths.js')

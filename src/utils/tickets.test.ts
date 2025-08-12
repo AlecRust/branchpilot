@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import * as config from './config.js'
 import * as git from './git.js'
 import * as github from './github.js'
-import { Logger } from './logger.js'
+import { logger, setVerbose } from './logger.js'
 import { loadAllTickets, loadTicketsForProcessing } from './tickets.js'
 
 vi.mock('node:fs/promises')
@@ -14,7 +14,7 @@ vi.mock('./git.js')
 vi.mock('./github.js')
 
 describe('tickets', () => {
-	const logger = new Logger(false)
+	setVerbose(false)
 
 	const mockReaddir = (files: string[]) => {
 		vi.mocked(fs.readdir).mockResolvedValueOnce(files as never)

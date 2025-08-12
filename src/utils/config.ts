@@ -2,9 +2,11 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { parse as parseToml } from 'toml'
 import { z } from 'zod'
-import type { Logger } from './logger.js'
+import type { logger } from './logger.js'
 import { configPath } from './paths.js'
 import type { GlobalConfig, RepoConfig } from './types.js'
+
+type Logger = typeof logger
 
 const GlobalSchema = z.object({
 	dirs: z.array(z.string()).optional(),

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { DateTime } from 'luxon'
 import { getDefaultBranch } from '../utils/github.js'
-import { Logger } from '../utils/logger.js'
+import { logger, setVerbose } from '../utils/logger.js'
 import { runDoctor } from './doctor.js'
 
 export type InitOptions = {
@@ -116,7 +116,7 @@ This advanced ticket demonstrates all available features:
 }
 
 export async function runInit(options: InitOptions = {}): Promise<InitResult> {
-	const logger = new Logger(options.verbose ?? false)
+	setVerbose(options.verbose ?? false)
 	const cwd = process.cwd()
 	const configPath = path.join(cwd, '.branchpilot.toml')
 	const ticketsDir = 'tickets'
@@ -148,10 +148,10 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
 		const detected = await getDefaultBranch(cwd)
 		if (detected) {
 			defaultBranch = detected
-			logger.verbose(`Detected default branch: ${defaultBranch}`)
+			logger.debug(`Detected default branch: ${defaultBranch}`)
 		}
 	} catch {
-		logger.verbose('Could not detect default branch, using "main"')
+		logger.debug('Could not detect default branch, using "main"')
 	}
 
 	logger.info(`Creating ${ticketsDir}/ directory...`)
@@ -174,7 +174,7 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
 		const ticketPath = path.join(ticketsPath, example.name)
 		await fs.writeFile(ticketPath, example.content, 'utf8')
 		ticketsCreated.push(example.name)
-		logger.verbose(`Created ${ticketsDir}/${example.name}`)
+		logger.debug(`Created ${ticketsDir}/${example.name}`)
 	}
 
 	const successMessage = `

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as config from '../utils/config.js'
 import * as git from '../utils/git.js'
 import * as github from '../utils/github.js'
+import { logger } from '../utils/logger.js'
 import type { LoadedTicket } from '../utils/tickets.js'
 import * as tickets from '../utils/tickets.js'
 import { runOnce } from './run.js'
@@ -24,7 +25,6 @@ describe('run-once', () => {
 
 	beforeEach(() => {
 		vi.resetAllMocks()
-		vi.spyOn(console, 'log').mockImplementation(() => {})
 		vi.spyOn(os, 'homedir').mockReturnValue('/home/testuser')
 		vi.mocked(simpleGit).mockReturnValue(mockGit as unknown as ReturnType<typeof simpleGit>)
 	})
@@ -115,7 +115,7 @@ describe('run-once', () => {
 			const result = await runOnce({})
 
 			expect(result).toBe(1)
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Tools missing: git not found'))
+			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Tools missing: git not found'))
 		})
 
 		it('handles ticket processing errors', async () => {
@@ -127,7 +127,7 @@ describe('run-once', () => {
 			const result = await runOnce({})
 
 			expect(result).toBe(1)
-			expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✗'))
+			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('✗'))
 		})
 	})
 

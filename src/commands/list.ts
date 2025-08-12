@@ -2,7 +2,7 @@ import path from 'node:path'
 import { blue, gray, green, red, yellow } from 'colorette'
 import { DateTime } from 'luxon'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
-import { Logger } from '../utils/logger.js'
+import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
 import { type LoadedTicket, loadAllTickets, type TicketStatus } from '../utils/tickets.js'
 import type { GlobalConfig } from '../utils/types.js'
@@ -135,7 +135,7 @@ function formatSummary(tickets: LoadedTicket[]): string {
 }
 
 export async function listTickets(options: ListOptions): Promise<void> {
-	const logger = new Logger(options.verbose ?? false)
+	setVerbose(options.verbose ?? false)
 
 	const globalConfig = await loadGlobalConfig(undefined, logger)
 	const cwd = process.cwd()
@@ -145,7 +145,7 @@ export async function listTickets(options: ListOptions): Promise<void> {
 
 	const dirsToScan = options.dirs || config.dirs || ['.']
 
-	logger.verbose(`Scanning directories: ${dirsToScan.join(', ')}`)
+	logger.debug(`Scanning directories: ${dirsToScan.join(', ')}`)
 
 	const tickets = await withSpinner(
 		() => loadAllTickets(dirsToScan, config, logger),

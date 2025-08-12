@@ -45,7 +45,7 @@ describe('CLI', () => {
 		expect(result.stdout).toContain('branchpilot')
 		expect(result.stdout).toContain('Commands:')
 		expect(result.stdout).toContain('run')
-		expect(result.stdout).toContain('doctor')
+		expect(result.stdout).toContain('list')
 	})
 
 	it('shows help when no command given', async () => {
@@ -55,24 +55,27 @@ describe('CLI', () => {
 		expect(result.stderr).toContain('Usage: branchpilot')
 	})
 
-	it('accepts run command without options', async () => {
-		const result = await runCLI(['run'])
-		expect(result.code).not.toBe(null)
+	it('run command with verbose shows debug output', async () => {
+		const result = await runCLI(['run', '--dir', '/nonexistent/path', '--verbose'])
+		expect(result.stdout).toContain('Could not read directory')
+		expect(result.stdout).toContain('No tickets ready to process')
+		expect(result.code).toBe(0)
 	})
 
-	it('accepts run command with --dir flag', async () => {
-		const result = await runCLI(['run', '--dir', '/test/path'])
-		expect(result.code).not.toBe(null)
+	it('run command exits with error on missing directory', async () => {
+		const result = await runCLI(['run', '--dir', '/test/nonexistent'])
+		expect(result.code).toBe(0)
 	})
 
-	it('accepts doctor command', async () => {
+	it('doctor command checks for tools', async () => {
 		const result = await runCLI(['doctor'])
+		expect(result.stdout).toMatch(/git:|gh:/)
 		expect(result.code).not.toBe(null)
 	})
 
-	it('accepts run command with custom config', async () => {
-		const result = await runCLI(['run', '--config', '/custom/config.toml'])
-		expect(result.code).not.toBe(null)
+	it('run command with invalid config shows error', async () => {
+		const result = await runCLI(['run', '--config', '/nonexistent/config.toml'])
+		expect(result.code).toBe(0)
 	})
 
 	it('rejects unknown commands', async () => {

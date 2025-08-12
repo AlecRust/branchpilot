@@ -2,7 +2,7 @@ import { execa } from 'execa'
 import { simpleGit } from 'simple-git'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import which from 'which'
-import { ensureGh, getDefaultBranch, gh } from './github.js'
+import { createOrUpdatePr, ensureGh, getDefaultBranch, gh } from './github.js'
 
 vi.mock('execa')
 vi.mock('simple-git')
@@ -95,6 +95,64 @@ describe('github', () => {
 			const result = await getDefaultBranch('/repo')
 
 			expect(result).toBe('main')
+		})
+	})
+
+	describe('createOrUpdatePr', () => {
+		it('builds basic PR command', async () => {
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+				title: 'Title',
+				body: 'Body',
+			})
+
+			expect(execa).toHaveBeenCalledWith(
+				'gh',
+				['pr', 'create', '--head', 'feature', '--base', 'main', '--title', 'Title', '--body', 'Body'],
+				{ cwd: '/repo' },
+			)
+		})
+
+		it('adds optional fields when provided', async () => {
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+				title: 'Title',
+				body: 'Body',
+				labels: ['bug'],
+				draft: true,
+			})
+
+			const args = vi.mocked(execa).mock.calls[0]?.[1]
+			expect(args).toContain('--label')
+			expect(args).toContain('bug')
+			expect(args).toContain('--draft')
+		})
+
+		it('skips empty arrays', async () => {
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+				title: 'Title',
+				body: 'Body',
+				labels: [],
+			})
+
+			const args = vi.mocked(execa).mock.calls[0]?.[1]
+			expect(args).not.toContain('--label')
 		})
 	})
 })

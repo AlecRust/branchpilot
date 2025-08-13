@@ -126,31 +126,3 @@ npm install
 npm test
 npm run check
 ```
-
-## The Vision
-
-The complete command set that branchpilot will eventually support:
-
-```bash
-# Core commands
-branchpilot run                      # Process due tickets once
-branchpilot list                     # List all tickets and their status
-branchpilot init                     # Initialize with examples
-
-# Watch mode (foreground)
-branchpilot watch                    # Watch and process tickets continuously (default every 15 minutes)
-branchpilot watch --interval 5m      # Custom check interval
-
-# Daemon mode (background - in progress)
-branchpilot daemon start             # Start background service
-branchpilot daemon stop              # Stop background service
-branchpilot daemon status            # Check if daemon is running
-branchpilot daemon restart           # Restart background service
-branchpilot daemon logs              # View daemon logs
-branchpilot daemon logs --tail 50    # View last 50 log lines
-
-# Utility commands
-branchpilot doctor                   # Verify environment setup
-branchpilot validate                 # Check ticket syntax (planned)
-branchpilot version                  # Show version info (use -V for now)
-```

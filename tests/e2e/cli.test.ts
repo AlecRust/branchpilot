@@ -46,6 +46,7 @@ describe('CLI', () => {
 		expect(result.stdout).toContain('Commands:')
 		expect(result.stdout).toContain('run')
 		expect(result.stdout).toContain('list')
+		expect(result.stdout).toContain('watch')
 	})
 
 	it('shows help when no command given', async () => {
@@ -83,5 +84,28 @@ describe('CLI', () => {
 
 		expect(result.code).toBe(1)
 		expect(result.stderr).toContain("error: unknown command 'unknown'")
+	})
+
+	it('watch command shows help', async () => {
+		const result = await runCLI(['watch', '--help'])
+
+		expect(result.code).toBe(0)
+		expect(result.stdout).toContain('Watch directories and process tickets on an interval')
+		expect(result.stdout).toContain('--interval')
+		expect(result.stdout).toContain('--dir')
+	})
+
+	it('watch command validates interval', async () => {
+		const result = await runCLI(['watch', '--interval', 'invalid'])
+
+		expect(result.code).toBe(1)
+		expect(result.stderr).toContain('Invalid interval: invalid')
+	})
+
+	it('watch command enforces minimum interval', async () => {
+		const result = await runCLI(['watch', '--interval', '30s'])
+
+		expect(result.code).toBe(1)
+		expect(result.stderr).toContain('Minimum interval is 1m')
 	})
 })

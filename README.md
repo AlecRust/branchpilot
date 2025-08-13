@@ -16,6 +16,9 @@ branchpilot init
 
 # Process tickets
 branchpilot run
+
+# Watch for new tickets and process them automatically
+branchpilot watch --interval 15m
 ```
 
 ## Prerequisites
@@ -82,6 +85,15 @@ Priority: Ticket → Repository → Global → Defaults
 Process tickets in configured directories and create any due PRs.
 
 - `--dir <path>` — Scan specific directories
+- `--verbose` — Show detailed output
+
+### `branchpilot watch`
+
+Watch directories and automatically process tickets on an interval.
+
+- `--dir <path>` — Scan specific directories
+- `--interval <time>` — Check interval (e.g., "5m", "1h", "30s") (default: "15m")
+- `--verbose` — Show detailed output
 
 ### `branchpilot list`
 
@@ -97,11 +109,28 @@ Initialize current project with example tickets and config.
 
 Run checks verifying dependencies and configuration.
 
-## Automation
+## Watch mode
 
-Simple example to run `branchpilot` every 15 minutes using [PM2](https://pm2.keymetrics.io/):
+Use the `watch` command to run continuously, checking for due tickets every 15 minutes:
 
 ```bash
+# Foreground
+branchpilot watch
+
+# Custom interval
+branchpilot watch --interval 5m --verbose
+
+# Run in the background with PM2
+pm2 start "branchpilot watch --interval 15m"
+```
+
+Alternatively, schedule individual runs using cron or a package like PM2:
+
+```bash
+# Cron (add to crontab -e)
+*/15 * * * * /usr/local/bin/branchpilot run
+
+# PM2
 pm2 start branchpilot --cron "*/15 * * * *" --no-autorestart -- run
 ```
 
@@ -111,4 +140,32 @@ pm2 start branchpilot --cron "*/15 * * * *" --no-autorestart -- run
 npm install
 npm test
 npm run check
+```
+
+## The Vision
+
+The complete command set that branchpilot will eventually support:
+
+```bash
+# Core commands
+branchpilot run                      # Process due tickets once
+branchpilot list                     # List all tickets and their status
+branchpilot init                     # Initialize with examples
+
+# Watch mode (foreground)
+branchpilot watch                    # Watch and process tickets continuously (default every 15 minutes)
+branchpilot watch --interval 5m      # Custom check interval
+
+# Daemon mode (background)
+branchpilot daemon start             # Start background service
+branchpilot daemon stop              # Stop background service
+branchpilot daemon status            # Check if daemon is running
+branchpilot daemon restart           # Restart background service
+branchpilot daemon logs              # View daemon logs
+branchpilot daemon logs --tail 50    # View last 50 log lines
+
+# Utility commands
+branchpilot doctor                   # Verify environment setup
+branchpilot validate                 # Check ticket syntax
+branchpilot version                  # Show version info
 ```

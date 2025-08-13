@@ -6,6 +6,7 @@ import { runDoctor } from './commands/doctor.js'
 import { runInit } from './commands/init.js'
 import { listTickets } from './commands/list.js'
 import { runOnce } from './commands/run.js'
+import { runWatch } from './commands/watch.js'
 import { logger, setVerbose } from './utils/logger.js'
 import type { RunOnceArgs } from './utils/types.js'
 
@@ -77,6 +78,27 @@ program
 		try {
 			await listTickets({
 				dirs: options.dir,
+				verbose: options.verbose ?? false,
+			})
+			process.exitCode = 0
+		} catch (error) {
+			setVerbose(true)
+			logger.error(`Fatal error: ${error}`)
+			process.exitCode = 1
+		}
+	})
+
+program
+	.command('watch')
+	.description('Watch directories and process tickets on an interval')
+	.option('-d, --dir <directories...>', 'Directories to scan for tickets (defaults to current directory)')
+	.option('-i, --interval <interval>', 'Check interval (e.g., "5m", "1h", "30s") (default: "15m")')
+	.option('-v, --verbose', 'Show detailed output')
+	.action(async (options) => {
+		try {
+			await runWatch({
+				dirs: options.dir,
+				interval: options.interval,
 				verbose: options.verbose ?? false,
 			})
 			process.exitCode = 0

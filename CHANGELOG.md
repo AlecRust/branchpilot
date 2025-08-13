@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0] - 2025-08-13
+
+### 🚀 Features
+
+- Add tickets autoMerge option
+- Add watch command
+
+### 📚 Documentation
+
+- Improve recommended PM2 command
+- Improve recommended PM2 command
+
 ## [0.5.1] - 2025-08-12
 
 ### 🚜 Refactor

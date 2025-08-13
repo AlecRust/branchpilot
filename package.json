@@ -1,6 +1,6 @@
 {
 	"name": "branchpilot",
-	"version": "0.5.1",
+	"version": "0.6.0",
 	"author": "Alec Rust",
 	"license": "MIT",
 	"description": "Automate Pull Request creation from local Git branches using Markdown files.",

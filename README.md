@@ -109,18 +109,13 @@ Initialize current project with example tickets and config.
 
 Run checks verifying dependencies and configuration.
 
-## Watch mode
+## Automation
 
-Use the `watch` command to run continuously, checking tickets at your specified interval.
+`branchpilot run` processes tickets once, while `branchpilot watch` runs continuously and checks tickets at the specified interval.
+
+To run `branchpilot watch` in the background you can use a process manager like [PM2](https://pm2.keymetrics.io/):
 
 ```bash
-# Foreground
-branchpilot watch
-
-# Custom interval
-branchpilot watch --interval 5m --verbose
-
-# Run in the background with PM2
 pm2 start "branchpilot watch --interval 5m"
 ```
 
@@ -146,7 +141,7 @@ branchpilot init                     # Initialize with examples
 branchpilot watch                    # Watch and process tickets continuously (default every 15 minutes)
 branchpilot watch --interval 5m      # Custom check interval
 
-# Daemon mode (background)
+# Daemon mode (background - in progress)
 branchpilot daemon start             # Start background service
 branchpilot daemon stop              # Stop background service
 branchpilot daemon status            # Check if daemon is running
@@ -156,6 +151,6 @@ branchpilot daemon logs --tail 50    # View last 50 log lines
 
 # Utility commands
 branchpilot doctor                   # Verify environment setup
-branchpilot validate                 # Check ticket syntax
-branchpilot version                  # Show version info
+branchpilot validate                 # Check ticket syntax (planned)
+branchpilot version                  # Show version info (use -V for now)
 ```

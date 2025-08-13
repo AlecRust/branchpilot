@@ -111,7 +111,7 @@ Run checks verifying dependencies and configuration.
 
 ## Watch mode
 
-Use the `watch` command to run continuously, checking for due tickets every 15 minutes:
+Use the `watch` command to run continuously, checking tickets at your specified interval.
 
 ```bash
 # Foreground
@@ -121,17 +121,7 @@ branchpilot watch
 branchpilot watch --interval 5m --verbose
 
 # Run in the background with PM2
-pm2 start "branchpilot watch --interval 15m"
-```
-
-Alternatively, schedule individual runs using cron or a package like PM2:
-
-```bash
-# Cron (add to crontab -e)
-*/15 * * * * /usr/local/bin/branchpilot run
-
-# PM2
-pm2 start branchpilot --cron "*/15 * * * *" --no-autorestart -- run
+pm2 start "branchpilot watch --interval 5m"
 ```
 
 ## Development

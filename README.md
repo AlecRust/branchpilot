@@ -17,8 +17,8 @@ branchpilot init
 # Process tickets
 branchpilot run
 
-# Watch for new tickets and process them automatically
-branchpilot watch --interval 15m
+# Watch and process tickets automatically
+branchpilot watch
 ```
 
 ## Prerequisites
@@ -27,9 +27,9 @@ branchpilot watch --interval 15m
 
 ## How it works
 
-1. **Create a branch** in any local repo with changes you want to schedule
-2. **Write a ticket** a Markdown file with PR details and `when` timestamp
-3. **Run branchpilot** — PRs will be opened on run if `when` is in the past
+1. **Create branches** in local repos with changes you want to schedule
+2. **Write ticket** Markdown files with PR description and `when` timestamp
+3. **Run branchpilot** and PRs will be opened when the `when` time arrives
 
 ## Writing tickets
 

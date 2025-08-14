@@ -56,6 +56,16 @@ Or use the `watch` command to monitor tickets at an interval:
 branchpilot watch
 ```
 
+## Daemon
+
+To run the process in the background use a process manager like [PM2](https://pm2.keymetrics.io/) with the `watch` command:
+
+```bash
+pm2 start branchpilot -- watch --interval 30m --verbose
+```
+
+A built-in daemon command may be added in the future, but PM2 or similar should work well.
+
 PRs will be created on each run when the `when` timestamp has passed.
 
 ## Ticket configuration
@@ -122,16 +132,6 @@ Initialize current Git project with example tickets and config.
 ### `branchpilot doctor`
 
 Run checks verifying dependencies and configuration.
-
-## Daemon
-
-To run the process in the background use a process manager like [PM2](https://pm2.keymetrics.io/) with the `watch` command:
-
-```bash
-pm2 start branchpilot -- watch --interval 30m --verbose
-```
-
-A built-in daemon command may be added in the future, but PM2 or similar should work well.
 
 ## Development
 

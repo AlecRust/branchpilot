@@ -116,7 +116,7 @@ Run checks verifying dependencies and configuration.
 To run `branchpilot watch` in the background you can use a process manager like [PM2](https://pm2.keymetrics.io/):
 
 ```bash
-pm2 start "branchpilot watch --interval 5m"
+pm2 start branchpilot -- watch --verbose
 ```
 
 ## Development

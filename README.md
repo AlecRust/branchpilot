@@ -13,9 +13,9 @@ npm install -g branchpilot
 
 ## Usage
 
-1. **Create** a branch in a local repo containing changes you want to schedule
-2. **Prepare** a Markdown file including the PR description and `when` timestamp
-3. **Execute** `branchpilot watch` to open the branches as PRs when they are due
+1. **Create** a branch in a local repository containing changes you want to schedule
+1. **Prepare** a Markdown file that includes PR configuration and a `when` timestamp
+1. **Execute** `branchpilot watch` to open the branches as PRs when they are due
 
 ### 1. Create
 

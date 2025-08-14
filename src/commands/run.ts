@@ -68,7 +68,7 @@ export async function run(args: RunOnceArgs): Promise<number> {
 			fatal = true
 			continue
 		}
-		const repoRoot = t.repoRoot
+		const repoRoot = path.resolve(t.repoRoot)
 
 		if (!repoConfigs.has(repoRoot)) {
 			repoConfigs.set(repoRoot, await loadRepoConfig(repoRoot, logger))

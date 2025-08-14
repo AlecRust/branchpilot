@@ -34,7 +34,7 @@ e.g. `~/projects/my-project/tickets/fix-readme-typo.md` or `~/tickets/fix-readme
 title: Fix typo in README
 when: 2025-01-15T09:00
 branch: fix-readme-typo
-repository: ~/projects/my-project  # Optional, defaults to current repo
+repository: ~/projects/my-project  # Optional, defaults to current repository
 ---
 
 Fixed a typo in the installation instructions.

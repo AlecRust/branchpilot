@@ -9,7 +9,7 @@ import { withSpinner } from '../utils/spinner.js'
 import { loadAllTickets } from '../utils/tickets.js'
 import type { PushMode, RepoConfig, RunOnceArgs } from '../utils/types.js'
 
-export async function runOnce(args: RunOnceArgs): Promise<number> {
+export async function run(args: RunOnceArgs): Promise<number> {
 	setVerbose(args.verbose ?? false)
 	const globalCfg = await loadGlobalConfig(args.configPath, logger)
 

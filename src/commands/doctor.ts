@@ -3,7 +3,7 @@ import { ensureGit } from '../utils/git.js'
 import { ensureGh, gh } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 
-export async function runDoctor(verbose = false): Promise<boolean> {
+export async function doctor(verbose = false): Promise<boolean> {
 	setVerbose(verbose)
 	const spinner = ora({ isEnabled: !verbose })
 	let ok = true

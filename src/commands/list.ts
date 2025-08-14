@@ -92,7 +92,7 @@ function outputTickets(tickets: LoadedTicket[]): void {
 	console.log(table.toString())
 }
 
-export async function listTickets(options: ListOptions): Promise<void> {
+export async function list(options: ListOptions): Promise<void> {
 	setVerbose(options.verbose ?? false)
 
 	const globalConfig = await loadGlobalConfig(undefined, logger)

@@ -3,7 +3,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as github from '../utils/github.js'
 import * as doctor from './doctor.js'
-import { runInit } from './init.js'
+import { init } from './init.js'
 
 vi.mock('../utils/github.js')
 vi.mock('./doctor.js')
@@ -18,7 +18,7 @@ describe('init command', () => {
 		process.chdir(tempDir)
 
 		// Mock doctor to return success
-		vi.mocked(doctor.runDoctor).mockResolvedValue(true)
+		vi.mocked(doctor.doctor).mockResolvedValue(true)
 
 		// Mock default branch detection
 		vi.mocked(github.getDefaultBranch).mockResolvedValue('main')
@@ -32,7 +32,7 @@ describe('init command', () => {
 	})
 
 	it('should initialize a new project successfully', async () => {
-		const result = await runInit({ verbose: false })
+		const result = await init({ verbose: false })
 
 		expect(result.success).toBe(true)
 		expect(result.configPath).toContain('.branchpilot.toml')
@@ -59,10 +59,10 @@ describe('init command', () => {
 
 	it('should not reinitialize without force flag', async () => {
 		// First initialization
-		await runInit({ verbose: false })
+		await init({ verbose: false })
 
 		// Try to initialize again without force
-		const result = await runInit({ verbose: false })
+		const result = await init({ verbose: false })
 
 		expect(result.success).toBe(false)
 		expect(result.message).toContain('already initialized')
@@ -71,13 +71,13 @@ describe('init command', () => {
 
 	it('should reinitialize with force flag', async () => {
 		// First initialization
-		await runInit({ verbose: false })
+		await init({ verbose: false })
 
 		// Modify the config to verify it gets overwritten
 		await fs.writeFile('.branchpilot.toml', '# modified', 'utf8')
 
 		// Reinitialize with force
-		const result = await runInit({ force: true, verbose: false })
+		const result = await init({ force: true, verbose: false })
 
 		expect(result.success).toBe(true)
 
@@ -89,9 +89,9 @@ describe('init command', () => {
 
 	it('should handle doctor check failures gracefully', async () => {
 		// Mock doctor to return failure
-		vi.mocked(doctor.runDoctor).mockResolvedValue(false)
+		vi.mocked(doctor.doctor).mockResolvedValue(false)
 
-		const result = await runInit({ verbose: false })
+		const result = await init({ verbose: false })
 
 		// Should still succeed but with warnings
 		expect(result.success).toBe(true)
@@ -102,7 +102,7 @@ describe('init command', () => {
 		// Mock getDefaultBranch to throw
 		vi.mocked(github.getDefaultBranch).mockRejectedValue(new Error('No git repo'))
 
-		const result = await runInit({ verbose: false })
+		const result = await init({ verbose: false })
 
 		expect(result.success).toBe(true)
 
@@ -112,7 +112,7 @@ describe('init command', () => {
 	})
 
 	it('should create example tickets with correct structure', async () => {
-		const result = await runInit({ verbose: false })
+		const result = await init({ verbose: false })
 
 		expect(result.success).toBe(true)
 
@@ -142,7 +142,7 @@ describe('init command', () => {
 		// Mock getDefaultBranch to return custom branch
 		vi.mocked(github.getDefaultBranch).mockResolvedValue('develop')
 
-		const result = await runInit({ verbose: false })
+		const result = await init({ verbose: false })
 
 		expect(result.success).toBe(true)
 

@@ -4,7 +4,7 @@ import { ensureGit } from '../utils/git.js'
 import { ensureGh } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import type { GlobalConfig } from '../utils/types.js'
-import { runOnce } from './run.js'
+import { run } from './run.js'
 
 export type WatchOptions = {
 	dirs?: string[]
@@ -13,7 +13,7 @@ export type WatchOptions = {
 	once?: boolean // For testing - run one cycle then exit
 }
 
-export async function runWatch(options: WatchOptions): Promise<void> {
+export async function watch(options: WatchOptions): Promise<void> {
 	setVerbose(options.verbose ?? false)
 
 	const globalConfig = await loadGlobalConfig(undefined, logger)
@@ -57,7 +57,7 @@ export async function runWatch(options: WatchOptions): Promise<void> {
 		try {
 			logger.debug(`[${timestamp}] Starting check cycle ${cycleCount}`)
 
-			const result = await runOnce({
+			const result = await run({
 				dirs: dirsToWatch,
 				verbose: options.verbose ?? false,
 			})

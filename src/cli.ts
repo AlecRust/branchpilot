@@ -2,11 +2,11 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Command } from 'commander'
-import { runDoctor } from './commands/doctor.js'
-import { runInit } from './commands/init.js'
-import { listTickets } from './commands/list.js'
-import { runOnce } from './commands/run.js'
-import { runWatch } from './commands/watch.js'
+import { doctor } from './commands/doctor.js'
+import { init } from './commands/init.js'
+import { list } from './commands/list.js'
+import { run } from './commands/run.js'
+import { watch } from './commands/watch.js'
 import { logger, setVerbose } from './utils/logger.js'
 import type { RunOnceArgs } from './utils/types.js'
 
@@ -41,7 +41,7 @@ program
 				args.configPath = options.config
 			}
 
-			const code = await runOnce(args)
+			const code = await run(args)
 			process.exitCode = code
 		} catch (error) {
 			setVerbose(true)
@@ -57,7 +57,7 @@ program
 	.option('-v, --verbose', 'Show detailed output')
 	.action(async (options) => {
 		try {
-			const result = await runInit({
+			const result = await init({
 				force: options.force ?? false,
 				verbose: options.verbose ?? false,
 			})
@@ -76,7 +76,7 @@ program
 	.option('-v, --verbose', 'Show detailed output')
 	.action(async (options) => {
 		try {
-			await listTickets({
+			await list({
 				dirs: options.dir,
 				verbose: options.verbose ?? false,
 			})
@@ -96,7 +96,7 @@ program
 	.option('-v, --verbose', 'Show detailed output')
 	.action(async (options) => {
 		try {
-			await runWatch({
+			await watch({
 				dirs: options.dir,
 				interval: options.interval,
 				verbose: options.verbose ?? false,
@@ -115,7 +115,7 @@ program
 	.option('-v, --verbose', 'Show detailed output')
 	.action(async (options) => {
 		try {
-			const ok = await runDoctor(options.verbose ?? false)
+			const ok = await doctor(options.verbose ?? false)
 			process.exitCode = ok ? 0 : 1
 		} catch (error) {
 			setVerbose(true)

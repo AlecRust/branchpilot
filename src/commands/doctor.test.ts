@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as git from '../utils/git.js'
 import * as github from '../utils/github.js'
 import { logger } from '../utils/logger.js'
-import { runDoctor } from './doctor.js'
+import { doctor } from './doctor.js'
 
 vi.mock('../utils/git.js')
 vi.mock('../utils/github.js')
@@ -12,13 +12,13 @@ describe('doctor', () => {
 		vi.resetAllMocks()
 	})
 
-	describe('runDoctor', () => {
+	describe('doctor', () => {
 		it('should return true when all tools are present and auth is configured', async () => {
 			vi.mocked(git.ensureGit).mockResolvedValue('/usr/bin/git')
 			vi.mocked(github.ensureGh).mockResolvedValue('/usr/bin/gh')
 			vi.mocked(github.gh).mockResolvedValue('Logged in to github.com as user')
 
-			const result = await runDoctor()
+			const result = await doctor()
 
 			expect(result).toBe(true)
 			expect(logger.success).toHaveBeenCalledWith('git: /usr/bin/git')
@@ -29,7 +29,7 @@ describe('doctor', () => {
 		it('should return false when git or gh is missing', async () => {
 			vi.mocked(git.ensureGit).mockRejectedValue(new Error('git not found'))
 
-			const result = await runDoctor()
+			const result = await doctor()
 
 			expect(result).toBe(false)
 			expect(logger.error).toHaveBeenCalledWith('Missing git and/or gh on PATH')
@@ -40,7 +40,7 @@ describe('doctor', () => {
 			vi.mocked(github.ensureGh).mockResolvedValue('/usr/bin/gh')
 			vi.mocked(github.gh).mockRejectedValue(new Error('Not authenticated'))
 
-			const result = await runDoctor()
+			const result = await doctor()
 
 			expect(result).toBe(false)
 			expect(logger.success).toHaveBeenCalledWith('git: /usr/bin/git')
@@ -53,7 +53,7 @@ describe('doctor', () => {
 			vi.mocked(github.ensureGh).mockResolvedValue('/usr/bin/gh')
 			vi.mocked(github.gh).mockResolvedValue('Some unclear output')
 
-			const result = await runDoctor()
+			const result = await doctor()
 
 			expect(result).toBe(true)
 			expect(logger.warn).toHaveBeenCalledWith('gh auth status unclear')
@@ -63,7 +63,7 @@ describe('doctor', () => {
 			vi.mocked(git.ensureGit).mockRejectedValue(new Error('git not found'))
 			vi.mocked(github.ensureGh).mockRejectedValue(new Error('gh not found'))
 
-			const result = await runDoctor()
+			const result = await doctor()
 
 			expect(result).toBe(false)
 			expect(logger.error).toHaveBeenCalledWith('Missing git and/or gh on PATH')

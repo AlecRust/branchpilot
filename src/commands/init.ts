@@ -3,7 +3,7 @@ import path from 'node:path'
 import { DateTime } from 'luxon'
 import { getDefaultBranch } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
-import { runDoctor } from './doctor.js'
+import { doctor } from './doctor.js'
 
 export type InitOptions = {
 	force?: boolean
@@ -115,7 +115,7 @@ This advanced ticket demonstrates all available features:
 `
 }
 
-export async function runInit(options: InitOptions = {}): Promise<InitResult> {
+export async function init(options: InitOptions = {}): Promise<InitResult> {
 	setVerbose(options.verbose ?? false)
 	const cwd = process.cwd()
 	const configPath = path.join(cwd, '.branchpilot.toml')
@@ -137,7 +137,7 @@ export async function runInit(options: InitOptions = {}): Promise<InitResult> {
 	} catch {}
 
 	logger.info('Checking environment...')
-	const doctorOk = await runDoctor(false)
+	const doctorOk = await doctor(false)
 	if (!doctorOk) {
 		logger.warn('Some environment checks failed. branchpilot may not work correctly.')
 		logger.warn('Run "branchpilot doctor" for details.')

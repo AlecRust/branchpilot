@@ -4,7 +4,7 @@ import * as git from '../utils/git.js'
 import * as github from '../utils/github.js'
 import { logger } from '../utils/logger.js'
 import * as runModule from './run.js'
-import { runWatch } from './watch.js'
+import { watch } from './watch.js'
 
 vi.mock('../utils/config.js')
 vi.mock('../utils/git.js')
@@ -31,7 +31,7 @@ describe('watch command', () => {
 		vi.mocked(config.loadRepoConfig).mockResolvedValue({})
 		vi.mocked(git.ensureGit).mockResolvedValue('git')
 		vi.mocked(github.ensureGh).mockResolvedValue('gh')
-		vi.mocked(runModule.runOnce).mockResolvedValue(0)
+		vi.mocked(runModule.run).mockResolvedValue(0)
 	})
 
 	afterEach(() => {
@@ -40,14 +40,14 @@ describe('watch command', () => {
 
 	it('should validate interval format', async () => {
 		await expect(
-			runWatch({
+			watch({
 				interval: 'invalid',
 				once: true,
 			}),
 		).rejects.toThrow('Invalid interval: invalid')
 
 		await expect(
-			runWatch({
+			watch({
 				interval: '30s',
 				once: true,
 			}),
@@ -59,7 +59,7 @@ describe('watch command', () => {
 
 		for (const interval of validIntervals) {
 			vi.clearAllMocks()
-			await runWatch({
+			await watch({
 				interval,
 				once: true,
 			})
@@ -69,7 +69,7 @@ describe('watch command', () => {
 	})
 
 	it('should use default interval of 15m when not specified', async () => {
-		await runWatch({
+		await watch({
 			once: true,
 		})
 
@@ -79,13 +79,13 @@ describe('watch command', () => {
 	it('should use configured directories', async () => {
 		const dirs = ['src', 'docs']
 
-		await runWatch({
+		await watch({
 			dirs,
 			once: true,
 		})
 
 		expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('src, docs'))
-		expect(runModule.runOnce).toHaveBeenCalledWith({
+		expect(runModule.run).toHaveBeenCalledWith({
 			dirs,
 			verbose: false,
 		})
@@ -96,27 +96,27 @@ describe('watch command', () => {
 			dirs: ['config-dir'],
 		})
 
-		await runWatch({
+		await watch({
 			once: true,
 		})
 
 		expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('config-dir'))
 	})
 
-	it('should handle runOnce errors gracefully', async () => {
-		vi.mocked(runModule.runOnce).mockResolvedValue(1)
+	it('should handle run errors gracefully', async () => {
+		vi.mocked(runModule.run).mockResolvedValue(1)
 
-		await runWatch({
+		await watch({
 			once: true,
 		})
 
 		expect(logger.warn).toHaveBeenCalledWith('Processing completed with errors')
 	})
 
-	it('should handle runOnce exceptions gracefully', async () => {
-		vi.mocked(runModule.runOnce).mockRejectedValue(new Error('Test error'))
+	it('should handle run exceptions gracefully', async () => {
+		vi.mocked(runModule.run).mockRejectedValue(new Error('Test error'))
 
-		await runWatch({
+		await watch({
 			once: true,
 		})
 
@@ -124,11 +124,11 @@ describe('watch command', () => {
 	})
 
 	it('should exit after one cycle in test mode', async () => {
-		await runWatch({
+		await watch({
 			once: true,
 		})
 
-		expect(runModule.runOnce).toHaveBeenCalledTimes(1)
+		expect(runModule.run).toHaveBeenCalledTimes(1)
 		expect(logger.debug).toHaveBeenCalledWith('Exiting after one cycle (test mode)')
 	})
 
@@ -136,7 +136,7 @@ describe('watch command', () => {
 		vi.mocked(git.ensureGit).mockRejectedValue(new Error('git not found'))
 
 		await expect(
-			runWatch({
+			watch({
 				once: true,
 			}),
 		).rejects.toThrow('git not found')
@@ -147,13 +147,13 @@ describe('watch command', () => {
 	it('should enable verbose mode when specified', async () => {
 		const { setVerbose } = await import('../utils/logger.js')
 
-		await runWatch({
+		await watch({
 			verbose: true,
 			once: true,
 		})
 
 		expect(setVerbose).toHaveBeenCalledWith(true)
-		expect(runModule.runOnce).toHaveBeenCalledWith({
+		expect(runModule.run).toHaveBeenCalledWith({
 			dirs: ['.'],
 			verbose: true,
 		})

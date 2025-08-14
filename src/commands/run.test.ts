@@ -8,7 +8,7 @@ import * as github from '../utils/github.js'
 import { logger } from '../utils/logger.js'
 import type { LoadedTicket } from '../utils/tickets.js'
 import * as tickets from '../utils/tickets.js'
-import { runOnce } from './run.js'
+import { run } from './run.js'
 
 vi.mock('node:fs')
 vi.mock('node:fs/promises')
@@ -94,7 +94,7 @@ describe('run-once', () => {
 		it('handles empty ticket lists gracefully', async () => {
 			setupMocks({ tickets: [] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 		})
@@ -103,7 +103,7 @@ describe('run-once', () => {
 			vi.mocked(config.loadGlobalConfig).mockResolvedValue({})
 			vi.mocked(tickets.loadAllTickets).mockResolvedValue([])
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 			expect(tickets.loadAllTickets).toHaveBeenCalledWith(['.'], {}, expect.anything())
@@ -112,7 +112,7 @@ describe('run-once', () => {
 		it('returns error when tools missing', async () => {
 			setupMocks({ ensureToolsError: new Error('git not found') })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(1)
 			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Tools missing: git not found'))
@@ -124,7 +124,7 @@ describe('run-once', () => {
 				rebaseError: new Error('Rebase conflict'),
 			})
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(1)
 			expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Rebase conflict'))
@@ -144,7 +144,7 @@ describe('run-once', () => {
 
 			setupMocks({ tickets: [dueTicket, futureTicket] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 			expect(git.pushBranch).toHaveBeenCalledOnce()
@@ -154,7 +154,7 @@ describe('run-once', () => {
 		it('shows message when no due tickets', async () => {
 			setupMocks({ tickets: [] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 		})
@@ -163,7 +163,7 @@ describe('run-once', () => {
 			const mergedTicket = createTicket({ status: 'merged' })
 			setupMocks({ tickets: [mergedTicket] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 			expect(git.pushBranch).not.toHaveBeenCalled()
@@ -175,7 +175,7 @@ describe('run-once', () => {
 		it('uses directories from config when provided', async () => {
 			setupMocks({ globalConfig: { dirs: ['config-dir'] } })
 
-			await runOnce({})
+			await run({})
 
 			expect(tickets.loadAllTickets).toHaveBeenCalledWith(['config-dir'], expect.anything(), expect.anything())
 		})
@@ -183,7 +183,7 @@ describe('run-once', () => {
 		it('uses directories from --dir flag over config', async () => {
 			setupMocks({ globalConfig: { dirs: ['config-dir'] } })
 
-			await runOnce({ dirs: ['cli-dir'] })
+			await run({ dirs: ['cli-dir'] })
 
 			expect(tickets.loadAllTickets).toHaveBeenCalledWith(['cli-dir'], expect.anything(), expect.anything())
 		})
@@ -200,7 +200,7 @@ describe('run-once', () => {
 				tickets: [createTicket()],
 			})
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith({
 				cwd: '/repo',
@@ -226,7 +226,7 @@ describe('run-once', () => {
 				tickets: [ticket],
 			})
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -249,7 +249,7 @@ describe('run-once', () => {
 				tickets: [createTicket()],
 			})
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -266,7 +266,7 @@ describe('run-once', () => {
 				globalConfig: { dirs: ['/repo1/tickets', '/repo2/tickets'] },
 			})
 
-			await runOnce({})
+			await run({})
 
 			expect(tickets.loadAllTickets).toHaveBeenCalledTimes(1)
 			expect(tickets.loadAllTickets).toHaveBeenCalledWith(
@@ -281,7 +281,7 @@ describe('run-once', () => {
 		it('restores original branch after processing tickets', async () => {
 			setupMocks({ tickets: [createTicket()] })
 
-			await runOnce({})
+			await run({})
 
 			expect(git.getCurrentBranch).toHaveBeenCalledWith('/repo')
 			expect(simpleGit).toHaveBeenCalledWith('/repo')
@@ -292,7 +292,7 @@ describe('run-once', () => {
 
 			// We'll mock the simpleGit checkout to fail during branch restoration
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 			// Branch restoration is handled gracefully even when mocked
@@ -314,7 +314,7 @@ describe('run-once', () => {
 
 			vi.mocked(git.getCurrentBranch).mockResolvedValueOnce('main').mockResolvedValueOnce('develop')
 
-			await runOnce({})
+			await run({})
 
 			expect(git.getCurrentBranch).toHaveBeenCalledTimes(2)
 
@@ -329,7 +329,7 @@ describe('run-once', () => {
 			const ticket = createTicket({ repoRoot: '/detected/git/root' })
 			setupMocks({ tickets: [ticket] })
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -342,7 +342,7 @@ describe('run-once', () => {
 			const ticket = createTicket({ repository: '~/custom/repo', repoRoot: '/home/testuser/custom/repo' })
 			setupMocks({ tickets: [ticket] })
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -358,7 +358,7 @@ describe('run-once', () => {
 			})
 			setupMocks({ tickets: [ticket] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 		})
@@ -371,7 +371,7 @@ describe('run-once', () => {
 			})
 			setupMocks({ tickets: [ticket] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 		})
@@ -384,7 +384,7 @@ describe('run-once', () => {
 			})
 			setupMocks({ tickets: [ticket] })
 
-			const result = await runOnce({})
+			const result = await run({})
 
 			expect(result).toBe(0)
 		})
@@ -399,7 +399,7 @@ describe('run-once', () => {
 
 			setupMocks({ tickets: [ticketWithRebase] })
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -416,7 +416,7 @@ describe('run-once', () => {
 
 			setupMocks({ tickets: [ticketWithoutRebase] })
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -430,7 +430,7 @@ describe('run-once', () => {
 
 			setupMocks({ tickets: [ticketWithoutBase] })
 
-			await runOnce({})
+			await run({})
 
 			expect(github.createOrUpdatePr).toHaveBeenCalledWith(
 				expect.objectContaining({
@@ -452,7 +452,7 @@ describe('run-once', () => {
 
 			setupMocks({ tickets: [ticketWithRebase, ticketWithoutRebase] })
 
-			await runOnce({})
+			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({

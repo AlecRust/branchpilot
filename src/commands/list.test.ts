@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as git from '../utils/git.js'
 import * as github from '../utils/github.js'
 import { logger } from '../utils/logger.js'
-import { listTickets } from './list.js'
+import { list } from './list.js'
 
 vi.mock('node:fs')
 vi.mock('../utils/git.js')
@@ -74,7 +74,7 @@ when: 2024-01-01T10:00:00Z
 This is the body of ticket 2.`,
 		)
 
-		await listTickets({ dirs: ['.'] })
+		await list({ dirs: ['.'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -103,7 +103,7 @@ branch: feature-1
 Missing required fields.`,
 		)
 
-		await listTickets({ dirs: ['.'] })
+		await list({ dirs: ['.'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -132,7 +132,7 @@ when: 2025-01-01T12:00:00 America/New_York
 Body`,
 		)
 
-		await listTickets({ dirs: ['.'] })
+		await list({ dirs: ['.'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -173,7 +173,7 @@ Body`,
 
 		await fs.writeFile('.branchpilot.toml', `dirs = ["tickets", "more-tickets"]`)
 
-		await listTickets({})
+		await list({})
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -192,7 +192,7 @@ Body`,
 	it('should handle missing directories gracefully', async () => {
 		await fs.writeFile('.branchpilot.toml', `dirs = ["non-existent-dir"]`)
 
-		await listTickets({ dirs: ['.'] })
+		await list({ dirs: ['.'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -217,7 +217,7 @@ when: 2025-01-01T10:00:00Z
 Body`,
 		)
 
-		await listTickets({ dirs: ['.'] })
+		await list({ dirs: ['.'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -240,7 +240,7 @@ branch: feature-1
 Missing fields`,
 		)
 
-		await listTickets({ dirs: ['.'], verbose: true })
+		await list({ dirs: ['.'], verbose: true })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -290,7 +290,7 @@ Body`,
 
 		await fs.writeFile('.branchpilot.toml', `dirs = ["dir3"]`)
 
-		await listTickets({ dirs: ['dir1', 'dir2'] })
+		await list({ dirs: ['dir1', 'dir2'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
@@ -341,7 +341,7 @@ branch: invalid-branch
 Invalid`,
 		)
 
-		await listTickets({ dirs: ['.'] })
+		await list({ dirs: ['.'] })
 
 		const allCalls = [
 			...loggerSuccessSpy.mock.calls.map((c) => c[0]),

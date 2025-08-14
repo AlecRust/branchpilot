@@ -2,55 +2,70 @@
 
 Automate Pull Request creation from local Git branches using Markdown files.
 
-## Quick start
+## Install
+
+Ensure [git](https://git-scm.com/) and [gh](https://cli.github.com/) are configured in your terminal e.g. `gh auth status`
+then run:
 
 ```bash
-# Install
-npm i -g branchpilot
-
-# (optional) Check setup
-branchpilot doctor
-
-# (optional) Initialize current project
-branchpilot init
-
-# Process tickets
-branchpilot run
-
-# Watch and process tickets automatically
-branchpilot watch
+npm install -g branchpilot
 ```
 
-## Prerequisites
+## Usage
 
-[git](https://git-scm.com/) and [gh](https://cli.github.com/) must be installed and configured.
+1. **Create** a branch in a local repo containing changes you want to schedule
+2. **Prepare** a Markdown file including the PR description and `when` timestamp
+3. **Execute** `branchpilot watch` to open the branches as PRs when they are due
 
-## How it works
+### 1. Create
 
-1. **Create branches** in local repos with changes you want to schedule
-2. **Write ticket** Markdown files with PR description and `when` timestamp
-3. **Run branchpilot** and PRs will be opened when the `when` time arrives
+Simply create a branch in any local Git repository with changes you want to schedule.
 
-## Writing tickets
+### 2. Prepare
 
-Create a Markdown file with some [front matter](https://gohugo.io/content-management/front-matter/) config at the top followed by your PR description.
+Create a Markdown file with any filename containing [front matter](https://gohugo.io/content-management/front-matter/) config at the top followed by your PR description.
 
-Place the file anywhere e.g. within a repo at `~/projects/my-repo/tickets` or in a dedicated tickets directory `~/tickets`.
+The file can be placed anywhere. If you place it in a Git repository you can omit the `repository` field.
+
+e.g. `~/projects/my-project/tickets/fix-readme-typo.md` or `~/tickets/fix-readme-typo.md`
 
 ```markdown
 ---
 title: Fix typo in README
 when: 2025-01-15T09:00
-branch: fix/readme-typo
+branch: fix-readme-typo
 repository: ~/projects/my-project  # Optional, defaults to current repo
 ---
 
 Fixed a typo in the installation instructions.
 ```
 
-### Optional fields
+### 3. Execute
+
+Configure the directories of tickets to scan using config files or command line flags as detailed below.
+
+Use the `run` command to process all tickets once on demand:
+
+```bash
+branchpilot run
+```
+
+Or use the `watch` command to monitor tickets at an interval:
+
+```bash
+branchpilot watch
+```
+
+PRs will be created on each run when the `when` timestamp has passed.
+
+## Ticket configuration
+
+These are all the PR configuration options you have in ticket Markdown files.
 
 ```yaml
+title: Example PR Title      # (required) Title of the PR
+when: 2025-01-15T09:00       # (required) When to open the PR (ISO 8601 format)
+branch: fix-readme-typo      # (required) Branch name to create PR from
 repository: ~/projects/repo  # Path to target repo for PRs (defaults to current repo)
 base: develop                # Base branch (auto-detected if omitted)
 rebase: true                 # Rebase against base branch before pushing
@@ -61,22 +76,20 @@ reviewers: ["alice"]         # Set reviewers
 assignees: ["bob"]           # Set assignees
 ```
 
-## Configuration
+## `branchpilot` configuration
 
-Global config: `~/.config/branchpilot.toml`
+Global config at `~/.config/branchpilot.toml`:
 
 ```toml
 dirs = ["~/tickets"]         # Directories to scan
 defaultBase = "main"         # Default base branch
 ```
 
-Repository config: `.branchpilot.toml`
+Repository config e.g. `~/projects/my-project/.branchpilot.toml`:
 
 ```toml
 defaultBase = "develop"      # Override global settings
 ```
-
-Priority: Ticket → Repository → Global → Defaults
 
 ## Commands
 
@@ -92,7 +105,7 @@ Process tickets in configured directories and create any due PRs.
 Watch directories and automatically process tickets on an interval.
 
 - `--dir <path>` — Scan specific directories
-- `--interval <time>` — Check interval (e.g., "5m", "1h", "30s") (default: "15m")
+- `--interval <time>` — Check interval (e.g. `1h`, default `15m`)
 - `--verbose` — Show detailed output
 
 ### `branchpilot list`
@@ -100,29 +113,32 @@ Watch directories and automatically process tickets on an interval.
 List all tickets with their status.
 
 - `--dir <path>` — Scan specific directories
+- `--verbose` — Show detailed output
 
 ### `branchpilot init`
 
-Initialize current project with example tickets and config.
+Initialize current Git project with example tickets and config.
 
 ### `branchpilot doctor`
 
 Run checks verifying dependencies and configuration.
 
-## Automation
+## Daemon
 
-`branchpilot run` processes tickets once, while `branchpilot watch` runs continuously and checks tickets at the specified interval.
-
-To run `branchpilot watch` in the background you can use a process manager like [PM2](https://pm2.keymetrics.io/):
+To run the process in the background use a process manager like [PM2](https://pm2.keymetrics.io/) with the `watch` command:
 
 ```bash
-pm2 start branchpilot -- watch --verbose
+pm2 start branchpilot -- watch --interval 30m --verbose
 ```
+
+A built-in daemon command may be added in the future, but PM2 or similar should work well.
 
 ## Development
 
+Contributions are welcome on this project, to get started clone the repo then run:
+
 ```bash
 npm install
-npm test
 npm run check
+npm test
 ```

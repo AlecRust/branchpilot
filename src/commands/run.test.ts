@@ -1,4 +1,5 @@
 import os from 'node:os'
+import path from 'node:path'
 import { DateTime } from 'luxon'
 import { simpleGit } from 'simple-git'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -203,7 +204,7 @@ describe('run-once', () => {
 			await run({})
 
 			expect(git.pushBranch).toHaveBeenCalledWith({
-				cwd: '/repo',
+				cwd: path.resolve('/repo'),
 				branch: 'feature/test',
 				base: undefined,
 				rebase: undefined,
@@ -283,8 +284,8 @@ describe('run-once', () => {
 
 			await run({})
 
-			expect(git.getCurrentBranch).toHaveBeenCalledWith('/repo')
-			expect(simpleGit).toHaveBeenCalledWith('/repo')
+			expect(git.getCurrentBranch).toHaveBeenCalledWith(path.resolve('/repo'))
+			expect(simpleGit).toHaveBeenCalledWith(path.resolve('/repo'))
 		})
 
 		it('handles branch restoration failures gracefully', async () => {
@@ -319,8 +320,8 @@ describe('run-once', () => {
 			expect(git.getCurrentBranch).toHaveBeenCalledTimes(2)
 
 			// Verify that both repositories were processed
-			expect(git.getCurrentBranch).toHaveBeenCalledWith(expect.stringContaining('repo1'))
-			expect(git.getCurrentBranch).toHaveBeenCalledWith(expect.stringContaining('repo2'))
+			expect(git.getCurrentBranch).toHaveBeenCalledWith(path.resolve('/home/testuser/repo1'))
+			expect(git.getCurrentBranch).toHaveBeenCalledWith(path.resolve('/home/testuser/repo2'))
 		})
 	})
 
@@ -333,7 +334,7 @@ describe('run-once', () => {
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					cwd: '/detected/git/root',
+					cwd: path.resolve('/detected/git/root'),
 				}),
 			)
 		})
@@ -346,7 +347,7 @@ describe('run-once', () => {
 
 			expect(git.pushBranch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					cwd: '/home/testuser/custom/repo',
+					cwd: path.resolve('/home/testuser/custom/repo'),
 				}),
 			)
 		})

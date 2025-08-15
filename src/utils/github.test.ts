@@ -73,7 +73,7 @@ describe('github', () => {
 
 			await gh('/repo', ['auth', 'status'])
 
-			expect(execa).toHaveBeenCalledWith('gh', ['auth', 'status'], { cwd: '/repo', timeout: 3000 })
+			expect(execa).toHaveBeenCalledWith('gh', ['auth', 'status'], { cwd: '/repo', timeout: 8000 })
 		})
 	})
 

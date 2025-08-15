@@ -119,7 +119,7 @@ Missing required fields.`,
 		expect(output).toContain('invalid')
 	})
 
-	it('should handle timezone in ticket when field', async () => {
+	it('should handle ISO dates with timezone offset', async () => {
 		await fs.writeFile('.branchpilot.toml', `dirs = ["."]`)
 
 		await fs.writeFile(
@@ -127,7 +127,7 @@ Missing required fields.`,
 			`---
 branch: feature-1
 title: Timezone test
-when: 2025-01-01T12:00:00 America/New_York
+when: 2025-01-01T12:00:00-05:00
 ---
 Body`,
 		)

@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { DateTime } from 'luxon'
+import { formatRelative, parseISO } from 'date-fns'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
@@ -15,8 +15,8 @@ export type ListOptions = {
 function formatTicketStatus(ticket: LoadedTicket): string {
 	if (!ticket.dueUtcISO) return ''
 
-	const dueDate = DateTime.fromISO(ticket.dueUtcISO)
-	const now = DateTime.utc()
+	const dueDate = parseISO(ticket.dueUtcISO)
+	const now = new Date()
 
 	if (ticket.status === 'pr-exists') {
 		return 'PR already exists'
@@ -28,8 +28,8 @@ function formatTicketStatus(ticket: LoadedTicket): string {
 	}
 
 	if (ticket.status === 'pending') {
-		const relativeTime = dueDate.toRelative({ base: now })
-		return `scheduled ${relativeTime}`
+		const relativeTime = formatRelative(dueDate, now)
+		return `scheduled for ${relativeTime}`
 	}
 
 	if (ticket.status === 'ready') {

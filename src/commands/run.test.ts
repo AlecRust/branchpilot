@@ -1,6 +1,6 @@
 import os from 'node:os'
 import path from 'node:path'
-import { DateTime } from 'luxon'
+import { addHours, formatISO, subHours } from 'date-fns'
 import { simpleGit } from 'simple-git'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as config from '../utils/config.js'
@@ -36,7 +36,7 @@ describe('run-once', () => {
 		branch: 'feature/test',
 		title: 'Test ticket',
 		when: 'now',
-		dueUtcISO: DateTime.utc().minus({ hours: 1 }).toISO() || '',
+		dueUtcISO: formatISO(subHours(new Date(), 1)),
 		body: 'Test body',
 		status: 'ready',
 		isDue: true,
@@ -138,7 +138,7 @@ describe('run-once', () => {
 			const futureTicket = createTicket({
 				file: '/repo/tickets/future.md',
 				branch: 'feature/future',
-				dueUtcISO: DateTime.utc().plus({ hours: 1 }).toISO() || '',
+				dueUtcISO: formatISO(addHours(new Date(), 1)),
 				status: 'pending',
 				isDue: false,
 			})

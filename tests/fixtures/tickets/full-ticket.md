@@ -1,7 +1,7 @@
 ---
 branch: feature/complete-example
 title: Complete ticket with all fields
-when: "2025-08-20T14:30:00 Europe/London"
+when: "2025-08-20T14:30:00+01:00"
 base: develop
 pushMode: force-with-lease
 labels: ["enhancement", "priority-high", "needs-review"]

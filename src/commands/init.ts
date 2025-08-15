@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { DateTime } from 'luxon'
+import { addDays, formatISO, setHours, setMilliseconds, setMinutes, setSeconds, subMinutes } from 'date-fns'
 import { getDefaultBranch } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { doctor } from './doctor.js'
@@ -37,7 +37,7 @@ dirs = ["${ticketsDir}"]
 }
 
 function generateExampleImmediate(_base: string): string {
-	const oneMinuteAgo = DateTime.now().minus({ minutes: 1 }).toISO()
+	const oneMinuteAgo = formatISO(subMinutes(new Date(), 1))
 	return `---
 branch: example/immediate-fix
 title: Fix critical typo in README
@@ -57,7 +57,7 @@ Run \`branchpilot run\` to see it processed immediately.
 }
 
 function generateExampleScheduled(base: string): string {
-	const tomorrow10am = DateTime.now().plus({ days: 1 }).set({ hour: 10, minute: 0, second: 0, millisecond: 0 }).toISO()
+	const tomorrow10am = formatISO(setMilliseconds(setSeconds(setMinutes(setHours(addDays(new Date(), 1), 10), 0), 0), 0))
 
 	return `---
 branch: feature/add-user-profile
@@ -80,7 +80,7 @@ It demonstrates how to schedule PRs for future dates.
 }
 
 function generateExampleAdvanced(base: string): string {
-	const threeDays = DateTime.now().plus({ days: 3 }).set({ hour: 14, minute: 30, second: 0, millisecond: 0 }).toISO()
+	const threeDays = formatISO(setMilliseconds(setSeconds(setMinutes(setHours(addDays(new Date(), 3), 14), 30), 0), 0))
 
 	return `---
 branch: refactor/improve-performance

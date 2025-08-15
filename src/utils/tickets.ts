@@ -2,8 +2,9 @@ import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
+import { differenceInDays, format, isValid, parse, parseISO } from 'date-fns'
+import { fromZonedTime } from 'date-fns-tz'
 import matter from 'gray-matter'
-import { DateTime, IANAZone } from 'luxon'
 import { z } from 'zod'
 import { loadRepoConfig } from './config.js'
 import { getGitRoot, hasUnmergedCommits, isBranchMerged, isGitRepository } from './git.js'
@@ -14,30 +15,13 @@ import type { GlobalConfig, PushMode, RepoConfig } from './types.js'
 
 type Logger = typeof logger
 
-const validTimezoneCache = new Map<string, boolean>()
-
-function isValidTimezone(zone: string): boolean {
-	const cached = validTimezoneCache.get(zone)
-	if (cached !== undefined) {
-		return cached
-	}
-
-	const ianaZone = IANAZone.create(zone)
-	const isValid = ianaZone.isValid
-	validTimezoneCache.set(zone, isValid)
-	return isValid
-}
-
-function getSystemTimezone(): string {
-	return DateTime.local().zoneName ?? 'UTC'
-}
-
 const TicketFrontSchema = z.object({
 	branch: z.string(),
 	title: z.string(),
 	when: z.union([z.string(), z.date()]).transform((val) => {
 		return val instanceof Date ? val.toISOString() : val
 	}),
+	timezone: z.string().optional(),
 	base: z.string().optional(),
 	rebase: z.boolean().optional(),
 	pushMode: z.enum(['force-with-lease', 'ff-only', 'force']).optional(),
@@ -60,6 +44,7 @@ export interface LoadedTicket {
 	when: string
 	body: string
 
+	timezone?: string
 	base?: string
 	rebase?: boolean
 	pushMode?: PushMode
@@ -78,44 +63,40 @@ export interface LoadedTicket {
 	repoRoot?: string
 }
 
-function parseWhenToUtcISO(whenStr: string): string {
-	const parts = whenStr.trim().split(/\s+/)
-	let dt: DateTime
+/**
+ * Parse a date string to UTC ISO format
+ */
+export function parseWhenToUtcISO(whenStr: string, timezone?: string): string {
+	const trimmed = whenStr.trim()
 
-	if (parts.length === 2 && parts[0] && parts[1]) {
-		const zone = parts[1]
-		if (!isValidTimezone(zone)) {
-			throw new Error(`Invalid timezone '${zone}' in 'when': ${whenStr}`)
+	let date = parseISO(trimmed)
+	if (isValid(date)) return date.toISOString()
+
+	const tz = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+
+	const formats = [
+		'yyyy-MM-dd HH:mm:ss',
+		'yyyy-MM-dd HH:mm',
+		'yyyy-MM-dd',
+		'MM/dd/yyyy HH:mm:ss',
+		'MM/dd/yyyy HH:mm',
+		'MM/dd/yyyy',
+		'dd/MM/yyyy HH:mm:ss',
+		'dd/MM/yyyy HH:mm',
+		'dd/MM/yyyy',
+		'd/M/yyyy',
+		'M/d/yyyy',
+	]
+
+	for (const fmt of formats) {
+		date = parse(trimmed, fmt, new Date())
+		if (isValid(date)) {
+			const isoLike = format(date, "yyyy-MM-dd'T'HH:mm:ss")
+			return fromZonedTime(new Date(isoLike), tz).toISOString()
 		}
-		dt = parseDateTime(parts[0], zone)
-	} else {
-		const zone = getSystemTimezone()
-		dt = parseDateTime(whenStr, zone)
 	}
 
-	if (!dt.isValid) throw new Error(`Invalid 'when': ${whenStr}`)
-	const isoString = dt.toUTC().toISO()
-	if (isoString === null) {
-		throw new Error(`Failed to convert to ISO string: ${whenStr}`)
-	}
-	return isoString
-}
-
-function parseDateTime(dateStr: string, zone: string): DateTime {
-	let dt = DateTime.fromISO(dateStr, { zone })
-	if (dt.isValid) return dt
-
-	if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-		dt = DateTime.fromISO(`${dateStr}T00:00:00`, { zone })
-		if (dt.isValid) return dt
-	}
-
-	if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(dateStr)) {
-		dt = DateTime.fromISO(`${dateStr}:00`, { zone })
-		if (dt.isValid) return dt
-	}
-
-	return DateTime.invalid('unparseable')
+	throw new Error(`Invalid 'when': ${trimmed}`)
 }
 
 /**
@@ -231,7 +212,7 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 
 				let dueUtcISO: string
 				try {
-					dueUtcISO = parseWhenToUtcISO(fm.data.when)
+					dueUtcISO = parseWhenToUtcISO(fm.data.when, fm.data.timezone)
 				} catch (error) {
 					tickets.push({
 						file,
@@ -247,10 +228,10 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 					continue
 				}
 
-				const now = DateTime.utc()
-				const dueDate = DateTime.fromISO(dueUtcISO)
+				const now = new Date()
+				const dueDate = parseISO(dueUtcISO)
 				const isDue = dueDate <= now
-				const daysUntilDue = Math.floor(dueDate.diff(now, 'days').days)
+				const daysUntilDue = Math.floor(differenceInDays(dueDate, now))
 
 				const ticket: LoadedTicket = {
 					file,
@@ -265,6 +246,7 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 					daysUntilDue,
 				}
 
+				if (fm.data.timezone) ticket.timezone = fm.data.timezone
 				if (fm.data.base) ticket.base = fm.data.base
 				if (fm.data.rebase) ticket.rebase = fm.data.rebase
 				if (fm.data.pushMode) ticket.pushMode = fm.data.pushMode

@@ -56,6 +56,8 @@ Or use the `watch` command to monitor tickets at an interval:
 branchpilot watch
 ```
 
+A PR will be opened during execution if the `when` timestamp is in the past.
+
 ## Daemon
 
 To run the process in the background use a process manager like [PM2](https://pm2.keymetrics.io/) with the `watch` command:
@@ -66,16 +68,15 @@ pm2 start branchpilot -- watch --interval 30m --verbose
 
 A built-in daemon command may be added in the future, but PM2 or similar should work well.
 
-PRs will be created on each run when the `when` timestamp has passed.
-
 ## Ticket configuration
 
 These are all the PR configuration options you have in ticket Markdown files.
 
 ```yaml
 title: Example PR Title      # (required) Title of the PR
-when: 2025-01-15T09:00       # (required) When to open the PR (ISO 8601 format)
+when: 2025-01-15 09:00       # (required) When to open the PR (various formats supported)
 branch: fix-readme-typo      # (required) Branch name to create PR from
+timezone: America/New_York   # Timezone for dates without offsets (defaults to system)
 repository: ~/projects/repo  # Path to target repo for PRs (defaults to current repo)
 base: develop                # Base branch (auto-detected if omitted)
 rebase: true                 # Rebase against base branch before pushing

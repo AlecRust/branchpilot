@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises'
-import { DateTime } from 'luxon'
+import { addDays, formatISO } from 'date-fns'
 import { describe, expect, it, vi } from 'vitest'
 import * as config from './config.js'
 import * as git from './git.js'
 import * as github from './github.js'
 import { logger, setVerbose } from './logger.js'
-import { loadAllTickets, loadTicketsForProcessing } from './tickets.js'
+import { loadAllTickets, loadTicketsForProcessing, parseWhenToUtcISO } from './tickets.js'
 
 vi.mock('node:fs/promises')
 vi.mock('node:fs')
@@ -31,7 +31,7 @@ describe('tickets', () => {
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`---
 branch: feature/auth
 title: Add authentication
-when: "2024-01-01T09:30:00 Europe/London"
+when: "2024-01-01T09:30:00Z"
 base: main
 labels: ["auth"]
 ---
@@ -141,7 +141,7 @@ Body`)
 		})
 
 		it('marks pending tickets correctly', async () => {
-			const futureDate = DateTime.utc().plus({ days: 1 }).toISO()
+			const futureDate = formatISO(addDays(new Date(), 1))
 			mockReaddir(['ticket.md'])
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`---
 branch: feature/future
@@ -253,6 +253,30 @@ when: "2024-01-01T00:00:00"
 			expect(tickets).toHaveLength(2)
 			expect(tickets[0]?.status).toBe('ready')
 			expect(tickets[1]?.status).toBe('invalid')
+		})
+	})
+
+	describe('parseWhenToUtcISO', () => {
+		it('parses various date formats correctly', () => {
+			expect(parseWhenToUtcISO('2024-01-15T10:30:00Z')).toBe('2024-01-15T10:30:00.000Z')
+			expect(parseWhenToUtcISO('2024-01-15')).toMatch(/^2024-01-15/)
+			expect(parseWhenToUtcISO('01/15/2024')).toMatch(/^2024-01-15/)
+			expect(parseWhenToUtcISO('2024-01-15 10:30:00')).toMatch(/^2024-01-15/)
+		})
+
+		it('accepts timezone parameter', () => {
+			const result = parseWhenToUtcISO('2024-01-15 10:00:00', 'America/New_York')
+			expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/)
+		})
+
+		it('uses offset when present, ignoring timezone parameter', () => {
+			// When date has offset, it takes precedence over timezone field
+			const withOffset = parseWhenToUtcISO('2024-01-15T10:00:00-05:00', 'Europe/London')
+			expect(withOffset).toBe('2024-01-15T15:00:00.000Z') // -05:00 offset is used, not London
+		})
+
+		it('throws error for invalid date', () => {
+			expect(() => parseWhenToUtcISO('not a date')).toThrow("Invalid 'when': not a date")
 		})
 	})
 })

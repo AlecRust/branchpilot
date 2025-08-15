@@ -1,16 +1,21 @@
 ---
 branch: feature/draft-example
-title: Example Draft PR
-when: "2025-08-10T16:00:00"
+title: Example draft PR for review
+when: 2025-08-10 16:00:00
 draft: true
-labels: ["example", "draft"]
+labels: ["wip", "draft"]
 ---
 
-This is an example of a draft PR. When branchpilot processes this ticket,
-it will create the PR as a draft on GitHub.
+This example demonstrates creating a draft PR that isn't ready for final review.
 
-## Features
+## What this demonstrates
 
-- The PR will be marked as a draft
-- It won't automatically request reviews
-- Perfect for work-in-progress changes
+- **Draft status** — PR is created as a draft on GitHub
+- **Labels** — Automatically applies the specified labels
+- **Review workflow** — Draft PRs don't trigger review requests
+
+## Use cases
+
+- **Work in progress** — Share early work for feedback
+- **Scheduled previews** — Create draft PRs for upcoming features
+- **Staged rollouts** — Prepare PRs that will be marked ready later

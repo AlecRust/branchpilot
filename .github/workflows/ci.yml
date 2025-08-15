@@ -23,6 +23,7 @@ jobs:
           cache: "npm"
 
       - run: npm ci
+      - run: npm audit --omit=dev
       - run: biome ci .
       - run: npm run typecheck
       - run: npm test

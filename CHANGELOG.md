@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.7.0] - 2025-08-16
+
+### 🚀 Features
+
+- Add timeout to gh commands
+
+### 🐛 Bug Fixes
+
+- Normalise repo paths for consistent branch restoration
+- Prevent gh CLI from hanging on interactive prompts
+
+### 💼 Other
+
+- Simplify Biom pre-commit command
+- Simplify Biome config
+- Add "npm audit" to release process
+- Move release building to CI
+
+### 🚜 Refactor
+
+- Simplify function names
+- Simplify "when" ticket option
+
+### 📚 Documentation
+
+- Simplify README
+- Improve README
+- Improve README
+- Improve README
+- Improve recommended PM2 command
+- Improve README
+- Improve README
+- Improve README
+
+### 🧪 Testing
+
+- Fix windows tests
+- Fix windows tests
+- Fix windows tests
+- Adjust CI Node.js test matrix
+
 ## [0.6.0] - 2025-08-13
 
 ### 🚀 Features

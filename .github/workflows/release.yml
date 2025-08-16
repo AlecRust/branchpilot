@@ -45,13 +45,16 @@ jobs:
         with:
           config: cliff.toml
           args: --latest --strip header
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # TODO: Perhaps there is a simpler way to avoid the heading of each release
       - name: Process release notes
         id: process-notes
         run: |
           # Remove the first two lines (version heading and empty line)
-          echo "${{ steps.git-cliff.outputs.content }}" | tail -n +3 > release_notes.txt
+          cat << 'RELEASE_EOF' | tail -n +3 > release_notes.txt
+          ${{ steps.git-cliff.outputs.content }}
+          RELEASE_EOF
           echo "content<<EOF" >> $GITHUB_OUTPUT
           cat release_notes.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

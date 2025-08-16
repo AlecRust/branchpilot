@@ -1,6 +1,10 @@
 # git-cliff configuration file
 # https://git-cliff.org/docs/configuration
 
+[remote.github]
+owner = "AlecRust"
+repo = "branchpilot"
+
 [changelog]
 header = """
 # Changelog
@@ -15,7 +19,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
     {% for commit in commits %}
-        - {{ commit.message | upper_first }}\
+        - {{ commit.message | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/commit/{{ commit.id }}))\
     {% endfor %}
 {% endfor %}
 

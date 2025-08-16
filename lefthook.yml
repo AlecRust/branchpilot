@@ -4,6 +4,9 @@ pre-commit:
       glob: "*"
       run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true
       stage_fixed: true
+    markdownlint:
+      run: npx markdownlint-cli2 --fix {staged_files}
+      stage_fixed: true
     typecheck:
       run: npm run typecheck
 

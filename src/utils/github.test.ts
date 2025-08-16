@@ -63,7 +63,7 @@ describe('github', () => {
 
 			const result = await gh('/repo', ['status'])
 
-			expect(execa).toHaveBeenCalledWith('gh', ['status'], { cwd: '/repo', stdin: 'ignore' })
+			expect(execa).toHaveBeenCalledWith('gh', ['status'], { cwd: '/repo', stdin: 'ignore', timeout: 5000 })
 			expect(result).toBe('output')
 		})
 
@@ -73,7 +73,7 @@ describe('github', () => {
 
 			await gh('/repo', ['auth', 'status'])
 
-			expect(execa).toHaveBeenCalledWith('gh', ['auth', 'status'], { cwd: '/repo', stdin: 'ignore' })
+			expect(execa).toHaveBeenCalledWith('gh', ['auth', 'status'], { cwd: '/repo', stdin: 'ignore', timeout: 5000 })
 		})
 	})
 
@@ -88,6 +88,7 @@ describe('github', () => {
 			expect(execa).toHaveBeenCalledWith('gh', ['repo', 'view', '--json', 'defaultBranchRef'], {
 				cwd: '/repo',
 				stdin: 'ignore',
+				timeout: 5000,
 			})
 		})
 
@@ -117,7 +118,7 @@ describe('github', () => {
 			expect(execa).toHaveBeenCalledWith(
 				'gh',
 				['pr', 'create', '--head', 'feature', '--base', 'main', '--title', 'Title', '--body', 'Body'],
-				{ cwd: '/repo', stdin: 'ignore' },
+				{ cwd: '/repo', stdin: 'ignore', timeout: 5000 },
 			)
 		})
 

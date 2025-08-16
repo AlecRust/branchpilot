@@ -7,11 +7,12 @@ export async function ensureGh(): Promise<string> {
 	return await which('gh')
 }
 
-export async function gh(cwd: string, args: string[]) {
+export async function gh(cwd: string, args: string[], timeout = 5000) {
 	// Use 'ignore' for stdin to prevent any commands from waiting for input
 	const { stdout } = await execa('gh', args, {
 		cwd,
 		stdin: 'ignore',
+		timeout,
 	})
 	return stdout.trim()
 }

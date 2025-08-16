@@ -28,9 +28,13 @@ export async function doctor(verbose = false): Promise<boolean> {
 			} else {
 				logger.warn('gh auth status unclear')
 			}
-		} catch {
+		} catch (error) {
 			spinner.stop()
-			logger.error('gh auth not set up. Run: gh auth login')
+			if (error && typeof error === 'object' && 'timedOut' in error) {
+				logger.error('gh auth check timed out - may not be authenticated')
+			} else {
+				logger.error('gh auth not set up. Run: gh auth login')
+			}
 			ok = false
 		}
 	} catch (_e) {

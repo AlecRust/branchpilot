@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.7.1] - 2025-08-16
+
+### 💼 Other
+
+- Set npm registry URL in release workflow
+
+### ⚙️ Miscellaneous Tasks
+
+- Simplify release npm script command
+
 ## [0.7.0] - 2025-08-16
 
 ### 🚀 Features

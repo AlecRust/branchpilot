@@ -8,9 +8,9 @@ This is a simple PR example showing the minimum required fields.
 
 ## What this demonstrates
 
-- **Minimal configuration** — Only `branch`, `title`, and `when` are required
+- **Minimal configuration** — Only `branch` and `when` are required
 - **Simple date format** — Uses your system timezone by default
-- **Clean PR body** — The markdown content becomes the PR description
+- **Clean PR body** — The markdown content below the last `---` becomes the PR description
 
 ## Usage
 

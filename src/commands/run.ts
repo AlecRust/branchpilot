@@ -105,9 +105,9 @@ export async function run(args: RunOnceArgs): Promise<number> {
 				cwd: repoRoot,
 				branch: t.branch,
 				base: t.base || 'main',
-				title: t.title,
-				body: t.body,
 			}
+			if (t.title) prOpts.title = t.title
+			if (t.body) prOpts.body = t.body
 			if (t.labels) prOpts.labels = t.labels
 			if (t.reviewers) prOpts.reviewers = t.reviewers
 			if (t.assignees) prOpts.assignees = t.assignees

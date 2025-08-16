@@ -13,12 +13,12 @@ export type RepoConfig = Partial<GlobalConfig>
 export type Ticket = {
 	file: string
 	branch: string
-	title: string
-	when: string // original string
-	dueUtcISO: string // parsed UTC ISO
-	body: string
+	when: string
+	dueUtcISO: string
 
 	// optional overrides
+	title?: string
+	body?: string
 	base?: string
 	rebase?: boolean // whether to rebase onto base branch before creating PR
 	pushMode?: PushMode

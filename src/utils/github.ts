@@ -38,8 +38,8 @@ export async function createOrUpdatePr(opts: {
 	cwd: string
 	branch: string
 	base: string
-	title: string
-	body: string
+	title?: string
+	body?: string
 	labels?: string[]
 	reviewers?: string[]
 	assignees?: string[]
@@ -49,7 +49,20 @@ export async function createOrUpdatePr(opts: {
 }): Promise<string> {
 	const { cwd, branch, base, title, body } = opts
 
-	const args = ['pr', 'create', '--head', branch, '--base', base, '--title', title, '--body', body]
+	const args = ['pr', 'create', '--head', branch, '--base', base]
+
+	if (title) {
+		args.push('--title', title)
+	}
+
+	if (body) {
+		args.push('--body', body)
+	}
+
+	// If neither title nor body is provided, use --fill to auto-generate from commits
+	if (!title && !body) {
+		args.push('--fill')
+	}
 
 	if (opts.labels && opts.labels.length > 0) {
 		args.push('--label', ...opts.labels)

@@ -101,6 +101,28 @@ This is a draft PR`)
 			expect(tickets[1]?.error).toContain('Missing required fields: branch')
 		})
 
+		it('handles tickets without title and body', async () => {
+			mockReaddir(['minimal.md'])
+			vi.mocked(fs.readFile).mockResolvedValueOnce(`---
+branch: feature/minimal
+when: "2024-01-01T00:00:00"
+---
+`)
+
+			vi.mocked(git.getGitRoot).mockResolvedValue('/repo')
+			vi.mocked(config.loadRepoConfig).mockResolvedValue({})
+			vi.mocked(github.gh).mockResolvedValue('[]')
+			vi.mocked(github.getDefaultBranch).mockResolvedValue('main')
+			vi.mocked(git.hasUnmergedCommits).mockResolvedValue(true)
+
+			const tickets = await loadAllTickets(['/test/dir'], {}, logger)
+			expect(tickets).toHaveLength(1)
+			expect(tickets[0]?.branch).toBe('feature/minimal')
+			expect(tickets[0]?.status).toBe('ready')
+			expect(tickets[0]?.title).toBeUndefined()
+			expect(tickets[0]?.body).toBeUndefined()
+		})
+
 		it('handles tickets with existing PRs', async () => {
 			mockReaddir(['ticket.md'])
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`---

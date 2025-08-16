@@ -73,9 +73,9 @@ A built-in daemon command may be added in the future, but PM2 or similar should 
 These are all the PR configuration options you have in ticket Markdown files.
 
 ```yaml
-title: Example PR Title      # (required) Title of the PR
 when: 2025-01-15 09:00       # (required) When to open the PR (various formats supported)
 branch: fix-readme-typo      # (required) Branch name to create PR from
+title: Example PR title      # Title of the PR
 timezone: America/New_York   # Timezone for dates without offsets (defaults to system)
 repository: ~/projects/repo  # Path to target repo for PRs (defaults to current repo)
 base: develop                # Base branch (auto-detected if omitted)

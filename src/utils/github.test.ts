@@ -158,5 +158,39 @@ describe('github', () => {
 			const args = vi.mocked(execa).mock.calls[0]?.[1]
 			expect(args).not.toContain('--label')
 		})
+
+		it('uses --fill when title and body are not provided', async () => {
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+			})
+
+			const args = vi.mocked(execa).mock.calls[0]?.[1]
+			expect(args).toContain('--fill')
+			expect(args).not.toContain('--title')
+			expect(args).not.toContain('--body')
+		})
+
+		it('uses title without body when only title is provided', async () => {
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+				title: 'Custom Title',
+			})
+
+			const args = vi.mocked(execa).mock.calls[0]?.[1]
+			expect(args).toContain('--title')
+			expect(args).toContain('Custom Title')
+			expect(args).not.toContain('--body')
+			expect(args).not.toContain('--fill')
+		})
 	})
 })

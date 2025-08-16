@@ -17,10 +17,10 @@ type Logger = typeof logger
 
 const TicketFrontSchema = z.object({
 	branch: z.string(),
-	title: z.string(),
 	when: z.union([z.string(), z.date()]).transform((val) => {
 		return val instanceof Date ? val.toISOString() : val
 	}),
+	title: z.string().optional(),
 	timezone: z.string().optional(),
 	base: z.string().optional(),
 	rebase: z.boolean().optional(),
@@ -40,9 +40,9 @@ export interface LoadedTicket {
 	file: string
 	relativePath: string
 	branch: string
-	title: string
 	when: string
-	body: string
+	title?: string
+	body?: string
 
 	timezone?: string
 	base?: string
@@ -183,7 +183,6 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 					const data = parsed.data || {}
 
 					if (!data.branch) missingFields.push('branch')
-					if (!data.title) missingFields.push('title')
 					if (!data.when) missingFields.push('when')
 
 					const errorMsg =
@@ -200,9 +199,8 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 						file,
 						relativePath,
 						branch: data.branch || '[missing]',
-						title: data.title || '[missing]',
 						when: data.when || '[missing]',
-						body: '',
+						...(data.title && { title: data.title }),
 						status: 'invalid',
 						isDue: false,
 						error: errorMsg,
@@ -218,9 +216,9 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 						file,
 						relativePath,
 						branch: fm.data.branch,
-						title: fm.data.title,
 						when: fm.data.when,
-						body: parsed.content.trim(),
+						...(fm.data.title && { title: fm.data.title }),
+						...(parsed.content.trim() && { body: parsed.content.trim() }),
 						status: 'invalid',
 						isDue: false,
 						error: `Invalid 'when' format: ${error}`,
@@ -237,9 +235,9 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 					file,
 					relativePath,
 					branch: fm.data.branch,
-					title: fm.data.title,
 					when: fm.data.when,
-					body: parsed.content.trim(),
+					...(fm.data.title && { title: fm.data.title }),
+					...(parsed.content.trim() && { body: parsed.content.trim() }),
 					dueUtcISO,
 					status: isDue ? 'ready' : 'pending',
 					isDue,
@@ -263,7 +261,6 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 					file,
 					relativePath,
 					branch: '[error]',
-					title: '[error]',
 					when: '[error]',
 					body: '',
 					status: 'invalid',

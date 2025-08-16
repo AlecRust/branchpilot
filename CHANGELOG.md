@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.1] - 2025-08-16
+
+### 💼 Other
+
+- Add Knip check in CI ([`187dbb6`](https://github.com/AlecRust/branchpilot/commit/187dbb661095bba51854df79dc85442c9bdcbe24))
+- Improve release workflow ([`20d95aa`](https://github.com/AlecRust/branchpilot/commit/20d95aa801b38322a360eed08ec8774050966a7a))
+
+### ⚙️ Miscellaneous Tasks
+
+- Tidy types ([`e0dc221`](https://github.com/AlecRust/branchpilot/commit/e0dc221ade1b6fd299537c1f6f7fe25a4f8269d0))
+
 ## [0.8.0] - 2025-08-16
 
 ### 🚀 Features

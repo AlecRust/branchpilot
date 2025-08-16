@@ -31,7 +31,6 @@
 		"typecheck": "tsc --noEmit",
 		"check": "npm run format && npm run typecheck && markdownlint-cli2 **/*.md",
 		"test": "vitest run",
-		"test:coverage": "vitest run --coverage",
 		"doctor": "node dist/cli.mjs doctor",
 		"release": "release-it --ci"
 	},

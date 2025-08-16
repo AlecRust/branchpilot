@@ -45,8 +45,18 @@ jobs:
           config: cliff.toml
           args: --latest --strip header
 
+      # TODO: Perhaps there is a simpler way to avoid the heading of each release
+      - name: Process release notes
+        id: process-notes
+        run: |
+          # Remove the first two lines (version heading and empty line)
+          echo "${{ steps.git-cliff.outputs.content }}" | tail -n +3 > release_notes.txt
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ github.ref_name }}
-          body: ${{ steps.git-cliff.outputs.content }}
+          body: ${{ steps.process-notes.outputs.content }}

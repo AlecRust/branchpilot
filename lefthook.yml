@@ -1,16 +1,16 @@
 pre-commit:
-  commands:
-    biome-check:
-      glob: "*"
+  jobs:
+    - name: Biome check
       run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true
       stage_fixed: true
-    markdownlint:
+    - name: Markdown lint
+      glob: '*.md'
       run: npx markdownlint-cli2 --fix {staged_files}
       stage_fixed: true
-    typecheck:
+    - name: Type check
       run: npm run typecheck
 
 commit-msg:
-  commands:
-    commitlint:
+  jobs:
+    - name: commitlint
       run: npx commitlint --edit {1}

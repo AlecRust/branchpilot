@@ -72,7 +72,7 @@ describe('CLI', () => {
 		const result = await runCLI(['doctor'])
 		expect(result.stdout).toMatch(/git:|gh:/)
 		expect(result.code).not.toBe(null)
-	}, 10000)
+	})
 
 	it('run command with invalid config shows error', async () => {
 		const result = await runCLI(['run', '--config', '/nonexistent/config.toml'])

@@ -8,8 +8,11 @@ export async function ensureGh(): Promise<string> {
 }
 
 export async function gh(cwd: string, args: string[]) {
-	const options = args.includes('auth') ? { cwd, timeout: 8000 } : { cwd }
-	const { stdout } = await execa('gh', args, options)
+	// Use 'ignore' for stdin to prevent any commands from waiting for input
+	const { stdout } = await execa('gh', args, {
+		cwd,
+		stdin: 'ignore',
+	})
 	return stdout.trim()
 }
 

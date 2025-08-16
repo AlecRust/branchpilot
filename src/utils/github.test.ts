@@ -63,17 +63,17 @@ describe('github', () => {
 
 			const result = await gh('/repo', ['status'])
 
-			expect(execa).toHaveBeenCalledWith('gh', ['status'], { cwd: '/repo' })
+			expect(execa).toHaveBeenCalledWith('gh', ['status'], { cwd: '/repo', stdin: 'ignore' })
 			expect(result).toBe('output')
 		})
 
-		it('applies timeout for auth commands', async () => {
+		it('prevents interactive input for all commands', async () => {
 			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
 			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('authenticated') as any)
 
 			await gh('/repo', ['auth', 'status'])
 
-			expect(execa).toHaveBeenCalledWith('gh', ['auth', 'status'], { cwd: '/repo', timeout: 8000 })
+			expect(execa).toHaveBeenCalledWith('gh', ['auth', 'status'], { cwd: '/repo', stdin: 'ignore' })
 		})
 	})
 
@@ -85,7 +85,10 @@ describe('github', () => {
 			const result = await getDefaultBranch('/repo')
 
 			expect(result).toBe('develop')
-			expect(execa).toHaveBeenCalledWith('gh', ['repo', 'view', '--json', 'defaultBranchRef'], { cwd: '/repo' })
+			expect(execa).toHaveBeenCalledWith('gh', ['repo', 'view', '--json', 'defaultBranchRef'], {
+				cwd: '/repo',
+				stdin: 'ignore',
+			})
 		})
 
 		it('falls back to main when all methods fail', async () => {
@@ -114,7 +117,7 @@ describe('github', () => {
 			expect(execa).toHaveBeenCalledWith(
 				'gh',
 				['pr', 'create', '--head', 'feature', '--base', 'main', '--title', 'Title', '--body', 'Body'],
-				{ cwd: '/repo' },
+				{ cwd: '/repo', stdin: 'ignore' },
 			)
 		})
 

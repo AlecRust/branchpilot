@@ -33,6 +33,9 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Unused check
+        run: npm run knip
+
       - name: Security audit
         run: npm audit --omit=dev
 

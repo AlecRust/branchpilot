@@ -1,7 +1,7 @@
 ---
 branch: feature/new-feature
 title: Add new feature
-when: 2025-08-12 10:00:00
+when: 2025-08-12 10:00
 ---
 
 This is a simple PR example showing the minimum required fields.

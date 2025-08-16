@@ -1,7 +1,7 @@
 ---
 branch: feature/needs-rebase
 title: Feature with automatic rebase
-when: 2025-08-12 11:00:00
+when: 2025-08-12 11:00
 base: develop
 rebase: true
 labels: ["enhancement", "needs-review"]

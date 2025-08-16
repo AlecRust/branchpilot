@@ -1,7 +1,7 @@
 ---
 branch: feature/draft-example
 title: Example draft PR for review
-when: 2025-08-10 16:00:00
+when: 2025-08-10 16:00
 draft: true
 labels: ["wip", "draft"]
 ---

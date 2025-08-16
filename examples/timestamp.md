@@ -1,7 +1,7 @@
 ---
 branch: feature/timestamp-example
 title: Example showing date and timezone handling
-when: 2025-01-15 09:00:00
+when: 2025-01-15 09:00
 timezone: America/New_York
 labels: ["example", "scheduled"]
 ---

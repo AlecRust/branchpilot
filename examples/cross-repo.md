@@ -1,7 +1,7 @@
 ---
 branch: feature/cross-repo-update
 title: Update dependency in other project
-when: 2025-08-12 12:00:00
+when: 2025-08-12 12:00
 repository: ~/projects/other-project
 assignees: ["alice"]
 ---

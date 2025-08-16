@@ -29,7 +29,7 @@
 		"start": "node dist/cli.mjs",
 		"format": "biome check --write .",
 		"typecheck": "tsc --noEmit",
-		"check": "npm run format && npm run typecheck",
+		"check": "npm run format && npm run typecheck && markdownlint-cli2 **/*.md",
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"doctor": "node dist/cli.mjs doctor",

@@ -13,11 +13,13 @@ This PR demonstrates branchpilot's flexible date and timezone handling.
 branchpilot supports various date formats in the `when` field:
 
 ### ISO 8601 with timezone info
+
 - `2025-01-15T09:00:00Z` - UTC time
 - `2025-01-15T09:00:00-05:00` - Eastern Standard Time
 - `2025-01-15T09:00:00+09:00` - Japan Standard Time
 
 ### Simple formats (use timezone field or system timezone)
+
 - `2025-01-15` - Date only (midnight)
 - `2025-01-15 09:00` - Date and time
 - `2025-01-15 09:00:00` - Date and time with seconds
@@ -36,11 +38,13 @@ Timezone is determined by (in order of precedence):
 ## Best Practices
 
 ### Option 1: ISO with explicit offset
+
 ```yaml
 when: 2025-01-15T09:00:00-05:00
 ```
 
 ### Option 2: Simple date with timezone field
+
 ```yaml
 when: 2025-01-15 09:00
 timezone: America/New_York

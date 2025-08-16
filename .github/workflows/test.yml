@@ -13,16 +13,22 @@ jobs:
         node: ['20', 'lts/*', 'current', 'latest']
     steps:
       - uses: actions/checkout@v4
-
+      - uses: biomejs/setup-biome@v2
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: npm
 
-      - run: npm ci
+      - name: Install Node packages
+        run: npm ci
 
-      - name: Format check
-        run: npm run format -- --diagnostic-level=error
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          globs: '**/*.md'
+
+      - name: Biome check
+        run: biome ci
 
       - name: Type check
         run: npm run typecheck

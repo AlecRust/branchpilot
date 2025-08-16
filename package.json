@@ -33,7 +33,7 @@
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"doctor": "node dist/cli.mjs doctor",
-		"release": "GITHUB_TOKEN=$(gh auth token) release-it --ci"
+		"release": "release-it --ci"
 	},
 	"keywords": [
 		"git",

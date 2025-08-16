@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: biomejs/setup-biome@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: npm
+
+      - name: Install Node packages
+        run: npm ci
+
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          globs: '**/*.md'
+
+      - name: Biome check
+        run: biome ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Unused check
+        run: npm run knip
+
+      - name: Security audit
+        run: npm audit --omit=dev

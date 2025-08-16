@@ -6,7 +6,7 @@ import { logger, setVerbose } from '../utils/logger.js'
 import type { GlobalConfig } from '../utils/types.js'
 import { run } from './run.js'
 
-export type WatchOptions = {
+type WatchOptions = {
 	dirs?: string[]
 	verbose?: boolean
 	interval?: string

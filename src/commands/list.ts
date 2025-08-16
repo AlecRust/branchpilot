@@ -7,7 +7,7 @@ import { createBorderlessTable } from '../utils/table.js'
 import { type LoadedTicket, loadAllTickets, type TicketStatus } from '../utils/tickets.js'
 import type { GlobalConfig } from '../utils/types.js'
 
-export type ListOptions = {
+type ListOptions = {
 	dirs?: string[]
 	verbose?: boolean
 }

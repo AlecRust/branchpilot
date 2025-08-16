@@ -5,12 +5,12 @@ import { getDefaultBranch } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { doctor } from './doctor.js'
 
-export type InitOptions = {
+type InitOptions = {
 	force?: boolean
 	verbose?: boolean
 }
 
-export type InitResult = {
+type InitResult = {
 	success: boolean
 	configPath: string
 	ticketsDir: string

@@ -34,7 +34,6 @@ const TicketFrontSchema = z.object({
 })
 
 export type TicketStatus = 'pending' | 'ready' | 'pr-exists' | 'merged' | 'invalid'
-export type TicketPrStatus = 'pr-exists' | 'merged' | 'ready'
 
 export interface LoadedTicket {
 	file: string
@@ -133,7 +132,7 @@ async function checkTicketPrStatus(
 	repoRoot: string,
 	repoCfg: RepoConfig,
 	globalCfg: GlobalConfig,
-): Promise<{ status: TicketPrStatus; base: string }> {
+): Promise<{ status: 'pr-exists' | 'merged' | 'ready'; base: string }> {
 	try {
 		const result = await gh(repoRoot, ['pr', 'list', '--head', ticket.branch, '--state', 'open', '--json', 'number'])
 		const prs = JSON.parse(result)

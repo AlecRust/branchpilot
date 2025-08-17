@@ -42,8 +42,6 @@ Fixed a typo in the installation instructions.
 
 ### 3. Execute
 
-Configure the directories of tickets to scan using config files or command line flags as detailed below.
-
 Use the `run` command to process all tickets once on demand:
 
 ```bash
@@ -57,6 +55,8 @@ branchpilot watch
 ```
 
 A PR will be opened during execution if the `when` timestamp is in the past.
+
+Configure the tickets directories to scan using config files or flags as documented.
 
 ## Daemon
 

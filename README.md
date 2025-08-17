@@ -1,4 +1,4 @@
-# branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
+# branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![CodeQL](https://github.com/AlecRust/branchpilot/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/github-code-scanning/codeql) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
 
 Automate Pull Request creation from local Git branches using Markdown files.
 

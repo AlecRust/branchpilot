@@ -284,8 +284,12 @@ describe('run-once', () => {
 
 			await run({})
 
-			expect(git.getCurrentBranch).toHaveBeenCalledWith(path.resolve('/repo'))
-			expect(simpleGit).toHaveBeenCalledWith(path.resolve('/repo'))
+			expect(git.pushBranch).toHaveBeenCalledWith(
+				expect.objectContaining({
+					cwd: path.resolve('/repo'),
+					branch: 'feature/test',
+				}),
+			)
 		})
 
 		it('handles branch restoration failures gracefully', async () => {
@@ -317,11 +321,18 @@ describe('run-once', () => {
 
 			await run({})
 
-			expect(git.getCurrentBranch).toHaveBeenCalledTimes(2)
-
-			// Verify that both repositories were processed
-			expect(git.getCurrentBranch).toHaveBeenCalledWith(path.resolve('/home/testuser/repo1'))
-			expect(git.getCurrentBranch).toHaveBeenCalledWith(path.resolve('/home/testuser/repo2'))
+			expect(git.pushBranch).toHaveBeenCalledWith(
+				expect.objectContaining({
+					cwd: path.resolve('/home/testuser/repo1'),
+					branch: 'feature/test',
+				}),
+			)
+			expect(git.pushBranch).toHaveBeenCalledWith(
+				expect.objectContaining({
+					cwd: path.resolve('/home/testuser/repo2'),
+					branch: 'feature/repo2',
+				}),
+			)
 		})
 	})
 

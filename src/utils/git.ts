@@ -97,34 +97,51 @@ export async function pushBranch(opts: {
 	const { cwd, branch, remote, pushMode } = opts
 	const git = simpleGit(cwd)
 
-	if (await hasUncommittedChanges(cwd)) {
-		throw new Error('Cannot checkout branch: uncommitted changes detected')
-	}
+	const originalBranch = await getCurrentBranch(cwd)
+	const hasChanges = await hasUncommittedChanges(cwd)
+	const stashName = hasChanges ? `branchpilot-${Date.now()}` : null
 
-	await git.checkout(branch)
-
-	let remoteBranchExists = false
 	try {
-		await git.listRemote(['--heads', remote, branch])
-		remoteBranchExists = true
-	} catch {}
+		if (stashName) {
+			await git.stash(['push', '-m', stashName, '--include-untracked'])
+		}
 
-	if (remoteBranchExists) {
-		await git.fetch(remote, branch)
-		await git.merge([`${remote}/${branch}`, '--ff-only'])
+		await git.checkout(branch)
+
+		const remoteBranchExists = await git
+			.listRemote(['--heads', remote, branch])
+			.then(() => true)
+			.catch(() => false)
+
+		if (remoteBranchExists) {
+			await git.fetch(remote, branch)
+			await git.merge([`${remote}/${branch}`, '--ff-only'])
+		}
+
+		if (opts.rebase && opts.base) {
+			await git.fetch(remote, opts.base)
+			await git.rebase([`${remote}/${opts.base}`])
+		}
+
+		const pushOptions: string[] = []
+		if (pushMode === 'force-with-lease') {
+			pushOptions.push('--force-with-lease')
+		} else if (pushMode === 'force') {
+			pushOptions.push('--force')
+		}
+
+		await git.push(remote, branch, pushOptions)
+	} finally {
+		if (originalBranch && originalBranch !== branch) {
+			await git.checkout(originalBranch).catch(() => {})
+		}
+
+		if (stashName) {
+			const stashList = await git.stashList()
+			const stashEntry = stashList.all.find((entry) => entry.message?.includes(stashName))
+			if (stashEntry) {
+				await git.stash(['pop', `stash@{${stashList.all.indexOf(stashEntry)}}`]).catch(() => {})
+			}
+		}
 	}
-
-	if (opts.rebase && opts.base) {
-		await git.fetch(remote, opts.base)
-		await git.rebase([`${remote}/${opts.base}`])
-	}
-
-	const pushOptions: string[] = []
-	if (pushMode === 'force-with-lease') {
-		pushOptions.push('--force-with-lease')
-	} else if (pushMode === 'force') {
-		pushOptions.push('--force')
-	}
-
-	await git.push(remote, branch, pushOptions)
 }

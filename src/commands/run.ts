@@ -1,8 +1,7 @@
 import path from 'node:path'
 import ora from 'ora'
-import { simpleGit } from 'simple-git'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
-import { ensureGit, getCurrentBranch, pushBranch } from '../utils/git.js'
+import { ensureGit, pushBranch } from '../utils/git.js'
 import { createOrUpdatePr, ensureGh } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
@@ -35,8 +34,6 @@ export async function run(args: RunOnceArgs): Promise<number> {
 	}
 
 	let fatal = false
-
-	const originalBranches = new Map<string, string>()
 	const repoConfigs = new Map<string, RepoConfig>()
 
 	const allTickets = await withSpinner(
@@ -74,13 +71,6 @@ export async function run(args: RunOnceArgs): Promise<number> {
 			repoConfigs.set(repoRoot, await loadRepoConfig(repoRoot, logger))
 		}
 		const repoCfg = repoConfigs.get(repoRoot) ?? {}
-
-		if (!originalBranches.has(repoRoot)) {
-			const originalBranch = await getCurrentBranch(repoRoot)
-			if (originalBranch) {
-				originalBranches.set(repoRoot, originalBranch)
-			}
-		}
 
 		const pushMode: PushMode = t.pushMode ?? repoCfg?.pushMode ?? globalCfg.pushMode ?? 'force-with-lease'
 		const remote = repoCfg?.remote ?? globalCfg.remote ?? 'origin'
@@ -125,16 +115,5 @@ export async function run(args: RunOnceArgs): Promise<number> {
 	}
 
 	spinner.stop()
-
-	for (const [repoRoot, originalBranch] of originalBranches) {
-		try {
-			await simpleGit(repoRoot).checkout(originalBranch)
-		} catch (e) {
-			logger.warn(
-				`Could not restore branch in ${path.basename(repoRoot)}: ${e instanceof Error ? e.message : String(e)}`,
-			)
-		}
-	}
-
 	return fatal ? 1 : 0
 }

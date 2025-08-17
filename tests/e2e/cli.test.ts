@@ -1,16 +1,22 @@
 import { spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { describe, expect, it } from 'vitest'
+import { execa } from 'execa'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const cliPath = path.join(__dirname, '../../src/cli.ts')
+const cliPath = path.join(__dirname, '../../dist/cli.mjs')
+
+beforeAll(async () => {
+	if (!existsSync(cliPath)) {
+		await execa('npm', ['run', 'build'], { cwd: path.join(__dirname, '../..') })
+	}
+})
 
 function runCLI(args: string[]): Promise<{ stdout: string; stderr: string; code: number | null }> {
 	return new Promise((resolve) => {
-		const nodeArgs = ['--import', 'tsx', cliPath, ...args]
-
-		const child = spawn('node', nodeArgs, {
+		const child = spawn('node', [cliPath, ...args], {
 			env: { ...process.env, NODE_ENV: 'test' },
 			shell: false,
 		})

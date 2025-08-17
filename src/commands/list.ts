@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { formatRelative, parseISO } from 'date-fns'
+import { enGB, enUS } from 'date-fns/locale'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
@@ -10,6 +11,11 @@ import type { GlobalConfig } from '../utils/types.js'
 type ListOptions = {
 	dirs?: string[]
 	verbose?: boolean
+}
+
+function getSystemLocale() {
+	const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale
+	return systemLocale.startsWith('en-US') ? enUS : enGB
 }
 
 function formatTicketStatus(ticket: LoadedTicket): string {
@@ -28,7 +34,7 @@ function formatTicketStatus(ticket: LoadedTicket): string {
 	}
 
 	if (ticket.status === 'pending') {
-		const relativeTime = formatRelative(dueDate, now)
+		const relativeTime = formatRelative(dueDate, now, { locale: getSystemLocale() })
 		return `scheduled for ${relativeTime}`
 	}
 

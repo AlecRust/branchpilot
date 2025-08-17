@@ -359,4 +359,41 @@ Invalid`,
 		expect(dueIndex).toBeLessThan(pendingIndex)
 		expect(pendingIndex).toBeLessThan(invalidIndex)
 	})
+
+	it('should use system locale for time formatting', async () => {
+		const tomorrow = new Date()
+		tomorrow.setDate(tomorrow.getDate() + 1)
+		tomorrow.setHours(7, 30, 0, 0)
+
+		await fs.writeFile(
+			'morning-ticket.md',
+			`---
+branch: morning-feature
+title: Morning scheduled ticket
+when: ${tomorrow.toISOString()}
+---
+Body`,
+		)
+
+		await list({ dirs: ['.'] })
+
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
+
+		expect(output).toContain('morning-feature')
+		expect(output).toContain('tomorrow at')
+
+		const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale
+		if (systemLocale.startsWith('en-US')) {
+			expect(output).toMatch(/7:30\s*AM/i)
+		} else {
+			expect(output).toContain('07:30')
+		}
+	})
 })

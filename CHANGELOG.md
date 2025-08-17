@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.3] - 2025-08-17
+
+### 🚀 Features
+
+- Add common command aliases ([`f988cb2`](https://github.com/AlecRust/branchpilot/commit/f988cb206363a671d087bce85c53e1b4609c911a))
+
+### 💼 Other
+
+- Simplify release commands ([`204a0a4`](https://github.com/AlecRust/branchpilot/commit/204a0a4b984f5c13a33edc022ab27e81014d2d83))
+
+### 🚜 Refactor
+
+- Check for Git repo in init command ([`51afb1f`](https://github.com/AlecRust/branchpilot/commit/51afb1f0729c1e71fb39b673b1946bf11bf816ae))
+- Improve repository path resolution ([`e6e6ce9`](https://github.com/AlecRust/branchpilot/commit/e6e6ce9ba47f03aa483207e47fd2d1075a55f861))
+- Improve handling when there are uncommitted changes ([`a8b19ed`](https://github.com/AlecRust/branchpilot/commit/a8b19ed362603fd44d4db711e98929576145268d))
+
+### 📚 Documentation
+
+- Add CodeQL badge to README ([`df4ca27`](https://github.com/AlecRust/branchpilot/commit/df4ca27d763a0139c572f9244e9990cd694c0be7))
+
 ## [0.8.2] - 2025-08-17
 
 ### 💼 Other

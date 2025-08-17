@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { addDays, formatISO, setHours, setMilliseconds, setMinutes, setSeconds, subMinutes } from 'date-fns'
+import { isGitRepository } from '../utils/git.js'
 import { getDefaultBranch } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { doctor } from './doctor.js'
@@ -121,6 +122,17 @@ export async function init(options: InitOptions = {}): Promise<InitResult> {
 	const configPath = path.join(cwd, '.branchpilot.toml')
 	const ticketsDir = 'tickets'
 	const ticketsPath = path.join(cwd, ticketsDir)
+
+	const isGitRepo = await isGitRepository(cwd)
+	if (!isGitRepo) {
+		return {
+			success: false,
+			configPath,
+			ticketsDir,
+			ticketsCreated: [],
+			message: `Not a git repository. Run 'git init' first to initialize a git repository.`,
+		}
+	}
 
 	try {
 		await fs.access(configPath)

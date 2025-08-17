@@ -19,6 +19,7 @@ program
 
 program
 	.command('run')
+	.alias('process')
 	.description('Process due tickets and create PRs')
 	.option('-d, --dir <directories...>', 'Directories to scan for tickets (defaults to current directory)')
 	.option('-c, --config <path>', 'Path to custom config file')
@@ -49,6 +50,7 @@ program
 
 program
 	.command('init')
+	.alias('setup')
 	.description('Initialize branchpilot in the current directory')
 	.option('-f, --force', 'Reinitialize even if already initialized')
 	.option('-v, --verbose', 'Show detailed output')
@@ -71,6 +73,8 @@ program
 
 program
 	.command('list')
+	.alias('ls')
+	.alias('status')
 	.description('List all tickets in configured directories')
 	.option('-d, --dir <directories...>', 'Directories to scan for tickets (defaults to configured dirs)')
 	.option('-v, --verbose', 'Show detailed output')
@@ -117,6 +121,7 @@ program
 
 program
 	.command('doctor')
+	.alias('check')
 	.description('Check environment and tools')
 	.option('-v, --verbose', 'Show detailed output')
 	.action(async (options) => {

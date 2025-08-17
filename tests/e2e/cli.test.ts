@@ -114,4 +114,36 @@ describe('CLI', () => {
 		expect(result.code).toBe(1)
 		expect(result.stderr).toContain('Minimum interval is 1m')
 	})
+
+	describe('Aliases', () => {
+		it('ls alias works for list command', async () => {
+			const result = await runCLI(['ls', '--help'])
+			expect(result.code).toBe(0)
+			expect(result.stdout).toContain('List all tickets in configured directories')
+		})
+
+		it('process alias works for run command', async () => {
+			const result = await runCLI(['process', '--help'])
+			expect(result.code).toBe(0)
+			expect(result.stdout).toContain('Process due tickets and create PRs')
+		})
+
+		it('check alias works for doctor command', async () => {
+			const result = await runCLI(['check', '--help'])
+			expect(result.code).toBe(0)
+			expect(result.stdout).toContain('Check environment and tools')
+		})
+
+		it('status alias works for list command', async () => {
+			const result = await runCLI(['status', '--help'])
+			expect(result.code).toBe(0)
+			expect(result.stdout).toContain('List all tickets in configured directories')
+		})
+
+		it('setup alias works for init command', async () => {
+			const result = await runCLI(['setup', '--help'])
+			expect(result.code).toBe(0)
+			expect(result.stdout).toContain('Initialize branchpilot in the current directory')
+		})
+	})
 })

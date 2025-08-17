@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs'
 import fs from 'node:fs/promises'
-import os from 'node:os'
 import path from 'node:path'
 import { differenceInDays, format, isValid, parse, parseISO } from 'date-fns'
 import { fromZonedTime } from 'date-fns-tz'
@@ -101,23 +100,27 @@ export function parseWhenToUtcISO(whenStr: string, timezone?: string): string {
 /**
  * Get the repository root for a ticket, resolving the repository field if specified
  */
-async function getTicketRepoRoot(ticket: { repository?: string }, ticketsDir: string): Promise<string> {
+async function getTicketRepoRoot(ticket: { repository?: string }, ticketsDir: string, logger: Logger): Promise<string> {
 	if (ticket.repository) {
-		const expandedPath = path.resolve(ticket.repository.replace(/^~/, os.homedir()))
+		const expandedPath = expandPath(ticket.repository)
 
 		if (!existsSync(expandedPath)) {
-			throw new Error(`Repository path does not exist: ${expandedPath}`)
+			throw new Error(`Repository path does not exist: ${ticket.repository} (resolved to: ${expandedPath})`)
 		}
 
-		if (!(await isGitRepository(expandedPath))) {
-			throw new Error(`Path is not a git repository: ${expandedPath}`)
+		const resolvedPath = await fs.realpath(expandedPath)
+
+		if (!(await isGitRepository(resolvedPath))) {
+			throw new Error(`Path is not a git repository: ${ticket.repository} (resolved to: ${resolvedPath})`)
 		}
 
-		return expandedPath
+		logger.debug(`Resolved repository path: ${ticket.repository} -> ${resolvedPath}`)
+		return resolvedPath
 	}
 
 	const gitRoot = await getGitRoot(ticketsDir)
 	if (gitRoot) {
+		logger.debug(`Using git root from ticket directory: ${gitRoot}`)
 		return gitRoot
 	}
 
@@ -301,7 +304,7 @@ export async function loadAllTickets(
 
 		const dir = path.dirname(ticket.file)
 		try {
-			const repoRoot = await getTicketRepoRoot(ticket, dir)
+			const repoRoot = await getTicketRepoRoot(ticket, dir, logger)
 			ticket.repoRoot = repoRoot
 
 			if (!repoConfigs.has(repoRoot)) {

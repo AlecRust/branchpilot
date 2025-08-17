@@ -114,7 +114,6 @@ async function getTicketRepoRoot(ticket: { repository?: string }, ticketsDir: st
 			throw new Error(`Path is not a git repository: ${ticket.repository} (resolved to: ${resolvedPath})`)
 		}
 
-		logger.debug(`Resolved repository path: ${ticket.repository} -> ${resolvedPath}`)
 		return resolvedPath
 	}
 

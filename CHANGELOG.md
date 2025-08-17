@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.2] - 2025-08-17
+
+### 💼 Other
+
+- Separate linting and testing in CI ([`eb7ce1e`](https://github.com/AlecRust/branchpilot/commit/eb7ce1e94fcd2ecd5ed845e0c1dbee19b1a89b6a))
+- Set permissions in workflows ([`ea544d2`](https://github.com/AlecRust/branchpilot/commit/ea544d2cf0eac9775d696a6eab86e5cb165625c7))
+
+### 🚜 Refactor
+
+- Improve time formatting ([`65206d8`](https://github.com/AlecRust/branchpilot/commit/65206d82c1c871404b3fd17b144d1006f2188ae2))
+
+### 📚 Documentation
+
+- Simplify README ([`f226cbc`](https://github.com/AlecRust/branchpilot/commit/f226cbcebd9a5199ec9af0a459594d6885479332))
+- Simplify README ([`ac0603e`](https://github.com/AlecRust/branchpilot/commit/ac0603ec344fd6ee331151fd2e06ee9401c83a1a))
+
+### ⚡ Performance
+
+- Lazy load main commands ([`1dbd250`](https://github.com/AlecRust/branchpilot/commit/1dbd250538364256f71109c6880e08764f523c65))
+
 ## [0.8.1] - 2025-08-16
 
 ### 💼 Other

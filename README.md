@@ -27,13 +27,13 @@ Create a Markdown file with any filename containing [front matter](https://gohug
 
 The file can be placed anywhere. If you place it in a Git repository you can omit the `repository` field.
 
-e.g. `~/projects/my-project/tickets/fix-readme-typo.md` or `~/tickets/fix-readme-typo.md`
+e.g. `~/projects/my-project/tickets/fix-typo.md` or `~/tickets/fix-typo.md`
 
 ```markdown
 ---
 title: Fix typo in README
 when: 2025-01-15T09:00
-branch: fix-readme-typo
+branch: fix-typo
 repository: ~/projects/my-project  # Optional, defaults to current repository
 ---
 
@@ -74,7 +74,7 @@ These are all the PR configuration options you have in ticket Markdown files.
 
 ```yaml
 when: 2025-01-15 09:00       # (required) When to open the PR (various formats supported)
-branch: fix-readme-typo      # (required) Branch name to create PR from
+branch: fix-typo             # (required) Branch name to create PR from
 title: Example PR title      # Title of the PR
 timezone: America/New_York   # Timezone for dates without offsets (defaults to system)
 repository: ~/projects/repo  # Path to target repo for PRs (defaults to current repo)

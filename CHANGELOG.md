@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.4] - 2025-08-18
+
+### 🐛 Bug Fixes
+
+- Fix list remote command ([`ba5b944`](https://github.com/AlecRust/branchpilot/commit/ba5b944cb71f713ab4c4acca7de3a8fb5e82a049))
+
+### 💼 Other
+
+- Add provenance flag back to build process ([`c15c301`](https://github.com/AlecRust/branchpilot/commit/c15c301e0be205daf38e4d6b64650a2103a7c600))
+
+### ⚙️ Miscellaneous Tasks
+
+- Remove excessive logging ([`9eda3b3`](https://github.com/AlecRust/branchpilot/commit/9eda3b39945bb59ac6faddd2c96e0850e84d6322))
+
 ## [0.8.3] - 2025-08-17
 
 ### 🚀 Features

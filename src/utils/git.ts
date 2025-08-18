@@ -110,7 +110,7 @@ export async function pushBranch(opts: {
 
 		const remoteBranchExists = await git
 			.listRemote(['--heads', remote, branch])
-			.then(() => true)
+			.then((result) => result.trim().length > 0)
 			.catch(() => false)
 
 		if (remoteBranchExists) {

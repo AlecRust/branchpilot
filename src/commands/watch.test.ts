@@ -149,6 +149,7 @@ describe('watch', () => {
 	})
 
 	it('should setup file watcher for markdown files', async () => {
+		const path = await import('node:path')
 		const chokidar = await import('chokidar')
 		const { loadAllTickets } = await import('../utils/tickets.js')
 
@@ -168,7 +169,7 @@ describe('watch', () => {
 
 		// Verify watcher was created with correct patterns
 		expect(chokidar.watch).toHaveBeenCalledWith(
-			['tickets/**/*.md'],
+			[path.join('tickets', '**', '*.md')],
 			expect.objectContaining({
 				persistent: true,
 				ignoreInitial: true,

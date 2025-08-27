@@ -132,4 +132,22 @@ describe('CLI', () => {
 			expect(result.stdout).toContain('Initialize branchpilot in the current directory')
 		})
 	})
+
+	describe('npx execution', () => {
+		it('works with npx for version command', async () => {
+			const { stdout, exitCode } = await execa('npx', ['branchpilot', '--version'], {
+				env: { ...process.env, NODE_ENV: 'test' },
+			})
+			expect(exitCode).toBe(0)
+			expect(stdout).toMatch(/^\d+\.\d+\.\d+/)
+		})
+
+		it('works with npx for list command', async () => {
+			const { stdout, exitCode } = await execa('npx', ['branchpilot', 'list', '--dir', '/tmp'], {
+				env: { ...process.env, NODE_ENV: 'test' },
+			})
+			expect(exitCode).toBe(0)
+			expect(stdout).toContain('No tickets found')
+		})
+	})
 })

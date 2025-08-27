@@ -89,6 +89,10 @@ describe('run-once', () => {
 		}
 
 		vi.mocked(github.createOrUpdatePr).mockResolvedValue('https://github.com/owner/repo/pull/123')
+		vi.mocked(git.cleanupLocalBranch).mockResolvedValue(undefined)
+		vi.mocked(tickets.deleteTicketFile).mockResolvedValue(undefined)
+		vi.mocked(tickets.archiveTicketFile).mockResolvedValue(undefined)
+		vi.mocked(tickets.resolveArchiveDir).mockReturnValue('/home/testuser/tickets/processed')
 	}
 
 	describe('error handling', () => {
@@ -477,6 +481,59 @@ describe('run-once', () => {
 					branch: 'feature/no-rebase',
 				}),
 			)
+		})
+	})
+
+	describe('post-processing', () => {
+		it('deletes local branch when configured', async () => {
+			const ticket = createTicket({ deleteLocalBranch: true })
+			setupMocks({ tickets: [ticket] })
+
+			await run({})
+
+			expect(git.cleanupLocalBranch).toHaveBeenCalledOnce()
+			expect(git.cleanupLocalBranch).toHaveBeenCalledWith({
+				cwd: path.resolve('/repo'),
+				branch: 'feature/test',
+				fallbackBranch: 'main',
+			})
+		})
+
+		it('deletes ticket file when onProcessed=delete', async () => {
+			const ticket = createTicket({ onProcessed: 'delete' })
+			setupMocks({ tickets: [ticket] })
+
+			await run({})
+
+			expect(tickets.deleteTicketFile).toHaveBeenCalledOnce()
+			expect(tickets.deleteTicketFile).toHaveBeenCalledWith('/repo/tickets/ticket.md')
+		})
+
+		it('archives ticket file when onProcessed=archive', async () => {
+			const ticket = createTicket({ onProcessed: 'archive' })
+			setupMocks({ tickets: [ticket] })
+			vi.mocked(tickets.resolveArchiveDir).mockReturnValue('/home/testuser/tickets/processed')
+
+			await run({})
+
+			expect(tickets.archiveTicketFile).toHaveBeenCalledOnce()
+			expect(tickets.archiveTicketFile).toHaveBeenCalledWith(
+				'/repo/tickets/ticket.md',
+				'/home/testuser/tickets/processed',
+			)
+		})
+
+		it('continues processing even if cleanup fails', async () => {
+			const ticket1 = createTicket({ branch: 'feature/first', deleteLocalBranch: true })
+			const ticket2 = createTicket({ branch: 'feature/second', onProcessed: 'delete' })
+			setupMocks({ tickets: [ticket1, ticket2] })
+
+			vi.mocked(git.cleanupLocalBranch).mockRejectedValueOnce(new Error('Branch cleanup failed'))
+			vi.mocked(tickets.deleteTicketFile).mockRejectedValueOnce(new Error('Delete failed'))
+
+			await run({})
+
+			expect(github.createOrUpdatePr).toHaveBeenCalledTimes(2)
 		})
 	})
 })

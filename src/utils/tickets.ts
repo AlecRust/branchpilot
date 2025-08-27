@@ -30,6 +30,9 @@ const TicketFrontSchema = z.object({
 	repository: z.string().optional(),
 	draft: z.boolean().optional(),
 	autoMerge: z.boolean().optional(),
+	deleteLocalBranch: z.boolean().optional(),
+	onProcessed: z.enum(['delete', 'archive', 'keep']).optional(),
+	archiveDir: z.string().optional(),
 })
 
 export type TicketStatus = 'pending' | 'ready' | 'pr-exists' | 'merged' | 'invalid'
@@ -52,6 +55,9 @@ export interface LoadedTicket {
 	repository?: string
 	draft?: boolean
 	autoMerge?: boolean
+	deleteLocalBranch?: boolean
+	onProcessed?: 'delete' | 'archive' | 'keep'
+	archiveDir?: string
 
 	status: TicketStatus
 	dueUtcISO?: string
@@ -255,6 +261,9 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 				if (fm.data.repository) ticket.repository = fm.data.repository
 				if (fm.data.draft) ticket.draft = fm.data.draft
 				if (fm.data.autoMerge) ticket.autoMerge = fm.data.autoMerge
+				if (fm.data.deleteLocalBranch !== undefined) ticket.deleteLocalBranch = fm.data.deleteLocalBranch
+				if (fm.data.onProcessed) ticket.onProcessed = fm.data.onProcessed
+				if (fm.data.archiveDir) ticket.archiveDir = fm.data.archiveDir
 
 				tickets.push(ticket)
 			} catch (error) {
@@ -341,4 +350,29 @@ export async function loadTicketsForProcessing(
 ): Promise<LoadedTicket[]> {
 	const allTickets = await loadAllTickets(dirs, globalConfig, logger)
 	return allTickets.filter((t) => t.status === 'ready')
+}
+
+export async function deleteTicketFile(filePath: string): Promise<void> {
+	await fs.unlink(filePath)
+}
+
+export async function archiveTicketFile(filePath: string, archiveDir: string): Promise<void> {
+	await fs.mkdir(archiveDir, { recursive: true })
+
+	const baseName = path.basename(filePath)
+	const timestamp = Date.now()
+	const ext = path.extname(baseName)
+	const nameWithoutExt = path.basename(baseName, ext)
+	const destPath = path.join(archiveDir, `${nameWithoutExt}-${timestamp}${ext}`)
+
+	await fs.rename(filePath, destPath)
+}
+
+export function resolveArchiveDir(ticket: LoadedTicket, archiveDir: string): string {
+	if (archiveDir.startsWith('~') || path.isAbsolute(archiveDir)) {
+		return expandPath(archiveDir)
+	}
+
+	const ticketDir = path.dirname(ticket.file)
+	return path.resolve(ticketDir, archiveDir)
 }

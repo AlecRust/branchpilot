@@ -145,3 +145,19 @@ export async function pushBranch(opts: {
 		}
 	}
 }
+
+export async function cleanupLocalBranch(opts: {
+	cwd: string
+	branch: string
+	fallbackBranch?: string
+}): Promise<void> {
+	const git = simpleGit(opts.cwd)
+	const status = await git.status()
+
+	if (status.current === opts.branch) {
+		const targetBranch = opts.fallbackBranch ?? 'main'
+		await git.checkout(targetBranch)
+	}
+
+	await git.deleteLocalBranch(opts.branch, true)
+}

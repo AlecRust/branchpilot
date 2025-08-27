@@ -6,6 +6,7 @@ base: develop
 rebase: true
 labels: ["enhancement", "needs-review"]
 reviewers: ["alice", "bob"]
+deleteLocalBranch: true
 ---
 
 This example demonstrates automatic rebasing before creating a PR.

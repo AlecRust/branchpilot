@@ -4,6 +4,10 @@ title: Example draft PR for review
 when: 2025-08-10 16:00
 draft: true
 labels: ["wip", "draft"]
+reviewers: ["reviewer1", "reviewer2"]
+assignees: ["alice"]
+onProcessed: archive
+archiveDir: processed
 ---
 
 This example demonstrates creating a draft PR that isn't ready for final review.

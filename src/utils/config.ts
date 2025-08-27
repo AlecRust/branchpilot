@@ -14,6 +14,9 @@ const GlobalSchema = z.object({
 	pushMode: z.enum(['force-with-lease', 'ff-only', 'force']).optional(),
 	remote: z.string().optional(),
 	repo: z.string().optional(),
+	deleteLocalBranch: z.boolean().optional(),
+	onProcessed: z.enum(['delete', 'archive', 'keep']).optional(),
+	archiveDir: z.string().optional(),
 })
 
 export async function loadGlobalConfig(explicitPath?: string, logger?: Logger): Promise<GlobalConfig> {
@@ -40,6 +43,9 @@ export async function loadGlobalConfig(explicitPath?: string, logger?: Logger): 
 			if (validated.pushMode) result.pushMode = validated.pushMode
 			if (validated.remote) result.remote = validated.remote
 			if (validated.repo) result.repo = validated.repo
+			if (validated.deleteLocalBranch !== undefined) result.deleteLocalBranch = validated.deleteLocalBranch
+			if (validated.onProcessed) result.onProcessed = validated.onProcessed
+			if (validated.archiveDir) result.archiveDir = validated.archiveDir
 			return result
 		} catch (schemaError) {
 			if (logger) {
@@ -83,6 +89,9 @@ export async function loadRepoConfig(repoRoot: string, logger?: Logger): Promise
 			if (validated.pushMode) result.pushMode = validated.pushMode
 			if (validated.remote) result.remote = validated.remote
 			if (validated.repo) result.repo = validated.repo
+			if (validated.deleteLocalBranch !== undefined) result.deleteLocalBranch = validated.deleteLocalBranch
+			if (validated.onProcessed) result.onProcessed = validated.onProcessed
+			if (validated.archiveDir) result.archiveDir = validated.archiveDir
 			return result
 		} catch (schemaError) {
 			if (logger) {

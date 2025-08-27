@@ -44,6 +44,8 @@ branch: example/immediate-fix
 title: Fix critical typo in README
 when: "${oneMinuteAgo}"
 labels: ["bug", "documentation"]
+deleteLocalBranch: true
+onProcessed: delete
 ---
 
 # Fix critical typo in README
@@ -65,7 +67,10 @@ branch: feature/add-user-profile
 title: Add user profile page
 when: "${tomorrow10am}"
 base: ${base}
+rebase: true
 labels: ["enhancement", "frontend"]
+onProcessed: archive
+archiveDir: processed
 ---
 
 # Add user profile page
@@ -93,6 +98,9 @@ labels: ["performance", "backend", "database"]
 reviewers: ["teammate1", "teammate2"]
 assignees: ["self"]
 draft: true
+deleteLocalBranch: true
+onProcessed: archive
+archiveDir: processed
 ---
 
 # Optimize database queries

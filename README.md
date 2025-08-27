@@ -85,6 +85,9 @@ autoMerge: true              # Enable auto-merge on PR
 labels: ["bug", "urgent"]    # Set labels
 reviewers: ["alice"]         # Set reviewers
 assignees: ["bob"]           # Set assignees
+deleteLocalBranch: true      # Delete the local branch after PR creation
+onProcessed: archive         # What to do with the ticket file: keep | delete | archive
+archiveDir: processed        # Archive directory (relative to ticket file or absolute, defaults to "processed")
 ```
 
 ## `branchpilot` configuration
@@ -94,12 +97,18 @@ Global config at `~/.config/branchpilot.toml`:
 ```toml
 dirs = ["~/tickets"]         # Directories to scan
 defaultBase = "main"         # Default base branch
+deleteLocalBranch = true      # Delete local branches after PR creation
+onProcessed = "archive"       # keep | delete | archive
+archiveDir = "processed"      # Default archive dir for ticket files
 ```
 
 Repository config e.g. `~/projects/my-project/.branchpilot.toml`:
 
 ```toml
 defaultBase = "develop"      # Override global settings
+deleteLocalBranch = true
+onProcessed = "archive"
+archiveDir = "processed"
 ```
 
 ## Commands

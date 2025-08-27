@@ -1,11 +1,11 @@
 import path from 'node:path'
 import ora from 'ora'
 import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
-import { ensureGit, pushBranch } from '../utils/git.js'
+import { cleanupLocalBranch, ensureGit, pushBranch } from '../utils/git.js'
 import { createOrUpdatePr, ensureGh } from '../utils/github.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
-import { loadAllTickets } from '../utils/tickets.js'
+import { archiveTicketFile, deleteTicketFile, loadAllTickets, resolveArchiveDir } from '../utils/tickets.js'
 import type { PushMode, RepoConfig, RunOnceArgs } from '../utils/types.js'
 
 export async function run(args: RunOnceArgs): Promise<number> {
@@ -105,6 +105,44 @@ export async function run(args: RunOnceArgs): Promise<number> {
 			if (t.draft) prOpts.draft = t.draft
 			if (t.autoMerge) prOpts.autoMerge = t.autoMerge
 			const url = await createOrUpdatePr(prOpts)
+
+			// Clean up local branch if configured
+			const shouldDeleteBranch =
+				t.deleteLocalBranch ?? repoCfg.deleteLocalBranch ?? globalCfg.deleteLocalBranch ?? false
+
+			if (shouldDeleteBranch) {
+				try {
+					const fallbackBranch = t.base ?? repoCfg.defaultBase ?? globalCfg.defaultBase ?? 'main'
+					await cleanupLocalBranch({ cwd: repoRoot, branch: t.branch, fallbackBranch })
+					logger.debug(`[${ticketName}] Deleted local branch ${t.branch}`)
+				} catch (error) {
+					logger.warn(
+						`[${ticketName}] Failed to delete branch: ${error instanceof Error ? error.message : String(error)}`,
+					)
+				}
+			}
+
+			// Process ticket file if configured
+			const onProcessed = t.onProcessed ?? repoCfg.onProcessed ?? globalCfg.onProcessed ?? 'keep'
+
+			if (onProcessed !== 'keep') {
+				try {
+					if (onProcessed === 'delete') {
+						await deleteTicketFile(t.file)
+						logger.debug(`[${ticketName}] Deleted ticket file`)
+					} else if (onProcessed === 'archive') {
+						const archiveDirConfig = t.archiveDir ?? repoCfg.archiveDir ?? globalCfg.archiveDir ?? 'processed'
+						const archiveDir = resolveArchiveDir(t, archiveDirConfig)
+						await archiveTicketFile(t.file, archiveDir)
+						logger.debug(`[${ticketName}] Archived ticket file`)
+					}
+				} catch (error) {
+					logger.warn(
+						`[${ticketName}] Failed to process ticket file: ${error instanceof Error ? error.message : String(error)}`,
+					)
+				}
+			}
+
 			spinner.stop()
 			logger.success(`[${ticketName}] ${t.branch} - ${url}`)
 		} catch (e) {

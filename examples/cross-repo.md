@@ -4,6 +4,7 @@ title: Update dependency in other project
 when: 2025-08-12 12:00
 repository: ~/projects/other-project
 assignees: ["alice"]
+onProcessed: delete
 ---
 
 This example demonstrates creating a PR in a different repository.

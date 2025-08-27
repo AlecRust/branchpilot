@@ -5,8 +5,8 @@ import { loadGlobalConfig, loadRepoConfig } from '../utils/config.js'
 import { logger, setVerbose } from '../utils/logger.js'
 import { withSpinner } from '../utils/spinner.js'
 import { createBorderlessTable } from '../utils/table.js'
-import { type LoadedTicket, loadAllTickets, type TicketStatus } from '../utils/tickets.js'
-import type { GlobalConfig } from '../utils/types.js'
+import { loadAllTickets } from '../utils/tickets.js'
+import type { GlobalConfig, LoadedTicket, TicketStatus } from '../utils/types.js'
 
 type ListOptions = {
 	dirs?: string[]
@@ -78,7 +78,7 @@ function outputTickets(tickets: LoadedTicket[]): void {
 	}
 
 	const sorted = [...tickets].sort((a, b) => {
-		const statusDiff = statusOrder[a.status] - statusOrder[b.status]
+		const statusDiff = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0)
 		if (statusDiff !== 0) return statusDiff
 
 		if (a.daysUntilDue !== undefined && b.daysUntilDue !== undefined) {

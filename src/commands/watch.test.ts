@@ -1,161 +1,233 @@
+import type { FSWatcher } from 'chokidar'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import * as config from '../utils/config.js'
-import * as git from '../utils/git.js'
-import * as github from '../utils/github.js'
-import { logger } from '../utils/logger.js'
-import * as runModule from './run.js'
+import type { LoadedTicket } from '../utils/types.js'
 import { watch } from './watch.js'
 
-vi.mock('../utils/config.js')
-vi.mock('../utils/git.js')
-vi.mock('../utils/github.js')
+vi.mock('../utils/config.js', () => ({
+	loadGlobalConfig: vi.fn().mockResolvedValue({}),
+	loadRepoConfig: vi.fn().mockResolvedValue({}),
+}))
+
+vi.mock('../utils/git.js', () => ({
+	ensureGit: vi.fn().mockResolvedValue(undefined),
+}))
+
+vi.mock('../utils/github.js', () => ({
+	ensureGh: vi.fn().mockResolvedValue(undefined),
+}))
+
 vi.mock('../utils/logger.js', () => ({
 	logger: {
 		info: vi.fn(),
-		error: vi.fn(),
-		warn: vi.fn(),
 		debug: vi.fn(),
+		warn: vi.fn(),
+		error: vi.fn(),
 		success: vi.fn(),
 	},
 	setVerbose: vi.fn(),
 }))
-vi.mock('./run.js')
 
-describe('watch command', () => {
+vi.mock('../utils/spinner.js', () => ({
+	withSpinner: vi.fn(async (fn) => fn()),
+}))
+
+vi.mock('../utils/tickets.js', () => ({
+	loadAllTickets: vi.fn(),
+}))
+
+vi.mock('./run.js', () => ({
+	run: vi.fn(),
+}))
+
+vi.mock('chokidar', () => ({
+	watch: vi.fn(() => ({
+		on: vi.fn(),
+		close: vi.fn(),
+	})),
+}))
+
+describe('watch', () => {
+	let originalExit: typeof process.exit
+	let exitMock: ReturnType<typeof vi.fn>
+
 	beforeEach(() => {
-		vi.resetAllMocks()
-		vi.clearAllTimers()
-		vi.useFakeTimers()
-
-		vi.mocked(config.loadGlobalConfig).mockResolvedValue({})
-		vi.mocked(config.loadRepoConfig).mockResolvedValue({})
-		vi.mocked(git.ensureGit).mockResolvedValue('git')
-		vi.mocked(github.ensureGh).mockResolvedValue('gh')
-		vi.mocked(runModule.run).mockResolvedValue(0)
+		vi.clearAllMocks()
+		originalExit = process.exit
+		exitMock = vi.fn()
+		// @ts-expect-error - mocking process.exit for testing
+		process.exit = exitMock
 	})
 
 	afterEach(() => {
-		vi.useRealTimers()
+		process.exit = originalExit
 	})
 
-	it('should validate interval format', async () => {
-		await expect(
-			watch({
-				interval: 'invalid',
-				once: true,
-			}),
-		).rejects.toThrow('Invalid interval: invalid')
+	it('should handle missing tools gracefully', async () => {
+		const { ensureGit } = await import('../utils/git.js')
+		vi.mocked(ensureGit).mockRejectedValueOnce(new Error('git not found'))
 
-		await expect(
-			watch({
-				interval: '30s',
-				once: true,
-			}),
-		).rejects.toThrow('Invalid interval: 30s. Minimum interval is 1m')
+		const promise = watch({ verbose: false })
+
+		await expect(promise).rejects.toThrow('git not found')
 	})
 
-	it('should accept valid interval formats', async () => {
-		const validIntervals = ['1m', '5m', '1h', '1d']
+	it('should process overdue tickets immediately on startup', async () => {
+		const { loadAllTickets } = await import('../utils/tickets.js')
+		const { run } = await import('./run.js')
 
-		for (const interval of validIntervals) {
-			vi.clearAllMocks()
-			await watch({
-				interval,
-				once: true,
-			})
+		vi.mocked(loadAllTickets).mockResolvedValueOnce([
+			{
+				file: 'test.md',
+				relativePath: 'test.md',
+				branch: 'test-branch',
+				when: '2024-01-01',
+				status: 'ready' as const,
+				isDue: true,
+				daysUntilDue: -1,
+			} as LoadedTicket,
+		])
 
-			expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('every'))
-		}
-	})
+		vi.mocked(run).mockResolvedValueOnce(0)
 
-	it('should use default interval of 15m when not specified', async () => {
-		await watch({
-			once: true,
-		})
+		// Mock subsequent calls to loadAllTickets to prevent errors
+		vi.mocked(loadAllTickets).mockResolvedValue([])
 
-		expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('every 15 minutes'))
-	})
+		// Start the command in the background
+		const promise = watch({ verbose: false })
 
-	it('should use configured directories', async () => {
-		const dirs = ['src', 'docs']
+		// Wait a bit for initial processing
+		await new Promise((resolve) => setTimeout(resolve, 100))
 
-		await watch({
-			dirs,
-			once: true,
-		})
-
-		expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('src, docs'))
-		expect(runModule.run).toHaveBeenCalledWith({
-			dirs,
+		// Verify run was called
+		expect(run).toHaveBeenCalledWith({
+			dirs: ['.'],
 			verbose: false,
 		})
+
+		// Clean up by triggering shutdown
+		process.emit('SIGINT', 'SIGINT')
+
+		// Wait for promise to settle
+		await Promise.race([promise.catch(() => {}), new Promise((resolve) => setTimeout(resolve, 100))])
 	})
 
-	it('should use directories from config when not specified', async () => {
-		vi.mocked(config.loadRepoConfig).mockResolvedValue({
-			dirs: ['config-dir'],
-		})
+	it('should schedule future tickets with a timer', async () => {
+		const { loadAllTickets } = await import('../utils/tickets.js')
 
-		await watch({
-			once: true,
-		})
+		const futureDate = new Date()
+		futureDate.setHours(futureDate.getHours() + 1)
 
-		expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('config-dir'))
+		vi.mocked(loadAllTickets).mockResolvedValue([
+			{
+				file: 'test.md',
+				relativePath: 'test.md',
+				branch: 'test-branch',
+				when: futureDate.toISOString(),
+				dueUtcISO: futureDate.toISOString(),
+				status: 'pending' as const,
+				isDue: false,
+				daysUntilDue: 0,
+			} as LoadedTicket,
+		])
+
+		const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+
+		// Start the command in the background
+		const promise = watch({ verbose: false })
+
+		// Wait a bit for initial processing
+		await new Promise((resolve) => setTimeout(resolve, 100))
+
+		// Verify setTimeout was called for scheduling
+		expect(setTimeoutSpy).toHaveBeenCalled()
+
+		// Clean up
+		process.emit('SIGINT', 'SIGINT')
+		await Promise.race([promise.catch(() => {}), new Promise((resolve) => setTimeout(resolve, 100))])
+
+		setTimeoutSpy.mockRestore()
 	})
 
-	it('should handle run errors gracefully', async () => {
-		vi.mocked(runModule.run).mockResolvedValue(1)
+	it('should setup file watcher for markdown files', async () => {
+		const chokidar = await import('chokidar')
+		const { loadAllTickets } = await import('../utils/tickets.js')
 
-		await watch({
-			once: true,
-		})
+		vi.mocked(loadAllTickets).mockResolvedValue([])
 
-		expect(logger.warn).toHaveBeenCalledWith('Processing completed with errors')
-	})
+		const watchMock = {
+			on: vi.fn().mockReturnThis(),
+			close: vi.fn(),
+		} as unknown as FSWatcher
+		vi.mocked(chokidar.watch).mockReturnValue(watchMock)
 
-	it('should handle run exceptions gracefully', async () => {
-		vi.mocked(runModule.run).mockRejectedValue(new Error('Test error'))
+		// Start the command
+		const promise = watch({ dirs: ['tickets'], verbose: false })
 
-		await watch({
-			once: true,
-		})
+		// Wait for initialization
+		await new Promise((resolve) => setTimeout(resolve, 100))
 
-		expect(logger.error).toHaveBeenCalledWith('Watch cycle error: Test error')
-	})
-
-	it('should exit after one cycle in test mode', async () => {
-		await watch({
-			once: true,
-		})
-
-		expect(runModule.run).toHaveBeenCalledTimes(1)
-		expect(logger.debug).toHaveBeenCalledWith('Exiting after one cycle (test mode)')
-	})
-
-	it('should fail if required tools are missing', async () => {
-		vi.mocked(git.ensureGit).mockRejectedValue(new Error('git not found'))
-
-		await expect(
-			watch({
-				once: true,
+		// Verify watcher was created with correct patterns
+		expect(chokidar.watch).toHaveBeenCalledWith(
+			['tickets/**/*.md'],
+			expect.objectContaining({
+				persistent: true,
+				ignoreInitial: true,
 			}),
-		).rejects.toThrow('git not found')
+		)
 
-		expect(logger.error).toHaveBeenCalledWith('Tools missing: git not found')
+		// Verify event handlers were registered
+		expect(watchMock.on).toHaveBeenCalledWith('add', expect.any(Function))
+		expect(watchMock.on).toHaveBeenCalledWith('change', expect.any(Function))
+		expect(watchMock.on).toHaveBeenCalledWith('unlink', expect.any(Function))
+		expect(watchMock.on).toHaveBeenCalledWith('error', expect.any(Function))
+
+		// Clean up
+		process.emit('SIGINT', 'SIGINT')
+		await Promise.race([promise.catch(() => {}), new Promise((resolve) => setTimeout(resolve, 100))])
 	})
 
-	it('should enable verbose mode when specified', async () => {
-		const { setVerbose } = await import('../utils/logger.js')
+	it('should setup safety rescan interval', async () => {
+		const { loadAllTickets } = await import('../utils/tickets.js')
+		vi.mocked(loadAllTickets).mockResolvedValue([])
 
-		await watch({
-			verbose: true,
-			once: true,
-		})
+		const setIntervalSpy = vi.spyOn(globalThis, 'setInterval')
 
-		expect(setVerbose).toHaveBeenCalledWith(true)
-		expect(runModule.run).toHaveBeenCalledWith({
-			dirs: ['.'],
-			verbose: true,
-		})
+		// Start the command
+		const promise = watch({ verbose: false })
+
+		// Wait for initialization
+		await new Promise((resolve) => setTimeout(resolve, 100))
+
+		// Verify setInterval was called for safety rescan
+		expect(setIntervalSpy).toHaveBeenCalledWith(
+			expect.any(Function),
+			3600000, // 1 hour
+		)
+
+		// Clean up
+		process.emit('SIGINT', 'SIGINT')
+		await Promise.race([promise.catch(() => {}), new Promise((resolve) => setTimeout(resolve, 100))])
+
+		setIntervalSpy.mockRestore()
+	})
+
+	it('should handle SIGINT gracefully', async () => {
+		const { loadAllTickets } = await import('../utils/tickets.js')
+		vi.mocked(loadAllTickets).mockResolvedValue([])
+
+		// Start the command
+		watch({ verbose: false })
+
+		// Wait for initialization
+		await new Promise((resolve) => setTimeout(resolve, 100))
+
+		// Send SIGINT
+		process.emit('SIGINT', 'SIGINT')
+
+		// Wait a bit
+		await new Promise((resolve) => setTimeout(resolve, 100))
+
+		// Verify exit was called
+		expect(exitMock).toHaveBeenCalledWith(0)
 	})
 })

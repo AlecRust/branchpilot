@@ -96,23 +96,9 @@ describe('CLI', () => {
 		const result = await runCLI(['watch', '--help'])
 
 		expect(result.code).toBe(0)
-		expect(result.stdout).toContain('Watch directories and process tickets on an interval')
-		expect(result.stdout).toContain('--interval')
+		expect(result.stdout).toContain('Start file watcher to process tickets immediately when due')
 		expect(result.stdout).toContain('--dir')
-	})
-
-	it('watch command validates interval', async () => {
-		const result = await runCLI(['watch', '--interval', 'invalid'])
-
-		expect(result.code).toBe(1)
-		expect(result.stderr).toContain('Invalid interval: invalid')
-	})
-
-	it('watch command enforces minimum interval', async () => {
-		const result = await runCLI(['watch', '--interval', '30s'])
-
-		expect(result.code).toBe(1)
-		expect(result.stderr).toContain('Minimum interval is 1m')
+		expect(result.stdout).toContain('--verbose')
 	})
 
 	describe('Aliases', () => {

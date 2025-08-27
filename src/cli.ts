@@ -97,9 +97,8 @@ program
 
 program
 	.command('watch')
-	.description('Watch directories and process tickets on an interval')
+	.description('Start file watcher to process tickets immediately when due')
 	.option('-d, --dir <directories...>', 'Directories to scan for tickets (defaults to current directory)')
-	.option('-i, --interval <interval>', 'Check interval (e.g., "5m", "1h", "30s") (default: "15m")')
 	.option('-v, --verbose', 'Show detailed output')
 	.action(async (options) => {
 		try {
@@ -107,7 +106,6 @@ program
 
 			await watch({
 				dirs: options.dir,
-				interval: options.interval,
 				verbose: options.verbose ?? false,
 			})
 			process.exitCode = 0

@@ -48,22 +48,22 @@ Use the `run` command to process all tickets once on demand:
 branchpilot run
 ```
 
-Or use the `watch` command to monitor tickets at an interval:
+Use the `watch` command for continuous monitoring:
 
 ```bash
 branchpilot watch
 ```
 
-A PR will be opened during execution if the `when` timestamp is in the past.
+A PR will be opened during execution if the `when` timestamp is reached.
 
 Configure the tickets directories to scan using config files or flags as documented.
 
 ## Daemon
 
-To run the process in the background use a process manager like [PM2](https://pm2.keymetrics.io/) with the `watch` command:
+To run the process in the background, use a process manager like [PM2](https://pm2.keymetrics.io/):
 
 ```bash
-pm2 start branchpilot -- watch --interval 30m --verbose
+pm2 start branchpilot -- watch --verbose
 ```
 
 A built-in daemon command may be added in the future, but PM2 or similar should work well.
@@ -122,10 +122,9 @@ Process tickets in configured directories and create any due PRs.
 
 ### `branchpilot watch`
 
-Watch directories and automatically process tickets on an interval.
+Start file watcher to process tickets immediately when due.
 
 - `--dir <path>` — Scan specific directories
-- `--interval <time>` — Check interval (e.g. `1h`, default `15m`)
 - `--verbose` — Show detailed output
 
 ### `branchpilot list`

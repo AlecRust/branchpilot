@@ -10,7 +10,7 @@ import { getGitRoot, hasUnmergedCommits, isBranchMerged, isGitRepository } from 
 import { getDefaultBranch, gh } from './github.js'
 import type { logger } from './logger.js'
 import { expandPath } from './paths.js'
-import type { GlobalConfig, PushMode, RepoConfig } from './types.js'
+import type { GlobalConfig, LoadedTicket, RepoConfig } from './types.js'
 
 type Logger = typeof logger
 
@@ -34,38 +34,6 @@ const TicketFrontSchema = z.object({
 	onProcessed: z.enum(['delete', 'archive', 'keep']).optional(),
 	archiveDir: z.string().optional(),
 })
-
-export type TicketStatus = 'pending' | 'ready' | 'pr-exists' | 'merged' | 'invalid'
-
-export interface LoadedTicket {
-	file: string
-	relativePath: string
-	branch: string
-	when: string
-	title?: string
-	body?: string
-
-	timezone?: string
-	base?: string
-	rebase?: boolean
-	pushMode?: PushMode
-	labels?: string[]
-	reviewers?: string[]
-	assignees?: string[]
-	repository?: string
-	draft?: boolean
-	autoMerge?: boolean
-	deleteLocalBranch?: boolean
-	onProcessed?: 'delete' | 'archive' | 'keep'
-	archiveDir?: string
-
-	status: TicketStatus
-	dueUtcISO?: string
-	isDue: boolean
-	daysUntilDue?: number
-	error?: string
-	repoRoot?: string
-}
 
 /**
  * Parse a date string to UTC ISO format

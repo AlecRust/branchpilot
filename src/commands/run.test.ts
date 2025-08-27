@@ -7,8 +7,8 @@ import * as config from '../utils/config.js'
 import * as git from '../utils/git.js'
 import * as github from '../utils/github.js'
 import { logger } from '../utils/logger.js'
-import type { LoadedTicket } from '../utils/tickets.js'
 import * as tickets from '../utils/tickets.js'
+import type { LoadedTicket } from '../utils/types.js'
 import { run } from './run.js'
 
 vi.mock('node:fs')

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0] - 2025-08-27
+
+### 🚀 Features
+
+- Add post-processing options ([`74faaff`](https://github.com/AlecRust/branchpilot/commit/74faaff8f1d4e597f9efc515cce9a4f546c4e76f))
+
+### 🐛 Bug Fixes
+
+- Update all non-major dependencies (#7) ([`35e4557`](https://github.com/AlecRust/branchpilot/commit/35e4557fc6452a06d6afc770797756d328a65233))
+
+### 🚜 Refactor
+
+- Refactor watch command to be more advanced ([`e3a54ec`](https://github.com/AlecRust/branchpilot/commit/e3a54ec1c74a66bdb5c567f00d20f8ad782269a9))
+
 ## [0.8.4] - 2025-08-18
 
 ### 🐛 Bug Fixes

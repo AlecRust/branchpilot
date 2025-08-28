@@ -1,6 +1,8 @@
 # branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![CodeQL](https://github.com/AlecRust/branchpilot/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/github-code-scanning/codeql) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
 
-CLI tool for scheduling Pull Requests from local Git branches.
+> PRs on autopilot, powered by Markdown
+
+`branchpilot` is a CLI tool for scheduling Pull Requests from local Git branches.
 
 ## Install
 
@@ -76,7 +78,7 @@ These are all the PR configuration options you have in ticket Markdown files.
 when: 2025-01-15 09:00       # (required) When to open the PR (various formats supported)
 branch: fix-typo             # (required) Branch name to create PR from
 title: Example PR title      # Title of the PR
-timezone: America/New_York   # Timezone for dates without offsets (defaults to system)
+timezone: America/New_York   # Timezone used when 'when' has no offset (defaults to system)
 repository: ~/projects/repo  # Path to target repo for PRs (defaults to current repo)
 base: develop                # Base branch (auto-detected if omitted)
 rebase: true                 # Rebase against base branch before pushing

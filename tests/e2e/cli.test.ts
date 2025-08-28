@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execa } from 'execa'
@@ -135,19 +136,20 @@ describe('CLI', () => {
 
 	describe('npx execution', () => {
 		it('works with npx for version command', async () => {
-			const { stdout, exitCode } = await execa('npx', ['branchpilot', '--version'], {
+			const { stdout, exitCode } = await execa('npx', ['--yes', 'branchpilot', '--version'], {
 				env: { ...process.env, NODE_ENV: 'test' },
 			})
 			expect(exitCode).toBe(0)
 			expect(stdout).toMatch(/^\d+\.\d+\.\d+/)
-		})
+		}, 20000)
 
 		it('works with npx for list command', async () => {
-			const { stdout, exitCode } = await execa('npx', ['branchpilot', 'list', '--dir', '/tmp'], {
+			const tempDir = os.tmpdir()
+			const { stdout, exitCode } = await execa('npx', ['--yes', 'branchpilot', 'list', '--dir', tempDir], {
 				env: { ...process.env, NODE_ENV: 'test' },
 			})
 			expect(exitCode).toBe(0)
 			expect(stdout).toContain('No tickets found')
-		})
+		}, 20000)
 	})
 })

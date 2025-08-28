@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.9.1] - 2025-08-28
+
+### 🐛 Bug Fixes
+
+- Update dependency zod to ^4.1.4 (#8) ([`c338d62`](https://github.com/AlecRust/branchpilot/commit/c338d62de686d73c93ec68fccf350ddfa7bf9904))
+
+### 💼 Other
+
+- Fix Knip failing due to npx usage ([`99c4db3`](https://github.com/AlecRust/branchpilot/commit/99c4db370e6002cd92747985345e920bee2f9ec6))
+
+### 📚 Documentation
+
+- Improve main description ([`7def32e`](https://github.com/AlecRust/branchpilot/commit/7def32ec8669ff1bcc95eedc663dd585f7ba52df))
+
+### 🧪 Testing
+
+- Add E2E test that uses npx ([`4787621`](https://github.com/AlecRust/branchpilot/commit/47876219ac1a475c7ea62075be5c35e26da91b6a))
+
+### ⚙️ Miscellaneous Tasks
+
+- Fix windows tests ([`6c0470c`](https://github.com/AlecRust/branchpilot/commit/6c0470cf929d1ba7e0fb16341b2172893239c0c4))
+
 ## [0.9.0] - 2025-08-27
 
 ### 🚀 Features

@@ -1,6 +1,6 @@
 {
 	"name": "branchpilot",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"author": "Alec Rust",
 	"license": "MIT",
 	"description": "CLI tool for scheduling Pull Requests from local Git branches.",

@@ -1,6 +1,6 @@
 # branchpilot [![CI](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/ci.yml) [![CodeQL](https://github.com/AlecRust/branchpilot/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/AlecRust/branchpilot/actions/workflows/github-code-scanning/codeql) [![npm version](https://img.shields.io/npm/v/branchpilot.svg)](https://www.npmjs.com/package/branchpilot)
 
-Automate Pull Request creation from local Git branches using Markdown files.
+CLI tool for scheduling Pull Requests from local Git branches.
 
 ## Install
 
@@ -66,7 +66,7 @@ To run the process in the background, use a process manager like [PM2](https://p
 pm2 start branchpilot -- watch --verbose
 ```
 
-A built-in daemon command may be added in the future, but PM2 or similar should work well.
+A built-in daemon mode may be added in the future, but PM2 or similar should work well.
 
 ## Ticket configuration
 

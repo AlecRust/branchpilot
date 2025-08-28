@@ -3,7 +3,7 @@
 	"version": "0.9.0",
 	"author": "Alec Rust",
 	"license": "MIT",
-	"description": "Automate Pull Request creation from local Git branches using Markdown files.",
+	"description": "CLI tool for scheduling Pull Requests from local Git branches.",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/AlecRust/branchpilot.git"

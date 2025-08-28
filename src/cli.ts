@@ -13,7 +13,7 @@ const program = new Command()
 
 program
 	.name('branchpilot')
-	.description('Automate Pull Request creation from local Git branches using Markdown files.')
+	.description('CLI tool for scheduling Pull Requests from local Git branches.')
 	.version(version)
 	.showHelpAfterError('(add --help for additional information)')
 

@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import fsp from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,10 +8,21 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cliPath = path.join(__dirname, '../../dist/cli.mjs')
+let tarballPath: string | null = null
+let packTmpDir: string | null = null
 
 beforeAll(async () => {
-	if (!existsSync(cliPath)) {
-		await execa('npm', ['run', 'build'], { cwd: path.join(__dirname, '../..') })
+	await execa('npm', ['run', 'build'], { cwd: path.join(__dirname, '../..') })
+	packTmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'branchpilot-pack-'))
+	const { stdout: packOut } = await execa('npm', ['pack', '--silent', path.join(__dirname, '../..')], {
+		cwd: packTmpDir,
+	})
+	tarballPath = path.join(packTmpDir, packOut.trim())
+})
+
+afterAll(async () => {
+	if (packTmpDir) {
+		await fsp.rm(packTmpDir, { recursive: true, force: true })
 	}
 })
 
@@ -136,7 +147,8 @@ describe('CLI', () => {
 
 	describe('npx execution', () => {
 		it('works with npx for version command', async () => {
-			const { stdout, exitCode } = await execa('npx', ['--yes', 'branchpilot', '--version'], {
+			const pkgArg = tarballPath ?? 'branchpilot'
+			const { stdout, exitCode } = await execa('npx', ['--yes', '--package', pkgArg, 'branchpilot', '--version'], {
 				env: { ...process.env, NODE_ENV: 'test' },
 			})
 			expect(exitCode).toBe(0)
@@ -145,9 +157,14 @@ describe('CLI', () => {
 
 		it('works with npx for list command', async () => {
 			const tempDir = os.tmpdir()
-			const { stdout, exitCode } = await execa('npx', ['--yes', 'branchpilot', 'list', '--dir', tempDir], {
-				env: { ...process.env, NODE_ENV: 'test' },
-			})
+			const pkgArg = tarballPath ?? 'branchpilot'
+			const { stdout, exitCode } = await execa(
+				'npx',
+				['--yes', '--package', pkgArg, 'branchpilot', 'list', '--dir', tempDir],
+				{
+					env: { ...process.env, NODE_ENV: 'test' },
+				},
+			)
 			expect(exitCode).toBe(0)
 			expect(stdout).toContain('No tickets found')
 		}, 20000)

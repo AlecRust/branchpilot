@@ -101,6 +101,28 @@ This is a draft PR`)
 			expect(tickets[1]?.error).toContain('Missing required fields: branch')
 		})
 
+		it('skips non-ticket markdown files and unrelated frontmatter', async () => {
+			mockReaddir(['note.md', 'ticket.md', 'just-frontmatter.md'])
+			vi.mocked(fs.readFile)
+				// note.md: no frontmatter -> should be ignored
+				.mockResolvedValueOnce('This is a plain markdown note without frontmatter')
+				// ticket.md: valid ticket -> should be included
+				.mockResolvedValueOnce(`---\nbranch: feature/ok\nwhen: "2024-01-01T00:00:00"\n---\nBody`)
+				// just-frontmatter.md: has frontmatter but neither branch nor when -> should be ignored
+				.mockResolvedValueOnce(`---\ntitle: Just a document\nauthor: Someone\n---\nSome content`)
+
+			vi.mocked(git.getGitRoot).mockResolvedValue('/repo')
+			vi.mocked(config.loadRepoConfig).mockResolvedValue({})
+			vi.mocked(github.gh).mockResolvedValue('[]')
+			vi.mocked(github.getDefaultBranch).mockResolvedValue('main')
+			vi.mocked(git.hasUnmergedCommits).mockResolvedValue(true)
+
+			const tickets = await loadAllTickets(['/test/dir'], {}, logger)
+			expect(tickets).toHaveLength(1)
+			expect(tickets[0]?.branch).toBe('feature/ok')
+			expect(tickets[0]?.status === 'ready' || tickets[0]?.status === 'pending').toBe(true)
+		})
+
 		it('handles tickets without title and body', async () => {
 			mockReaddir(['minimal.md'])
 			vi.mocked(fs.readFile).mockResolvedValueOnce(`---

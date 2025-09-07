@@ -9,8 +9,6 @@ const config: KnipConfig = {
 	ignoreBinaries: [
 		// Used for GitHub operations
 		'gh',
-		// Self-reference used in E2E tests
-		'branchpilot',
 	],
 }
 

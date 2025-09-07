@@ -150,13 +150,20 @@ async function loadTicketsFromDirectory(dir: string, baseDir: string, logger: Lo
 
 			try {
 				const raw = await fs.readFile(file, 'utf8')
+				const hasFrontmatter = raw.trimStart().startsWith('---')
+				if (!hasFrontmatter) {
+					continue
+				}
 				const parsed = matter(raw)
+				const data = parsed.data || {}
+				if (!data.branch && !data.when) {
+					continue
+				}
+
 				const fm = TicketFrontSchema.safeParse(parsed.data)
 
 				if (!fm.success) {
 					const missingFields: string[] = []
-					const data = parsed.data || {}
-
 					if (!data.branch) missingFields.push('branch')
 					if (!data.when) missingFields.push('when')
 

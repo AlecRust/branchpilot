@@ -78,20 +78,22 @@ export async function run(args: RunOnceArgs): Promise<number> {
 
 		try {
 			spinner.text = `Pushing branch ${t.branch}...`
+			const branchBase = t.base ?? repoCfg.defaultBase ?? globalCfg.defaultBase ?? 'main'
+
 			const pushOpts: Parameters<typeof pushBranch>[0] = {
 				cwd: repoRoot,
 				branch: t.branch,
 				remote,
 				pushMode,
 			}
-			if (t.rebase && t.base) {
-				pushOpts.base = t.base
-				pushOpts.rebase = t.rebase
+			if (t.rebase) {
+				pushOpts.base = branchBase
+				pushOpts.rebase = true
 			}
 			await pushBranch(pushOpts)
 
 			spinner.text = `Creating PR for ${t.branch}...`
-			const prBase = t.base ?? repoCfg.defaultBase ?? globalCfg.defaultBase ?? 'main'
+			const prBase = branchBase
 			const prOpts: Parameters<typeof createOrUpdatePr>[0] = {
 				cwd: repoRoot,
 				branch: t.branch,

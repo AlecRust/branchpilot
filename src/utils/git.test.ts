@@ -1,7 +1,7 @@
 import { simpleGit } from 'simple-git'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import which from 'which'
-import { ensureGit, getCurrentBranch, getGitRoot, hasUncommittedChanges, isGitRepository } from './git.js'
+import { ensureGit, getCurrentBranch, getGitRoot, hasUncommittedChanges, isGitRepository, pushBranch } from './git.js'
 
 vi.mock('simple-git')
 vi.mock('which')
@@ -122,6 +122,53 @@ describe('git', () => {
 			const result = await hasUncommittedChanges('/repo')
 
 			expect(result).toBe(true)
+		})
+	})
+
+	describe('pushBranch rebase behavior', () => {
+		it('uses forced replay rebase to reset timestamps', async () => {
+			// Arrange
+			// Working tree clean -> no stash
+			mockGit.status.mockResolvedValue({ files: [] })
+			// No remote branch exists
+			mockGit.listRemote.mockResolvedValue('')
+			// Base fetch ok
+			mockGit.fetch.mockResolvedValue(undefined)
+			mockGit.checkout.mockResolvedValue(undefined)
+			mockGit.merge.mockResolvedValue(undefined)
+			mockGit.rebase.mockResolvedValue(undefined)
+			mockGit.push.mockResolvedValue(undefined)
+			mockGit.revparse.mockResolvedValue('original-branch')
+
+			// Act
+			await pushBranch({
+				cwd: '/repo',
+				branch: 'feature/test',
+				remote: 'origin',
+				pushMode: 'force-with-lease',
+				base: 'main',
+				rebase: true,
+			})
+
+			// Assert - rebase should be called with --onto <base> <base>
+			expect(mockGit.rebase).toHaveBeenCalledWith(['--onto', 'origin/main', 'origin/main'])
+		})
+
+		it('does nothing when rebase not requested', async () => {
+			mockGit.status.mockResolvedValue({ files: [] })
+			mockGit.listRemote.mockResolvedValue('')
+			mockGit.checkout.mockResolvedValue(undefined)
+			mockGit.push.mockResolvedValue(undefined)
+			mockGit.revparse.mockResolvedValue('original-branch')
+
+			await pushBranch({
+				cwd: '/repo',
+				branch: 'feature/test',
+				remote: 'origin',
+				pushMode: 'force-with-lease',
+			})
+
+			expect(mockGit.rebase).not.toHaveBeenCalled()
 		})
 	})
 })

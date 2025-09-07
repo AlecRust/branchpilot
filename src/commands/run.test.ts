@@ -407,6 +407,25 @@ describe('run-once', () => {
 	})
 
 	describe('rebase behavior', () => {
+		it('rebases using default base when base omitted', async () => {
+			const ticketWithRebase = createTicket({ rebase: true })
+			// Remove base to simulate omission
+			delete (ticketWithRebase as unknown as { base?: string }).base
+
+			setupMocks({
+				globalConfig: { defaultBase: 'develop' },
+				tickets: [ticketWithRebase],
+			})
+
+			await run({})
+
+			expect(git.pushBranch).toHaveBeenCalledWith(
+				expect.objectContaining({
+					base: 'develop',
+					rebase: true,
+				}),
+			)
+		})
 		it('only rebases when rebase is true', async () => {
 			const ticketWithRebase = createTicket({
 				base: 'develop',

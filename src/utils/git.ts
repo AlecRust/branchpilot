@@ -118,9 +118,12 @@ export async function pushBranch(opts: {
 			await git.merge([`${remote}/${branch}`, '--ff-only'])
 		}
 
+		// If rebase is requested, always rewrite the branch's commits relative to base
+		// so that commit timestamps are refreshed even when upstream hasn't moved.
 		if (opts.rebase && opts.base) {
 			await git.fetch(remote, opts.base)
-			await git.rebase([`${remote}/${opts.base}`])
+			const baseRef = `${remote}/${opts.base}`
+			await git.rebase(['--onto', baseRef, baseRef])
 		}
 
 		const pushOptions: string[] = []

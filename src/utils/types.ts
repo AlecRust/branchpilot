@@ -7,7 +7,7 @@ export type GlobalConfig = {
 	defaultBase?: string
 	pushMode?: PushMode
 	remote?: string
-	repo?: string // optional explicit owner/name for gh
+	repo?: string
 	deleteLocalBranch?: boolean
 	onProcessed?: OnProcessed
 	archiveDir?: string
@@ -16,7 +16,7 @@ export type GlobalConfig = {
 export type RepoConfig = Partial<GlobalConfig>
 
 export type RunOnceArgs = {
-	dirs?: string[] // Override directories (from --dir flag)
+	dirs?: string[]
 	configPath?: string
 	verbose?: boolean
 }

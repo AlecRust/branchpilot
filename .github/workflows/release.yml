@@ -29,7 +29,6 @@ jobs:
         with:
           node-version: "lts/*"
           registry-url: "https://registry.npmjs.org"
-          cache: "npm"
 
       - name: Install Node packages
         run: npm ci

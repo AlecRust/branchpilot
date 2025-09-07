@@ -15,7 +15,6 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "lts/*"
-          cache: npm
 
       - name: Install Node packages
         run: npm ci

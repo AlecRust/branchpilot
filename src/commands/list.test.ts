@@ -396,4 +396,50 @@ Body`,
 			expect(output).toContain('07:30')
 		}
 	})
+
+	it('orders same-day pending tickets by exact time', async () => {
+		const base = new Date()
+		base.setHours(10, 0, 0, 0) // 10:00 today
+
+		const t1 = new Date(base.getTime()) // 10:00
+		const t2 = new Date(base.getTime())
+		t2.setHours(15, 0, 0, 0) // 15:00
+
+		await fs.writeFile(
+			'pending-early.md',
+			`---
+branch: pending-early
+title: Pending early
+when: ${t1.toISOString()}
+---
+Body`,
+		)
+
+		await fs.writeFile(
+			'pending-late.md',
+			`---
+branch: pending-late
+title: Pending late
+when: ${t2.toISOString()}
+---
+Body`,
+		)
+
+		await list({ dirs: ['.'] })
+
+		const allCalls = [
+			...loggerSuccessSpy.mock.calls.map((c) => c[0]),
+			...loggerWarnSpy.mock.calls.map((c) => c[0]),
+			...loggerInfoSpy.mock.calls.map((c) => c[0]),
+			...loggerErrorSpy.mock.calls.map((c) => c[0]),
+			...consoleLogSpy.mock.calls.map((c) => c[0]),
+		]
+		const output = allCalls.join('\n')
+
+		const earlyIdx = output.indexOf('pending-early')
+		const lateIdx = output.indexOf('pending-late')
+		expect(earlyIdx).toBeGreaterThan(-1)
+		expect(lateIdx).toBeGreaterThan(-1)
+		expect(earlyIdx).toBeLessThan(lateIdx)
+	})
 })

@@ -81,10 +81,23 @@ function outputTickets(tickets: LoadedTicket[]): void {
 		const statusDiff = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0)
 		if (statusDiff !== 0) return statusDiff
 
-		if (a.daysUntilDue !== undefined && b.daysUntilDue !== undefined) {
-			return a.daysUntilDue - b.daysUntilDue
+		// Within the same status, sort by exact due time (earliest first)
+		const aHasDue = Boolean(a.dueUtcISO)
+		const bHasDue = Boolean(b.dueUtcISO)
+		if (a.dueUtcISO && b.dueUtcISO) {
+			const aTime = parseISO(a.dueUtcISO).getTime()
+			const bTime = parseISO(b.dueUtcISO).getTime()
+			if (aTime !== bTime) return aTime - bTime
+		} else if (aHasDue !== bHasDue) {
+			// Prefer tickets with a known due time
+			return aHasDue ? -1 : 1
 		}
-		return 0
+
+		// Final deterministic fallback: repo name then branch
+		const aRepo = a.repoRoot ? path.basename(a.repoRoot) : getTicketIdentifier(a)
+		const bRepo = b.repoRoot ? path.basename(b.repoRoot) : getTicketIdentifier(b)
+		if (aRepo !== bRepo) return aRepo.localeCompare(bRepo)
+		return a.branch.localeCompare(b.branch)
 	})
 
 	const table = createBorderlessTable(['Repository', 'Branch', 'Status'])

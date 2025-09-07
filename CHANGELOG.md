@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.3] - 2025-09-07
+
+### 🚀 Features
+
+- Reset commit timestamps even when no upstream changes ([`920d72d`](https://github.com/AlecRust/branchpilot/commit/920d72d07693d3ff70c4d7b61f470de6e8db3296))
+
+### 🚜 Refactor
+
+- Order tickets by exact due time ([`d93ab18`](https://github.com/AlecRust/branchpilot/commit/d93ab18aab8ffbf558de838033a7c7e148a12783))
+
 ## [0.9.2] - 2025-09-07
 
 ### 🐛 Bug Fixes

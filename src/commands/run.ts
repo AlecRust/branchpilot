@@ -91,10 +91,11 @@ export async function run(args: RunOnceArgs): Promise<number> {
 			await pushBranch(pushOpts)
 
 			spinner.text = `Creating PR for ${t.branch}...`
+			const prBase = t.base ?? repoCfg.defaultBase ?? globalCfg.defaultBase ?? 'main'
 			const prOpts: Parameters<typeof createOrUpdatePr>[0] = {
 				cwd: repoRoot,
 				branch: t.branch,
-				base: t.base || 'main',
+				base: prBase,
 			}
 			if (t.title) prOpts.title = t.title
 			if (t.body) prOpts.body = t.body

@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.9.2] - 2025-09-07
+
+### 🐛 Bug Fixes
+
+- Update all non-major dependencies (#10) ([`c95b009`](https://github.com/AlecRust/branchpilot/commit/c95b009a556e61e753794117726f41eabcba87f5))
+- Respect defaultBase config for PR base ([`46af011`](https://github.com/AlecRust/branchpilot/commit/46af0117a8ae354b0d8c08e57f477d74a6a062ca))
+
+### 🚜 Refactor
+
+- Ignore non-ticket MD files ([`2d4fda9`](https://github.com/AlecRust/branchpilot/commit/2d4fda9e85fa3c94723cc8a6938a56857164aceb))
+
+### 📚 Documentation
+
+- Improve README ([`eef1773`](https://github.com/AlecRust/branchpilot/commit/eef1773515d6aa9817345ee460ce67c8b1f1197e))
+- Adjust README badge ([`afd02c6`](https://github.com/AlecRust/branchpilot/commit/afd02c6176bc80c4425ee583d40445d1e716066a))
+
+### 🧪 Testing
+
+- Improve tests robustness ([`e8646ea`](https://github.com/AlecRust/branchpilot/commit/e8646ea617fec50052e7d1d925ed1a40aacb06c6))
+- Reduce test matrix runs ([`a1dad4e`](https://github.com/AlecRust/branchpilot/commit/a1dad4e3b5d0928ebae83451d9887271233cebf4))
+- Refactor npx tests ([`f649df7`](https://github.com/AlecRust/branchpilot/commit/f649df744bf68a7dbe829f8bbd90ad6c0ee80db7))
+
 ## [0.9.1] - 2025-08-28
 
 ### 🐛 Bug Fixes

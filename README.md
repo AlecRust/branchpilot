@@ -44,7 +44,7 @@ Fixed a typo in the installation instructions.
 
 ### 3. Execute
 
-Use the `run` command to process all tickets once on demand:
+Use the `run` command to open any past-due PRs once:
 
 ```bash
 branchpilot run

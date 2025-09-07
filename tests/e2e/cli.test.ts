@@ -1,6 +1,4 @@
 import { spawn } from 'node:child_process'
-import fsp from 'node:fs/promises'
-import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execa } from 'execa'
@@ -8,22 +6,9 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cliPath = path.join(__dirname, '../../dist/cli.mjs')
-let tarballPath: string | null = null
-let packTmpDir: string | null = null
 
 beforeAll(async () => {
 	await execa('npm', ['run', 'build'], { cwd: path.join(__dirname, '../..') })
-	packTmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'branchpilot-pack-'))
-	const { stdout: packOut } = await execa('npm', ['pack', '--silent', path.join(__dirname, '../..')], {
-		cwd: packTmpDir,
-	})
-	tarballPath = path.join(packTmpDir, packOut.trim())
-})
-
-afterAll(async () => {
-	if (packTmpDir) {
-		await fsp.rm(packTmpDir, { recursive: true, force: true })
-	}
 })
 
 function runCLI(args: string[]): Promise<{ stdout: string; stderr: string; code: number | null }> {
@@ -143,30 +128,5 @@ describe('CLI', () => {
 			expect(result.code).toBe(0)
 			expect(result.stdout).toContain('Initialize branchpilot in the current directory')
 		})
-	})
-
-	describe('npx execution', () => {
-		it('works with npx for version command', async () => {
-			const pkgArg = tarballPath ?? 'branchpilot'
-			const { stdout, exitCode } = await execa('npx', ['--yes', '--package', pkgArg, 'branchpilot', '--version'], {
-				env: { ...process.env, NODE_ENV: 'test' },
-			})
-			expect(exitCode).toBe(0)
-			expect(stdout).toMatch(/^\d+\.\d+\.\d+/)
-		}, 20000)
-
-		it('works with npx for list command', async () => {
-			const tempDir = os.tmpdir()
-			const pkgArg = tarballPath ?? 'branchpilot'
-			const { stdout, exitCode } = await execa(
-				'npx',
-				['--yes', '--package', pkgArg, 'branchpilot', 'list', '--dir', tempDir],
-				{
-					env: { ...process.env, NODE_ENV: 'test' },
-				},
-			)
-			expect(exitCode).toBe(0)
-			expect(stdout).toContain('No tickets found')
-		}, 20000)
 	})
 })

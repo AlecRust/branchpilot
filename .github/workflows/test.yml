@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
+          check-latest: true
 
       - name: Install Node packages
         run: npm ci
@@ -30,3 +31,16 @@ jobs:
 
       - name: Verify CLI
         run: node dist/cli.mjs --help
+
+      - name: Packaging smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARBALL=$(npm pack --silent)
+          TMPDIR=$(node -e "const fs=require('fs'),os=require('os'),p=require('path'); const d=fs.mkdtempSync(p.join(os.tmpdir(), 'bp-pack-')); process.stdout.write(d)")
+          pushd "$TMPDIR" >/dev/null
+          npm init -y >/dev/null 2>&1
+          npm i "${GITHUB_WORKSPACE}/${TARBALL}" >/dev/null 2>&1
+          npx branchpilot --version
+          popd >/dev/null
+          rm -f "$TARBALL"

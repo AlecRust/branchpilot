@@ -19,9 +19,9 @@
 	"bin": {
 		"branchpilot": "dist/cli.mjs"
 	},
-	"packageManager": "npm@11.5.2",
+	"packageManager": "npm@11.6.0",
 	"engines": {
-		"node": ">=20.19.4"
+		"node": ">=20.19.5"
 	},
 	"scripts": {
 		"dev": "tsx watch src/cli.ts",
@@ -56,20 +56,20 @@
 		"simple-git": "^3.28.0",
 		"toml": "^3.0.0",
 		"which": "^5.0.0",
-		"zod": "^4.1.4"
+		"zod": "^4.1.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.2",
+		"@biomejs/biome": "2.2.3",
 		"@commitlint/cli": "^19.8.1",
 		"@commitlint/config-conventional": "^19.8.1",
 		"@commitlint/types": "^19.8.1",
 		"@release-it/bumper": "^7.0.5",
 		"@tsconfig/node-lts": "^22.0.2",
-		"@types/node": "^24.3.0",
+		"@types/node": "^24.3.1",
 		"@types/which": "^3.0.4",
 		"@vitest/coverage-v8": "^3.2.4",
 		"git-cliff": "^2.10.0",
-		"knip": "^5.63.0",
+		"knip": "^5.63.1",
 		"lefthook": "^1.12.3",
 		"markdownlint-cli2": "^0.18.1",
 		"release-it": "^19.0.4",

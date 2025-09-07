@@ -12,10 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: biomejs/setup-biome@v2
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "lts/*"
-          cache: npm
 
       - name: Install Node packages
         run: npm ci

@@ -15,10 +15,9 @@ jobs:
         node: ['20', 'lts/*', 'current', 'latest']
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
 
       - name: Install Node packages
         run: npm ci

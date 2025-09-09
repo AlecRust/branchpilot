@@ -2,6 +2,7 @@ import { execa } from 'execa'
 import { simpleGit } from 'simple-git'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import which from 'which'
+import * as githubModule from './github.js'
 import { createOrUpdatePr, ensureGh, getDefaultBranch, gh } from './github.js'
 
 vi.mock('execa')
@@ -191,6 +192,72 @@ describe('github', () => {
 			expect(args).toContain('Custom Title')
 			expect(args).not.toContain('--body')
 			expect(args).not.toContain('--fill')
+		})
+
+		it('enables auto-merge using an allowed method (prefers squash)', async () => {
+			// 1) pr create -> returns PR URL
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('https://github.com/owner/repo/pull/123') as any)
+
+			// 2) repo view -> allowed methods only squash
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(
+				mockExecaResult(
+					JSON.stringify({ mergeCommitAllowed: false, rebaseMergeAllowed: false, squashMergeAllowed: true }),
+				) as any,
+			)
+
+			// 3) pr merge -> success
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+				autoMerge: true,
+				repo: 'owner/repo',
+			})
+
+			// Validate auto-merge call
+			const mergeArgs = vi.mocked(execa).mock.calls[2]?.[1] as string[]
+			expect(mergeArgs.slice(0, 3)).toEqual(['pr', 'merge', 'https://github.com/owner/repo/pull/123'])
+			expect(mergeArgs).toContain('--auto')
+			expect(mergeArgs).toContain('--squash')
+			expect(mergeArgs).toContain('--repo')
+			expect(mergeArgs).toContain('owner/repo')
+		})
+
+		it('enables auto-merge with merge commit when allowed', async () => {
+			// 1) pr create -> returns PR URL
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('https://github.com/owner/repo/pull/456') as any)
+
+			// 2) repo view -> only merge commit allowed
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(
+				mockExecaResult(
+					JSON.stringify({ mergeCommitAllowed: true, rebaseMergeAllowed: false, squashMergeAllowed: false }),
+				) as any,
+			)
+
+			// 3) pr merge -> success
+			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('') as any)
+
+			await createOrUpdatePr({
+				cwd: '/repo',
+				branch: 'feature',
+				base: 'main',
+				autoMerge: true,
+			})
+
+			const mergeArgs = vi.mocked(execa).mock.calls[2]?.[1] as string[]
+			expect(mergeArgs).toContain('--auto')
+			expect(mergeArgs).toContain('--merge')
+			// ensure we didn't pick other methods
+			expect(mergeArgs).not.toContain('--squash')
+			expect(mergeArgs).not.toContain('--rebase')
 		})
 	})
 })

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.4] - 2025-09-09
+
+### 🐛 Bug Fixes
+
+- Fix autoMerge option ([`d87cd69`](https://github.com/AlecRust/branchpilot/commit/d87cd692cabef5d009dfbd529d626aff2d14e657))
+
+### 📚 Documentation
+
+- Improve README ([`17f963f`](https://github.com/AlecRust/branchpilot/commit/17f963f10b37ec67da146b3b03b14b45010d6055))
+
 ## [0.9.3] - 2025-09-07
 
 ### 🚀 Features

@@ -15,6 +15,6 @@
 	"hooks": {
 		"before:init": ["npm run check"],
 		"after:bump": ["git cliff --config cliff.toml -o CHANGELOG.md --tag v${version}", "git add CHANGELOG.md"],
-		"after:release": "echo Successfully tagged ${name} v${version}. CI will handle publishing."
+		"after:release": "Successfully tagged ${name} v${version}. CI will handle publishing."
 	}
 }

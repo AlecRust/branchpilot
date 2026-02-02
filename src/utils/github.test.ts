@@ -2,7 +2,6 @@ import { execa } from 'execa'
 import { simpleGit } from 'simple-git'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import which from 'which'
-import * as githubModule from './github.js'
 import { createOrUpdatePr, ensureGh, getDefaultBranch, gh } from './github.js'
 
 vi.mock('execa')
@@ -40,7 +39,7 @@ describe('github', () => {
 			isMaxBuffer: false,
 			isTerminated: false,
 			isForcefullyTerminated: false,
-		}) as unknown as ReturnType<typeof execa>
+		}) as unknown as Awaited<ReturnType<typeof execa>>
 
 	describe('ensureGh', () => {
 		it('finds gh tool', async () => {
@@ -59,8 +58,7 @@ describe('github', () => {
 
 	describe('gh command', () => {
 		it('executes commands and returns trimmed output', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('  output  \n') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('  output  \n'))
 
 			const result = await gh('/repo', ['status'])
 
@@ -69,8 +67,7 @@ describe('github', () => {
 		})
 
 		it('prevents interactive input for all commands', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('authenticated') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('authenticated'))
 
 			await gh('/repo', ['auth', 'status'])
 
@@ -80,8 +77,7 @@ describe('github', () => {
 
 	describe('getDefaultBranch', () => {
 		it('gets default branch from GitHub', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('{"defaultBranchRef":{"name":"develop"}}') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('{"defaultBranchRef":{"name":"develop"}}'))
 
 			const result = await getDefaultBranch('/repo')
 
@@ -105,8 +101,7 @@ describe('github', () => {
 
 	describe('createOrUpdatePr', () => {
 		it('builds basic PR command', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url'))
 
 			await createOrUpdatePr({
 				cwd: '/repo',
@@ -124,8 +119,7 @@ describe('github', () => {
 		})
 
 		it('adds optional fields when provided', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url'))
 
 			await createOrUpdatePr({
 				cwd: '/repo',
@@ -144,8 +138,7 @@ describe('github', () => {
 		})
 
 		it('skips empty arrays', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url'))
 
 			await createOrUpdatePr({
 				cwd: '/repo',
@@ -161,8 +154,7 @@ describe('github', () => {
 		})
 
 		it('uses --fill when title and body are not provided', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url'))
 
 			await createOrUpdatePr({
 				cwd: '/repo',
@@ -177,8 +169,7 @@ describe('github', () => {
 		})
 
 		it('uses title without body when only title is provided', async () => {
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('url'))
 
 			await createOrUpdatePr({
 				cwd: '/repo',
@@ -196,20 +187,17 @@ describe('github', () => {
 
 		it('enables auto-merge using an allowed method (prefers squash)', async () => {
 			// 1) pr create -> returns PR URL
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('https://github.com/owner/repo/pull/123') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('https://github.com/owner/repo/pull/123'))
 
 			// 2) repo view -> allowed methods only squash
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
 			vi.mocked(execa).mockResolvedValueOnce(
 				mockExecaResult(
 					JSON.stringify({ mergeCommitAllowed: false, rebaseMergeAllowed: false, squashMergeAllowed: true }),
-				) as any,
+				),
 			)
 
 			// 3) pr merge -> success
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult(''))
 
 			await createOrUpdatePr({
 				cwd: '/repo',
@@ -230,20 +218,17 @@ describe('github', () => {
 
 		it('enables auto-merge with merge commit when allowed', async () => {
 			// 1) pr create -> returns PR URL
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('https://github.com/owner/repo/pull/456') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('https://github.com/owner/repo/pull/456'))
 
 			// 2) repo view -> only merge commit allowed
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
 			vi.mocked(execa).mockResolvedValueOnce(
 				mockExecaResult(
 					JSON.stringify({ mergeCommitAllowed: true, rebaseMergeAllowed: false, squashMergeAllowed: false }),
-				) as any,
+				),
 			)
 
 			// 3) pr merge -> success
-			// biome-ignore lint/suspicious/noExplicitAny: complex execa mock typing
-			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult('') as any)
+			vi.mocked(execa).mockResolvedValueOnce(mockExecaResult(''))
 
 			await createOrUpdatePr({
 				cwd: '/repo',

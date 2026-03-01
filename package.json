@@ -19,7 +19,7 @@
 	"bin": {
 		"branchpilot": "dist/cli.mjs"
 	},
-	"packageManager": "npm@11.8.0",
+	"packageManager": "npm@11.11.0",
 	"engines": {
 		"node": ">=20.20.0"
 	},
@@ -52,26 +52,26 @@
 		"date-fns-tz": "^3.2.0",
 		"execa": "^9.6.1",
 		"gray-matter": "^4.0.3",
-		"ora": "^9.1.0",
-		"simple-git": "^3.30.0",
+		"ora": "^9.3.0",
+		"simple-git": "^3.32.3",
 		"toml": "^3.0.0",
 		"which": "^5.0.0",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.13",
-		"@commitlint/cli": "^20.4.0",
-		"@commitlint/config-conventional": "^20.4.0",
+		"@biomejs/biome": "2.4.4",
+		"@commitlint/cli": "^20.4.2",
+		"@commitlint/config-conventional": "^20.4.2",
 		"@commitlint/types": "^20.4.0",
 		"@release-it/bumper": "^7.0.5",
 		"@tsconfig/node-lts": "^24.0.0",
-		"@types/node": "^24.10.9",
+		"@types/node": "^24.11.0",
 		"@types/which": "^3.0.4",
 		"@vitest/coverage-v8": "^3.2.4",
 		"git-cliff": "^2.12.0",
-		"knip": "^5.82.1",
+		"knip": "^5.85.0",
 		"lefthook": "^1.13.6",
-		"markdownlint-cli2": "^0.20.0",
+		"markdownlint-cli2": "^0.21.0",
 		"release-it": "^19.2.4",
 		"tsup": "^8.5.1",
 		"tsx": "^4.21.0",

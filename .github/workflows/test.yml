@@ -15,7 +15,7 @@ jobs:
         node: ['20', 'lts/*', 'latest']
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
           check-latest: true

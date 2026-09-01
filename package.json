@@ -63,7 +63,7 @@
 		"@commitlint/cli": "^20.4.2",
 		"@commitlint/config-conventional": "^20.4.2",
 		"@commitlint/types": "^20.4.0",
-		"@release-it/bumper": "^7.0.5",
+		"@release-it/bumper": "^8.0.0",
 		"@tsconfig/node-lts": "^24.0.0",
 		"@types/node": "^24.11.0",
 		"@types/which": "^3.0.4",
